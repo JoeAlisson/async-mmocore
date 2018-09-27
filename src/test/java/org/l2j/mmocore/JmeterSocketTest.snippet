@@ -1,0 +1,27 @@
+package org.l2j.mmocore;
+
+import java.nio.*;
+import org.apache.jmeter.protocol.tcp.sampler.*;
+
+try {
+    ByteBuffer buffer = ByteBuffer.allocateDirect(1024);
+    buffer.putShort((short)40);
+    buffer.putInt(41);
+    buffer.putLong(42);
+
+    char[] hexArray = "0123456789ABCDEF".toCharArray();
+    byte[] bytes = buffer.array();
+
+    char[] hexChars = new char[bytes.length * 2];
+    for ( int j = 0; j < bytes.length; j++ ) {
+        int v = bytes[j] & 0xFF;
+        hexChars[j * 2] = hexArray[v >>> 4];
+        hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+    }
+
+        sampler.setRequestData(new String(hexChars));
+} catch (Exception e) {
+    log.error("Beanshell failure: ", e);
+    throw e;
+}
+
