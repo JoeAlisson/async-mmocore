@@ -25,7 +25,7 @@ class ReadHandler<T extends Client<Connection<T>>> implements CompletionHandler<
             return;
         }
 
-        var buffer = connection.getReadingBuffer();
+        ByteBuffer buffer = connection.getReadingBuffer();
         buffer.flip();
 
         if (buffer.remaining() < HEADER_SIZE){

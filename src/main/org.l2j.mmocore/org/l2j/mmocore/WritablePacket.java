@@ -36,7 +36,7 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> extends Ab
 	 * @param value to be put on data
 	 */
 	protected final void writeDouble(final double value) {
-	    var x = doubleToRawLongBits(value);
+	    long x = doubleToRawLongBits(value);
 	    writeLong(x);
 	}
 	
@@ -46,7 +46,7 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> extends Ab
 	 * @param value to be put on data
 	 */
 	protected final void writeShort(final int value) {
-		var x = convertEndian((short) value);
+		short x = convertEndian((short) value);
 		writeShortParts((byte) x,
                         (byte) (x >>> 8));
 	}
@@ -62,7 +62,7 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> extends Ab
 	 * @param value to be put on data
 	 */
 	protected final void writeInt(final int value) {
-	    var x  = convertEndian(value);
+	    int x  = convertEndian(value);
 	    writeIntParts((byte) x,
                       (byte) (x >>> 8),
                       (byte) (x >>> 16),
@@ -82,7 +82,7 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> extends Ab
 	 * @param value to be put on data
 	 */
 	protected final void writeLong(final long value) {
-        var x = convertEndian(value);
+        long x = convertEndian(value);
         writeLongParts((byte) x,
                        (byte) (x >>> 8),
                        (byte) (x >>> 16),
@@ -149,8 +149,8 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> extends Ab
 	protected abstract void write();
 
     void writeHeader(int dataSize) {
-        var header = convertEndian((short) dataSize);
-        var tmp = (byte) (header >>> 8);
+        int header = convertEndian((short) dataSize);
+        byte tmp = (byte) (header >>> 8);
         data[0] = pickByte((byte) header, tmp);
         data[1] = pickByte(tmp, (byte) header);
     }

@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 public class GenericClientHandler implements ClientFactory<AsyncClient>, PacketHandler<AsyncClient>, PacketExecutor<AsyncClient> {
 
-    ThreadPoolExecutor threadPool = new ThreadPoolExecutor(2, 2, 15L,TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), Executors.defaultThreadFactory());
+    private ThreadPoolExecutor threadPool = new ThreadPoolExecutor(2, 2, 15L,TimeUnit.SECONDS, new LinkedBlockingQueue<>(), Executors.defaultThreadFactory());
 
     @Override
     public AsyncClient create(Connection<AsyncClient> connection) {
@@ -19,7 +19,7 @@ public class GenericClientHandler implements ClientFactory<AsyncClient>, PacketH
 
     @Override
     public ReadablePacket<AsyncClient> handlePacket(DataWrapper wrapper, AsyncClient client) {
-        var opcode = Byte.toUnsignedInt(wrapper.get());
+        int opcode = Byte.toUnsignedInt(wrapper.get());
         ReadablePacket<AsyncClient> packet = null;
         switch (opcode) {
             case 0x01:

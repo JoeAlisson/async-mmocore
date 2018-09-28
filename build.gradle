@@ -1,10 +1,13 @@
 plugins {
-    id "java"
+    id "java-library"
     id "idea"
     id "eclipse"
+    id 'maven-publish'
 }
 
 version '2.0'
+
+sourceCompatibility = JavaVersion.VERSION_1_8
 
 ext.moduleName = 'org.l2j.mmocore'
 
@@ -17,6 +20,10 @@ sourceSets {
             srcDirs = ['src/main/resources']
         }
     }
+}
+
+compileJava {
+    inputs.property("moduleName", moduleName)
 }
 
 jar {
