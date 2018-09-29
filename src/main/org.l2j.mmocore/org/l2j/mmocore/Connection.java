@@ -1,5 +1,8 @@
 package org.l2j.mmocore;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -9,6 +12,8 @@ import java.util.concurrent.ExecutionException;
 import static java.util.Objects.isNull;
 
 public class Connection<T extends Client<Connection<T>>> {
+
+    private static final Logger logger = LoggerFactory.getLogger(Connection.class);
 
     private final AsynchronousSocketChannel channel;
     private final ReadHandler<T> readHandler;
@@ -97,7 +102,7 @@ public class Connection<T extends Client<Connection<T>>> {
         try {
             channel.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e.getLocalizedMessage(), e);
         }
 
     }
@@ -107,6 +112,7 @@ public class Connection<T extends Client<Connection<T>>> {
             InetSocketAddress address = (InetSocketAddress) channel.getRemoteAddress();
             return address.getAddress().getHostAddress();
         } catch (IOException e) {
+            logger.error(e.getLocalizedMessage(), e);
             return "";
         }
     }

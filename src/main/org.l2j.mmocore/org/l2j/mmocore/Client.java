@@ -1,5 +1,8 @@
 package org.l2j.mmocore;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -7,6 +10,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static java.util.Objects.isNull;
 
 public abstract class Client<T extends Connection<?>> {
+
+    private static final Logger logger = LoggerFactory.getLogger(Client.class);
 
     private final T connection;
     private Queue<WritablePacket<? extends Client<T>>> packetsToWrite = new ConcurrentLinkedQueue<>();
@@ -24,8 +29,10 @@ public abstract class Client<T extends Connection<?>> {
     protected void writePacket(WritablePacket<? extends Client<T>> packet) {
         putClientOnPacket(packet);
         if(packetsToWrite.isEmpty() && writing.compareAndSet(false, true) ) {
+            logger.debug("Sending packet {} immediately", packet);
             write(packet);
         } else {
+            logger.debug("Queueing packet {} to send", packet);
             packetsToWrite.add(packet);
         }
     }
@@ -36,8 +43,10 @@ public abstract class Client<T extends Connection<?>> {
     }
 
     void tryWriteNextPacket() {
+        logger.debug("Trying to send next packet");
         if(packetsToWrite.isEmpty()) {
             writing.getAndSet(false);
+            logger.debug("no packet found");
         } else {
             WritablePacket<? extends Client<T>> packet = packetsToWrite.poll();
             write(packet);
@@ -60,6 +69,7 @@ public abstract class Client<T extends Connection<?>> {
         packet.writeHeader(dataSentSize);
         if(dataSentSize > 0) {
             connection.write(packet.data, 0, dataSentSize, sync);
+            logger.debug("Sending packet {} to {}", packet, this);
         }
     }
 
@@ -68,12 +78,14 @@ public abstract class Client<T extends Connection<?>> {
     }
 
     public void close(WritablePacket<? extends Client<T>> packet) {
+        logger.debug("Closing client connection {} with packet {}", this, packet);
         packetsToWrite.clear();
         putClientOnPacket(packet);
         write(packet, true);
     }
 
-    protected final void disconnect() {
+    final void disconnect() {
+        logger.debug("Client {} disconnecting", this);
         connection.close();
         onDisconnection();
     }
