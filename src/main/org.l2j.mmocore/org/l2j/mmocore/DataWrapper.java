@@ -37,7 +37,4 @@ public final class DataWrapper extends ReadablePacket<Object> {
     public byte[] expose() {
         return data;
     }
-
-
-
 }

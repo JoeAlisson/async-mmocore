@@ -55,7 +55,7 @@ public abstract class ReadablePacket<T> extends AbstractPacket<T> implements Run
 
     /**
      * Reads raw <B>byte</B> from the buffer
-     * @return
+     * @return byte read
      */
 	protected final byte readByte() {
 	    return data[dataIndex++];
@@ -64,7 +64,7 @@ public abstract class ReadablePacket<T> extends AbstractPacket<T> implements Run
 
     /**
      *  Reads <B>char</B> from the buffer
-     * @return
+     * @return char read
      */
 	protected final char readChar() {
 	    return convertEndian((char) readShort());
@@ -73,7 +73,7 @@ public abstract class ReadablePacket<T> extends AbstractPacket<T> implements Run
     /**
      * Reads <B>byte</B> from the buffer. <BR>
      * 8bit integer (00)
-     * @return
+     * @return unsigned int read
      */
 	protected final int readUnsignedByte() {
 		return toUnsignedInt(data[dataIndex++]);
@@ -82,7 +82,7 @@ public abstract class ReadablePacket<T> extends AbstractPacket<T> implements Run
 	/**
 	 * Reads <B>short</B> from the buffer. <BR>
 	 * 16bit integer (00 00)
-	 * @return
+	 * @return short read
 	 */
 	protected final short readShort()  {
 		return convertEndian((short) (readUnsignedByte() << pickShift(8, 0) |
@@ -92,7 +92,7 @@ public abstract class ReadablePacket<T> extends AbstractPacket<T> implements Run
 	/**
 	 * Reads <B>int</B> from the buffer. <BR>
 	 * 32bit integer (00 00 00 00)
-	 * @return
+	 * @return int read
 	 */
 	protected final int readInt() {
         return convertEndian(readUnsignedByte() << pickShift(24, 0)  |
@@ -105,7 +105,7 @@ public abstract class ReadablePacket<T> extends AbstractPacket<T> implements Run
 	/**
 	 * Reads <B>long</B> from the buffer. <BR>
 	 * 64bit integer (00 00 00 00 00 00 00 00)
-	 * @return
+	 * @return long read
 	 */
 	protected final long readLong() {
 		return convertEndian(toUnsignedLong(readByte()) << pickShift(56, 0)  |
@@ -121,7 +121,7 @@ public abstract class ReadablePacket<T> extends AbstractPacket<T> implements Run
 	/**
 	 * Reads <B>double</B> from the buffer. <BR>
 	 * 64bit double precision float (00 00 00 00 00 00 00 00)
-	 * @return
+	 * @return double read
 	 */
 	protected final double readDouble() {
 	    return longBitsToDouble(readLong());
@@ -129,15 +129,16 @@ public abstract class ReadablePacket<T> extends AbstractPacket<T> implements Run
 	
 	/**
 	 * Reads <B>String</B> from the buffer.
-	 * @return
+	 * @return String read
 	 */
 	protected final String readString()  {
 	    int start = dataIndex;
+	    int size = 0;
 
 	    while (dataIndex < data.length &&  readChar() != '\000'){
-
+			size += 2;
         }
-	    return new String(data, start, dataIndex-start-2, Charset.forName("UTF-16LE"));
+	    return new String(data, start, size, Charset.forName("UTF-16LE"));
 	}
 
     private static int pickShift(int top, int pos) { return isBigEndian ? top - pos : pos; }

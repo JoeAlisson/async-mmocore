@@ -49,7 +49,6 @@ public class Connection<T extends Client<Connection<T>>> {
         }
     }
 
-
     final void write() {
         if(channel.isOpen()) {
             channel.write(writingBuffer, client, writeHandler);

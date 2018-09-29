@@ -143,7 +143,7 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> extends Ab
     private static byte pickByte(byte  le, byte  be) { return isBigEndian ? be : le; }
 
     protected int packetSize() {
-        return  9 * 1024;
+        return  ResourcePool.bufferSize;
     }
 
 	protected abstract void write();

@@ -1,5 +1,6 @@
 package org.l2j.mmocore.async;
 
+import org.l2j.mmocore.ConnectionBuilder;
 import org.l2j.mmocore.ConnectionHandler;
 
 import java.io.IOException;
@@ -15,8 +16,8 @@ public class AsyncMmoCoreServerTest {
     private void start() throws IOException {
         System.out.println("Iniciando Servidor porta 8080");
         GenericClientHandler handler = new GenericClientHandler();
-        ConnectionHandler<AsyncClient> connectionHandler = new ConnectionHandler<>(new InetSocketAddress("10.89.5.106", 8080), false, 4, handler, handler, handler, null);
+        ConnectionHandler<AsyncClient> connectionHandler =  ConnectionBuilder.create(new InetSocketAddress(8080), handler, handler, handler).build();
+
         connectionHandler.start();
     }
-
 }
