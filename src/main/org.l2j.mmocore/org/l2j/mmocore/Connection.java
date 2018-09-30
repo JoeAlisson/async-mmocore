@@ -29,7 +29,7 @@ public class Connection<T extends Client<Connection<T>>> {
         this.writeHandler = writeHandler;
     }
 
-    public void setClient(T client) {
+    void setClient(T client) {
         this.client = client;
     }
 

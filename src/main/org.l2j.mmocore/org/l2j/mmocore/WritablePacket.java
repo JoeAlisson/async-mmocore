@@ -4,6 +4,14 @@ import static java.lang.Double.doubleToRawLongBits;
 import static java.lang.System.arraycopy;
 import static java.util.Objects.nonNull;
 
+/**
+ * This class represents a Packet that can be sent to clients.
+ *
+ * All data sent must have a header with 2 bytes and an optional payload.
+ *
+ * The first and second bytes is a 16 bits integer holding the size of the packet.
+ *
+ */
 public abstract class WritablePacket<T extends Client<Connection<T>>> extends AbstractPacket<T> {
 
     protected WritablePacket() {
@@ -11,8 +19,11 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> extends Ab
     }
 
 	/**
-	 * Write <B>byte</B> to the buffer. <BR>
+	 * Write a<B>byte</B> to the buffer. <BR>
 	 * 8bit integer (00)
+     *
+     * If the underlying data array can't hold a new byte its size is increased 20%
+     *
 	 * @param value to be written
 	 */
 	protected final void writeByte(final byte value) {
@@ -26,6 +37,11 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> extends Ab
         }
 	}
 
+    /**
+     * Write a int to the buffer, the int is casted to a byte;
+     *
+     * @param value to be written
+     */
 	protected final void writeByte(final int value) {
 	    writeByte((byte) value);
     }
@@ -33,7 +49,7 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> extends Ab
 	/**
 	 * Write <B>double</B> to the buffer. <BR>
 	 * 64bit double precision float (00 00 00 00 00 00 00 00)
-	 * @param value to be put on data
+	 * @param value to be written
 	 */
 	protected final void writeDouble(final double value) {
 	    long x = doubleToRawLongBits(value);
@@ -43,7 +59,7 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> extends Ab
 	/**
 	 * Write <B>short</B> to the buffer. <BR>
 	 * 16bit integer (00 00)
-	 * @param value to be put on data
+	 * @param value to be written
 	 */
 	protected final void writeShort(final int value) {
 		short x = convertEndian((short) value);
@@ -59,7 +75,7 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> extends Ab
     /**
 	 * Write <B>int</B> to the buffer. <BR>
 	 * 32bit integer (00 00 00 00)
-	 * @param value to be put on data
+	 * @param value to be written
 	 */
 	protected final void writeInt(final int value) {
 	    int x  = convertEndian(value);
@@ -79,7 +95,7 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> extends Ab
     /**
 	 * Write <B>long</B> to the buffer. <BR>
 	 * 64bit integer (00 00 00 00 00 00 00 00)
-	 * @param value to be put on data
+	 * @param value to be written
 	 */
 	protected final void writeLong(final long value) {
         long x = convertEndian(value);
@@ -107,13 +123,19 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> extends Ab
     /**
 	 * Write <B>byte[]</B> to the buffer. <BR>
 	 * 8bit integer array (00 ...)
-	 * @param bytes to be put on data
+	 * @param bytes to be written
 	 */
 	protected final void writeBytes(final byte[] bytes) {
 	    arraycopy(bytes, 0, data, dataIndex, bytes.length);
 		dataIndex += bytes.length;
 	}
 
+    /**
+     * Write <B>char</B> to the buffer.<BR>
+     * 16 bit char
+     *
+     * @param value the char to be put on data.
+     */
 	protected  final void writeChar(final char value) {
         short x =  (short) convertEndian(value);
         writeShortParts((byte) x,
@@ -122,7 +144,7 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> extends Ab
 	
 	/**
 	 * Write <B>String</B> to the buffer.
-	 * @param text to be put on data
+	 * @param text to be written
 	 */
 	protected final void writeString(final String text) {
 		if (nonNull(text)) {
@@ -142,10 +164,21 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> extends Ab
 
     private static byte pickByte(byte  le, byte  be) { return isBigEndian ? be : le; }
 
+    /**
+     * By default this method return the size of the bufferSize configured.
+     *
+     * If the size of the packet can be calculated, its high recommended to override this method to return the exactly packet size.
+     * This way less resource are used a each packet improving the memory and cpu usage.
+     *
+     * @return The size of the packet to be sent.
+     */
     protected int packetSize() {
         return  ResourcePool.bufferSize;
     }
 
+    /**
+     * Writes the data into the packet
+     */
 	protected abstract void write();
 
     void writeHeader(int dataSize) {

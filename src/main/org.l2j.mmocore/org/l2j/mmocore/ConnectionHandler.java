@@ -91,7 +91,7 @@ public final class ConnectionHandler<T extends Client<Connection<T>>> extends Th
                 connection.setClient(client);
                 connection.read();
                 client.onConnected();
-            } catch (IOException e) {
+            } catch (Exception  e) {
                 logger.error(e.getLocalizedMessage(), e);
             }
         }

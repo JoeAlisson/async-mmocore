@@ -10,6 +10,10 @@ public abstract class AbstractPacket<T> {
 
     protected T client;
 
+    /**
+     *
+     * @return The client that owners this packet
+     */
     public T getClient() {
         return client;
     }

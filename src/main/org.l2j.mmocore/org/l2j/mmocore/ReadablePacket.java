@@ -23,6 +23,14 @@ import static java.lang.Byte.toUnsignedInt;
 import static java.lang.Byte.toUnsignedLong;
 import static java.lang.Double.longBitsToDouble;
 
+/**
+ * This class represents a Packet received from the client.
+ *
+ * All data received must have a header with 2 bytes and an optional payload.
+ *
+ * The first and second bytes is a 16 bits integer holding the size of the packet.
+ *
+ */
 public abstract class ReadablePacket<T> extends AbstractPacket<T> implements Runnable {
 
 	protected ReadablePacket() { }

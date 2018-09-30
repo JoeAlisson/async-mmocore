@@ -37,3 +37,13 @@ compileJava {
 jar {
     baseName 'mmocore'
 }
+
+task jarSources(type:Jar){
+    baseName 'mmocore'
+    from sourceSets.main.allSource
+    classifier = 'source'
+}
+
+artifacts {
+    archives jarSources
+}
