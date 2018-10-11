@@ -24,7 +24,7 @@ Packets greater than this can be lead to unexpected behaviour.
 
 #### The Basics to Use
 
-* ###### Define a Client Implementation
+* ##### Define a Client Implementation
 
 The client Class is a representation of a external connection. Thus it's the unique source of incoming packets and the target of the outcome packets.
 
@@ -63,7 +63,7 @@ public class ClientImpl extends Client<Connection<ClientImpl>> {
 }
 ```
 
-* ###### Define a Client Factory Implementation
+* ##### Define a Client Factory Implementation
 
 The Client Factory instantiate the new incoming connections. 
 
@@ -79,7 +79,7 @@ public class ClientFactoryImpl implements ClientFactory<ClientImpl> {
 }
 ``` 
 
-* ###### Define a Packet Handler Implementation
+* ##### Define a Packet Handler Implementation
 
 The Packet Handler converts the incoming data into a **ReadablePacket**.
 
@@ -96,7 +96,7 @@ public class PacketHandlerImpl implements PacketHandler<ClientImpl> {
 
 ```
 
-* ###### Define a Packet Executor Implementation
+* ##### Define a Packet Executor Implementation
 
 The Packet Executor executes the incoming Packets. 
 
@@ -115,7 +115,7 @@ public class PacketExecutorImpl implements PacketExecutor<ClientImpl> {
 }
 ```  
 
-* ###### Listen Connections
+* ##### Listen Connections
 
 To listen Connections it's necessary to build a ConnectionHandler
 
@@ -129,7 +129,7 @@ public class ServerHandler {
 
 ```
 
-* ###### Sending a Packet
+* ##### Sending a Packet
 
 To send a Packet it's necessary to implement the [abstract class WritablePacket](https://github.com/JoeAlisson/async-mmocore/blob/master/src/main/org.l2j.mmocore/org/l2j/mmocore/WritablePacket.java)
 
@@ -155,6 +155,6 @@ public class ServerHandler {
 }
 ```
 
-* ###### Receiving a Packet
+* ##### Receiving a Packet
 
-The receiving packet is almost all done by the **Async-mmocore**. The only part that needs to be implemented to fully read was the steps described in [Define a Packet Handler Implementation](#define-a-packet-handler-implementation) and [Define a Packet Executor Implementation sections](#define-a-packet-executor-implementation) sections.  
+The receiving packet is almost all done by the **Async-mmocore**. The only part that needs to be implemented to fully read are the steps described in [Define a Packet Handler Implementation](#define-a-packet-handler-implementation) and [Define a Packet Executor Implementation](#define-a-packet-executor-implementation) sections.  
