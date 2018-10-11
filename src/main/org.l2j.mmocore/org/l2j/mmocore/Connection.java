@@ -112,7 +112,6 @@ public class Connection<T extends Client<Connection<T>>> {
             InetSocketAddress address = (InetSocketAddress) channel.getRemoteAddress();
             return address.getAddress().getHostAddress();
         } catch (IOException e) {
-            logger.error(e.getLocalizedMessage(), e);
             return "";
         }
     }

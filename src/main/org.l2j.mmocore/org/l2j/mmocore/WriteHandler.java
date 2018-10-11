@@ -14,7 +14,9 @@ class WriteHandler<T extends Client<Connection<T>>> implements CompletionHandler
     public void completed(Integer result, T client) {
         if(result < 0) {
             logger.warn("Couldn't send data to client {}", client);
-            client.disconnect();
+            if(client.isConnected()) {
+                client.disconnect();
+            }
             return;
         }
 
@@ -32,7 +34,9 @@ class WriteHandler<T extends Client<Connection<T>>> implements CompletionHandler
 
     @Override
     public void failed(Throwable e, T client) {
-        client.disconnect();
+        if(client.isConnected()) {
+            client.disconnect();
+        }
         if(! (e instanceof AsynchronousCloseException)) {
             // client just closes the connection, doesn't to be logged
             logger.error(e.getLocalizedMessage(), e);

@@ -27,7 +27,9 @@ class ReadHandler<T extends Client<Connection<T>>> implements CompletionHandler<
         Connection<T> connection = client.getConnection();
         logger.debug("Reading {} from {}", bytesRead, client);
         if(bytesRead < 0 ) {
-            client.disconnect();
+            if(client.isConnected()) {
+                client.disconnect();
+            }
             return;
         }
 
@@ -98,7 +100,9 @@ class ReadHandler<T extends Client<Connection<T>>> implements CompletionHandler<
 
     @Override
     public void failed(Throwable e, T client) {
-        client.disconnect();
+        if(client.isConnected()) {
+            client.disconnect();
+        }
         if(! (e instanceof AsynchronousCloseException)) {
             // client just closes the connection, doesn't to be logged
             logger.error(e.getLocalizedMessage(), e);
