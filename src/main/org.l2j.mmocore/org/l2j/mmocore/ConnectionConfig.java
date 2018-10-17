@@ -8,8 +8,17 @@ import java.nio.ByteOrder;
 
 class ConnectionConfig<T extends Client<Connection<T>>> {
 
+    static final int BUFFER_MAX_SIZE = 64 * 1024;
+    int bufferDefaultSize = 9 * 1024;
+    int bufferMinSize = 4 * 1024;
+    int bufferMediumSize = 1024;
+    int bufferLargeSize = 64;
+
     int bufferPoolSize = 100;
-    int bufferSize = 9 * 1024;
+    int bufferMinPoolSize = 100;
+    int bufferMediumPoolSize = 50;
+    int bufferLargePoolSize = 10;
+
     long shutdownWaitTime = 5000;
     ByteOrder byteOrder = ByteOrder.LITTLE_ENDIAN;
     boolean useNagle;

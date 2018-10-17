@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
 
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+
 /**
  * Builds the {@link ConnectionHandler} responsible to manage all incoming connections.
  *
@@ -86,19 +89,56 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
     }
 
     /**
-     * Sets the size limit of the data sent/received. The size must be as bigger as the biggest packet received or sent.
+     * Sets the size limit of the data sent/received. The size must be as bigger as the biggest packet received.
      *
      * @param bufferSize - the buffer size to be set
      *
      * @return this.
      */
-    public ConnectionBuilder<T> bufferSize(int bufferSize) {
-        config.bufferSize = bufferSize;
+    public ConnectionBuilder<T> bufferDefaultSize(int bufferSize) {
+        config.bufferDefaultSize = min(max(bufferSize, config.bufferMinSize), ConnectionConfig.BUFFER_MAX_SIZE);
         return this;
     }
 
     /**
-     * Sets the maximum amount of buffer that can be holder on the BufferPool.
+     * Sets the min size of the data sent/received.
+     *
+     * @param bufferSize - the buffer size to be set
+     *
+     * @return this.
+     */
+    public ConnectionBuilder<T> bufferMinSize(int bufferSize) {
+        config.bufferMinSize = min(max(config.bufferMinSize, bufferSize), ConnectionConfig.BUFFER_MAX_SIZE);
+        return this;
+    }
+
+    /**
+     * Sets the large size of the data sent/received.
+     *
+     * @param bufferSize - the buffer size to be set
+     *
+     * @return this.
+     */
+    public ConnectionBuilder<T> bufferLargeSize(int bufferSize) {
+        config.bufferLargeSize = min(max(bufferSize, config.bufferMinSize), ConnectionConfig.BUFFER_MAX_SIZE);
+        return this;
+    }
+
+    /**
+     * Sets the medium size of the data sent/received.
+     *
+     * @param bufferSize - the buffer size to be set
+     *
+     * @return this.
+     */
+    public ConnectionBuilder<T> bufferMediumSize(int bufferSize) {
+        config.bufferMediumSize = min(max(bufferSize, config.bufferMinSize), ConnectionConfig.BUFFER_MAX_SIZE);
+        return this;
+    }
+
+
+    /**
+     * Sets the maximum amount of buffer with default size that can be holder on the BufferPool.
      * A small value can be lead to buffer overhead creation.
      * Otherwise a too big size can be lead to unwanted memory usage.
      *
@@ -111,6 +151,54 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
     public ConnectionBuilder<T> bufferPoolSize(int bufferPoolSize) {
         config.bufferPoolSize = bufferPoolSize;
         return this;
+    }
+
+    /**
+     * Sets the maximum amount of buffer with min size that can be holder on the BufferPool.
+     * A small value can be lead to buffer overhead creation.
+     * Otherwise a too big size can be lead to unwanted memory usage.
+     *
+     * The size must be restricted related to the number of expected clients and taking considerations of system resources.
+     *
+     * @param bufferPoolSize - the size of the buffer pool size.
+     *
+     * @return this
+     */
+    public ConnectionBuilder<T> bufferMinPoolSize(int bufferPoolSize) {
+        config.bufferMinPoolSize = bufferPoolSize;
+        return this;
+    }
+
+    /**
+     * Sets the maximum amount of buffer with medium size that can be holder on the BufferPool.
+     * A small value can be lead to buffer overhead creation.
+     * Otherwise a too big size can be lead to unwanted memory usage.
+     *
+     * The size must be restricted related to the number of expected clients and taking considerations of system resources.
+     *
+     * @param bufferPoolSize - the size of the buffer pool size.
+     *
+     * @return this
+     */
+    public ConnectionBuilder<T> bufferMediumPoolSize(int bufferPoolSize) {
+        config.bufferMediumPoolSize = bufferPoolSize;
+        return  this;
+    }
+
+    /**
+     * Sets the maximum amount of buffer with large size that can be holder on the BufferPool.
+     * A small value can be lead to buffer overhead creation.
+     * Otherwise a too big size can be lead to unwanted memory usage.
+     *
+     * The size must be restricted related to the number of expected clients and taking considerations of system resources.
+     *
+     * @param bufferPoolSize - the size of the buffer pool size.
+     *
+     * @return this
+     */
+    public ConnectionBuilder<T> bufferLargePoolSize(int bufferPoolSize) {
+        config.bufferLargePoolSize = bufferPoolSize;
+        return  this;
     }
 
     /**

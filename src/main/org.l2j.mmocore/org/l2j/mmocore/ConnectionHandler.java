@@ -28,19 +28,11 @@ public final class ConnectionHandler<T extends Client<Connection<T>>> extends Th
 
     ConnectionHandler(ConnectionConfig<T> config) throws IOException {
         this.config = config;
-        initalizeResourcePool();
+        ResourcePool.initialize(config);
         group = createChannelGroup(config.threadPoolSize);
         listener = group.provider().openAsynchronousServerSocketChannel(group);
         listener.setOption(StandardSocketOptions.SO_REUSEADDR, true);
         listener.bind(config.address);
-
-    }
-
-    private void initalizeResourcePool() {
-        ResourcePool.setBufferPoolSize(config.bufferPoolSize);
-        ResourcePool.setBufferSize(config.bufferSize);
-        ResourcePool.setByteOrder(config.byteOrder);
-        logger.debug("Initialize ResourcePool with byteOrder {}, bufferSize {}, bufferPoolSize{}",config.byteOrder, config.bufferSize, config.bufferPoolSize);
     }
 
     private AsynchronousChannelGroup createChannelGroup(int threadPoolSize) throws IOException {

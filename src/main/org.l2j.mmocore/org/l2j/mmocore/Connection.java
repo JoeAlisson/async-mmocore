@@ -10,6 +10,7 @@ import java.nio.channels.AsynchronousSocketChannel;
 import java.util.concurrent.ExecutionException;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 public class Connection<T extends Client<Connection<T>>> {
 
@@ -39,13 +40,13 @@ public class Connection<T extends Client<Connection<T>>> {
         }
     }
 
-    final void write(byte[] data, int offset, int limit, boolean sync) {
+    final void write(byte[] data, int offset, int length, boolean sync) {
         if(!channel.isOpen()) {
             return;
         }
 
-        ByteBuffer buffer = getWritingBuffer();
-        buffer.put(data, offset, limit);
+        ByteBuffer buffer = getWritingBuffer(length);
+        buffer.put(data, offset, length);
         buffer.flip();
         if(sync) {
             writeSync();
@@ -55,7 +56,7 @@ public class Connection<T extends Client<Connection<T>>> {
     }
 
     final void write() {
-        if(channel.isOpen()) {
+        if(channel.isOpen() && nonNull(writingBuffer)) {
             channel.write(writingBuffer, client, writeHandler);
         }
     }
@@ -79,9 +80,12 @@ public class Connection<T extends Client<Connection<T>>> {
         return readingBuffer;
     }
 
-    private ByteBuffer getWritingBuffer() {
+    private ByteBuffer getWritingBuffer(int length) {
         if(isNull(writingBuffer)) {
-            writingBuffer =  ResourcePool.getPooledBuffer();
+            writingBuffer =  ResourcePool.getPooledBuffer(length);
+        } else if(writingBuffer.capacity() < length) {
+            ResourcePool.recycleBuffer(writingBuffer);
+            writingBuffer = ResourcePool.getPooledBuffer(length);
         }
         return writingBuffer;
     }
