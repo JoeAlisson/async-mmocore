@@ -78,7 +78,6 @@ public abstract class Client<T extends Connection<?>> {
         connection.write();
     }
 
-
     private void write(WritablePacket packet, boolean sync) {
         if(isNull(packet)) {
             return;
@@ -86,8 +85,8 @@ public abstract class Client<T extends Connection<?>> {
 
         int dataSize = packet.writeData();
         dataSentSize  = encrypt(packet.data, ReadHandler.HEADER_SIZE, dataSize - ReadHandler.HEADER_SIZE) + ReadHandler.HEADER_SIZE;
-        packet.writeHeader(dataSentSize);
         if(dataSentSize > 0) {
+            packet.writeHeader(dataSentSize);
             connection.write(packet.data, 0, dataSentSize, sync);
             logger.debug("Sending packet {} to {}", packet, this);
         }
