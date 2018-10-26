@@ -24,15 +24,17 @@ class ReadHandler<T extends Client<Connection<T>>> implements CompletionHandler<
 
     @Override
     public void completed(Integer bytesRead, T client) {
-        Connection<T> connection = client.getConnection();
-        logger.debug("Reading {} from {}", bytesRead, client);
-        if(bytesRead < 0 ) {
-            if(client.isConnected()) {
-                client.disconnect();
-            }
+        if(!client.isConnected()) {
             return;
         }
 
+        logger.debug("Reading {} from {}", bytesRead, client);
+        if(bytesRead < 0 ) {
+            client.disconnect();
+            return;
+        }
+
+        Connection<T> connection = client.getConnection();
         ByteBuffer buffer = connection.getReadingBuffer();
         buffer.flip();
 
