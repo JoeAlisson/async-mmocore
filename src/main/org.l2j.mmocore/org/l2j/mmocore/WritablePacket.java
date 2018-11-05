@@ -30,7 +30,7 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> extends Ab
             data[dataIndex++] = value;
         } catch (IndexOutOfBoundsException e) {
 	        byte[] tmp =  new byte[(int) (data.length * 1.2)];
-	        arraycopy(data, 0, tmp, 0, dataIndex -1);
+	        arraycopy(data, 0, tmp, 0, data.length);
 	        data = tmp;
 	        data[dataIndex] = value;
         }
@@ -44,6 +44,16 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> extends Ab
 	protected final void writeByte(final int value) {
 	    writeByte((byte) value);
     }
+
+	/**
+	 * Write <B>boolean</B> to the buffer. <BR>
+     *  If the value is true so write a <B>byte</B> with value 1, otherwise 0
+	 *  8bit integer (00)
+	 * @param value to be written
+	 */
+	protected final void writeByte(final boolean value) {
+		writeByte((byte) (value ? 0x01 : 0x00));
+	}
 	
 	/**
 	 * Write <B>double</B> to the buffer. <BR>
@@ -66,6 +76,16 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> extends Ab
                         (byte) (x >>> 8));
 	}
 
+    /**
+     * Write <B>boolean</B> to the buffer. <BR>
+     * If the value is true so write a <B>byte</B> with value 1, otherwise 0
+     *  16bit integer (00 00)
+     * @param value to be written
+     */
+    protected final void writeShort(final boolean value) {
+        writeShort(value ? 0x01 : 0x00);
+    }
+
     private void writeShortParts(byte b0, byte b1) {
 	    writeByte(pickByte(b0, b1));
 	    writeByte(pickByte(b1, b0));
@@ -83,6 +103,16 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> extends Ab
                       (byte) (x >>> 16),
                       (byte) (x >>> 24));
 	}
+
+    /**
+     * Write <B>boolean</B> to the buffer. <BR>
+     * If the value is true so write a <B>byte</B> with value 1, otherwise 0
+     *  32bit integer (00 00 00 00)
+     * @param value to be written
+     */
+    protected final void writeInt(final boolean value) {
+        writeInt(value ? 0x01 : 0x00);
+    }
 
     private void writeIntParts(byte b0, byte b1, byte b2, byte b3) {
 	    writeByte(pickByte(b0, b3));
