@@ -172,7 +172,9 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> extends Ab
     }
 	
 	/**
-	 * Write <B>String</B> to the buffer.
+	 * Write a <B>String</B> to the buffer with a null termination (\000).
+     * Each character is a 16bit char
+     *
 	 * @param text to be written
 	 */
 	protected final void writeString(final String text) {
@@ -184,6 +186,23 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> extends Ab
 		}
 		writeChar('\000');
 	}
+
+    /**
+     * Write <B>String</B> to the buffer preceded by a <B>short</B> 16 bit with String length and no null termination.
+     * Each character is a 16bit char.
+     *
+     * @param text to be written
+     */
+    protected final void writeSizedString(final String text) {
+        if(nonNull(text)) {
+            final int len = text.length();
+            writeShort(len);
+            writeString(text);
+            dataIndex -= 2; // the termination char is not necessary
+        } else {
+            writeShort(0);
+        }
+    }
 
     int writeData() {
 		dataIndex += ReadHandler.HEADER_SIZE;
