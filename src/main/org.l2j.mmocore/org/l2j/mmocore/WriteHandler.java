@@ -20,16 +20,12 @@ class WriteHandler<T extends Client<Connection<T>>> implements CompletionHandler
             return;
         }
 
-        Connection connection = client.getConnection();
-
         if(result < client.getDataSentSize()) {
             logger.debug("Still data to send. Trying to send");
             client.resumeSend(result);
         } else {
-            connection.releaseWritingBuffer();
-            client.tryWriteNextPacket();
+            client.finishWriting();
         }
-        
     }
 
     @Override
@@ -38,7 +34,6 @@ class WriteHandler<T extends Client<Connection<T>>> implements CompletionHandler
             client.disconnect();
         }
         if(! (e instanceof AsynchronousCloseException)) {
-            // client just closes the connection, doesn't to be logged
             logger.error(e.getLocalizedMessage(), e);
         }
     }

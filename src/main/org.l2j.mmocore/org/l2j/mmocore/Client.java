@@ -3,7 +3,6 @@ package org.l2j.mmocore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -47,29 +46,28 @@ public abstract class Client<T extends Connection<?>> {
      * @param packet to be sent.
      */
     protected void writePacket(WritablePacket<? extends Client<T>> packet) {
-        putClientOnPacket(packet);
-        if(packetsToWrite.isEmpty() && writing.compareAndSet(false, true) ) {
-            logger.debug("Sending packet {} immediately", packet);
-            write(packet);
-        } else {
-            logger.debug("Queueing packet {} to send", packet);
-            packetsToWrite.add(packet);
+        if(!isConnected() || isNull(packet)) {
+            return;
         }
+        putClientOnPacket(packet);
+        packetsToWrite.add(packet);
+        tryWriteNextPacket();
     }
 
-    @SuppressWarnings("unchecked")
     private void putClientOnPacket(WritablePacket packet) {
         packet.client = this;
     }
 
-    void tryWriteNextPacket() {
+    private void tryWriteNextPacket() {
         logger.debug("Trying to send next packet");
-        if(packetsToWrite.isEmpty()) {
-            writing.getAndSet(false);
-            logger.debug("no packet found");
-        } else {
-            WritablePacket<? extends Client<T>> packet = packetsToWrite.poll();
-            write(packet);
+        if(writing.compareAndSet(false, true)) {
+            if(packetsToWrite.isEmpty()) {
+                writing.getAndSet(false);
+                logger.debug("no packet found");
+            } else {
+                WritablePacket<? extends Client<T>> packet = packetsToWrite.poll();
+                write(packet);
+            }
         }
     }
 
@@ -78,12 +76,19 @@ public abstract class Client<T extends Connection<?>> {
         connection.write();
     }
 
+    void finishWriting() {
+        connection.releaseWritingBuffer();
+        writing.getAndSet(false);
+        tryWriteNextPacket();
+    }
+
     private void write(WritablePacket packet, boolean sync) {
         if(isNull(packet)) {
             return;
         }
 
         int dataSize = packet.writeData();
+
         dataSentSize  = encrypt(packet.data, ReadHandler.HEADER_SIZE, dataSize - ReadHandler.HEADER_SIZE) + ReadHandler.HEADER_SIZE;
         if(dataSentSize > 0) {
             packet.writeHeader(dataSentSize);
@@ -93,7 +98,11 @@ public abstract class Client<T extends Connection<?>> {
     }
 
     private void write(WritablePacket<? extends Client<T>> packet) {
-        write(packet, false);
+        try {
+            write(packet, false);
+        } catch (Exception e) {
+            tryWriteNextPacket();
+        }
     }
 
     /**
@@ -104,7 +113,7 @@ public abstract class Client<T extends Connection<?>> {
      * @param packet to be sent before the connection is closed.
      */
     public void close(WritablePacket<? extends Client<T>> packet) {
-        if(isClosing) {
+        if(!isConnected()) {
             return;
         }
         isClosing = true;
@@ -112,12 +121,19 @@ public abstract class Client<T extends Connection<?>> {
         packetsToWrite.clear();
         if(nonNull(packet)) {
             putClientOnPacket(packet);
+            while (!writing.compareAndSet(false, true)) {
+                try {
+                    wait(500);
+                } catch (InterruptedException e) {
+                    logger.debug(e.getLocalizedMessage(), e);
+                }
+            }
             write(packet, true);
         }
         disconnect();
     }
 
-    final void disconnect() {
+    protected final void disconnect() {
         logger.debug("Client {} disconnecting", this);
         onDisconnection();
         connection.close();
@@ -134,7 +150,7 @@ public abstract class Client<T extends Connection<?>> {
         return connection.getRemoteAddress();
     }
 
-    public boolean isConnected() {
+    protected boolean isConnected() {
         return connection.isOpen() && !isClosing;
     }
 
@@ -145,7 +161,7 @@ public abstract class Client<T extends Connection<?>> {
      * @param offset - the initial index to be encrypted
      * @param size - the length of data to be encrypted
      *
-     * @return The size of the data after encrypted
+     * @return The data size after encrypted
      */
     public abstract int encrypt(byte[] data, int offset, int size);
 
