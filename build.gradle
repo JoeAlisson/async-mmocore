@@ -1,15 +1,21 @@
+import java.text.SimpleDateFormat
+
 plugins {
     id "java-library"
     id "idea"
     id "eclipse"
     id 'maven-publish'
+    id "net.nemerosa.versioning" version "2.8.2"
 }
 
 version '2.0'
 
+
 sourceCompatibility = JavaVersion.VERSION_1_8
 
 ext.moduleName = 'org.l2j.mmocore'
+ext.revision = versioning.info.build
+ext.buildJDK = "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})".toString()
 
 sourceSets {
     main {
@@ -32,10 +38,19 @@ dependencies {
 
 compileJava {
     inputs.property("moduleName", moduleName)
+    options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
 }
 
 jar {
     baseName 'mmocore'
+
+    manifest {
+        attributes('Built-By'       : System.getProperty('user.name'),
+                   'Build-Timestamp': new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
+                   'Build-Revision' : revision,
+                   'Build-Version'  : version,
+                   'Build-Jdk'      : buildJDK)
+    }
 }
 
 task jarSources(type:Jar){

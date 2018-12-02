@@ -12,7 +12,7 @@ public class AsyncPongPacket extends WritablePacket<AsyncClient> {
     }
 
     @Override
-    protected void write() {
+    protected boolean write() {
         while(packetSize >= 8) {
             writeLong(Long.MAX_VALUE);
             packetSize -=  8;
@@ -32,6 +32,6 @@ public class AsyncPongPacket extends WritablePacket<AsyncClient> {
             writeByte(Byte.MAX_VALUE);
             packetSize--;
         }
-
+        return true;
     }
 }

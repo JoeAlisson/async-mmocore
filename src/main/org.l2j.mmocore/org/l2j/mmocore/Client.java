@@ -54,6 +54,7 @@ public abstract class Client<T extends Connection<?>> {
         tryWriteNextPacket();
     }
 
+    @SuppressWarnings("unchecked")
     private void putClientOnPacket(WritablePacket packet) {
         packet.client = this;
     }
