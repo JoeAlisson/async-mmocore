@@ -114,6 +114,17 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> extends Ab
         writeInt(value ? 0x01 : 0x00);
     }
 
+
+	/**
+	 * Write <B>float</B> to the buffer. <BR>
+	 *  32bit float point number (00 00 00 00)
+	 * @param value to be written
+	 */
+    protected final void writeFloat(final float value) {
+        int x  = Float.floatToRawIntBits(value);
+        writeInt(x);
+    }
+
     private void writeIntParts(byte b0, byte b1, byte b2, byte b3) {
 	    writeByte(pickByte(b0, b3));
         writeByte(pickByte(b1, b2));
@@ -177,7 +188,7 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> extends Ab
      *
 	 * @param text to be written
 	 */
-	protected final void writeString(final String text) {
+	protected final void writeString(final CharSequence text) {
 		if (nonNull(text)) {
 			final int len = text.length();
 			for (int i = 0; i < len; i++) {
@@ -193,7 +204,7 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> extends Ab
      *
      * @param text to be written
      */
-    protected final void writeSizedString(final String text) {
+    protected final void writeSizedString(final CharSequence text) {
         if(nonNull(text)) {
             final int len = text.length();
             writeShort(len);

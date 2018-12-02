@@ -1,20 +1,3 @@
-/* This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
- * 02111-1307, USA.
- *
- * http://www.gnu.org/copyleft/gpl.html
- */
 package org.l2j.mmocore;
 
 import java.nio.charset.Charset;
@@ -22,6 +5,7 @@ import java.nio.charset.Charset;
 import static java.lang.Byte.toUnsignedInt;
 import static java.lang.Byte.toUnsignedLong;
 import static java.lang.Double.longBitsToDouble;
+import static java.lang.Float.intBitsToFloat;
 
 /**
  * This class represents a Packet received from the client.
@@ -98,6 +82,15 @@ public abstract class ReadablePacket<T> extends AbstractPacket<T> implements Run
 	}
 	
 	/**
+	 * Reads <B>float</B> from the buffer. <BR>
+	 * 32bit precision float (00 00 00 00)
+	 * @return float read
+	 */
+	protected final float readFloat() {
+		return intBitsToFloat(readInt());
+	}
+
+	/**
 	 * Reads <B>int</B> from the buffer. <BR>
 	 * 32bit integer (00 00 00 00)
 	 * @return int read
@@ -148,6 +141,16 @@ public abstract class ReadablePacket<T> extends AbstractPacket<T> implements Run
         }
 	    return new String(data, start, size, Charset.forName("UTF-16LE"));
 	}
+
+    /**
+     *
+     * Reads a predefined length <B>String</B> from the buffer.
+     * @return String read
+     */
+	protected final String readSizedString() {
+	    short size = readShort();
+	    return new String(data, dataIndex, size, Charset.forName("UTF-16LE"));
+    }
 
     private static int pickShift(int top, int pos) { return isBigEndian ? top - pos : pos; }
 
