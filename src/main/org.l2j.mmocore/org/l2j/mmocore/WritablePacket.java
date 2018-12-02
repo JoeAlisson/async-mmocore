@@ -15,6 +15,7 @@ import static java.util.Objects.nonNull;
  */
 public abstract class WritablePacket<T extends Client<Connection<T>>> extends AbstractPacket<T> {
 
+	private byte[] staticData;
     protected WritablePacket() { }
 
 	/**
@@ -216,11 +217,29 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> extends Ab
     }
 
     int writeData() {
-		dataIndex += ReadHandler.HEADER_SIZE;
-		data = new byte[max(2, packetSize())];
-        write();
+		if(hasWritedStaticData()) {
+			return writedStaticData();
+		}
+		if(callPacketWrite()) {
+			if(getClass().isAnnotationPresent(StaticPacket.class)) {
+				staticData = new byte[dataIndex];
+				arraycopy(data, 0, staticData, 0, dataIndex);
+			}
         return dataIndex;
     }
+		return 0;
+    }
+
+	private int writedStaticData() {
+        arraycopy(staticData, 0, data, 0, staticData.length);
+        return staticData.length;
+	}
+
+	private boolean callPacketWrite() {
+		data = new byte[max(2, packetSize())];
+		dataIndex += ReadHandler.HEADER_SIZE;
+		return write();
+	}
 
     private static byte pickByte(byte  le, byte  be) { return isBigEndian ? be : le; }
 
@@ -239,12 +258,17 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> extends Ab
     /**
      * Writes the data into the packet
      */
-	protected abstract void write();
+	protected abstract boolean write();
 
     void writeHeader(int dataSize) {
         int header = convertEndian((short) dataSize);
         byte tmp = (byte) (header >>> 8);
         data[0] = pickByte((byte) header, tmp);
         data[1] = pickByte(tmp, (byte) header);
+
+    }
+
+    private boolean hasWritedStaticData() {
+        return getClass().isAnnotationPresent(StaticPacket.class) && nonNull(staticData);
     }
 }

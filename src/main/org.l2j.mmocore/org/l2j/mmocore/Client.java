@@ -89,6 +89,10 @@ public abstract class Client<T extends Connection<?>> {
 
         int dataSize = packet.writeData();
 
+        if(dataSize <= 0) {
+            return;
+        }
+
         dataSentSize  = encrypt(packet.data, ReadHandler.HEADER_SIZE, dataSize - ReadHandler.HEADER_SIZE) + ReadHandler.HEADER_SIZE;
         if(dataSentSize > 0) {
             packet.writeHeader(dataSentSize);
