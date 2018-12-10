@@ -8,7 +8,7 @@ plugins {
     id "net.nemerosa.versioning" version "2.8.2"
 }
 
-version '2.0.0'
+version '2.1.0'
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 
@@ -33,6 +33,7 @@ repositories {
 
 dependencies {
     compile 'org.slf4j:slf4j-api:1.8.0-beta2'
+    testCompile 'junit:junit:4.12'
 }
 
 compileJava {

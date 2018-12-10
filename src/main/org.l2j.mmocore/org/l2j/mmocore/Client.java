@@ -19,6 +19,7 @@ public abstract class Client<T extends Connection<?>> {
     private int dataSentSize;
     private AtomicBoolean writing = new AtomicBoolean(false);
     private volatile boolean isClosing;
+    private ResourcePool resourcePool;
 
     /**
      * Construct a new Client
@@ -158,6 +159,15 @@ public abstract class Client<T extends Connection<?>> {
     protected boolean isConnected() {
         return connection.isOpen() && !isClosing;
     }
+
+    void setResourcePool(ResourcePool resourcePool) {
+        this.resourcePool = resourcePool;
+    }
+
+    ResourcePool getResourcePool() {
+        return resourcePool;
+    }
+
 
     /**
      * Encrypt the data in-place.

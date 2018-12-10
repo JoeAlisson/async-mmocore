@@ -1,12 +1,8 @@
-package org.l2j.mmocore.async;
-
-import org.l2j.mmocore.Client;
-import org.l2j.mmocore.Connection;
-import org.l2j.mmocore.WritablePacket;
+package org.l2j.mmocore;
 
 public class AsyncClient extends Client<Connection<AsyncClient>> {
 
-    AsyncClient(Connection<AsyncClient> connection) {
+    public AsyncClient(Connection<AsyncClient> connection) {
         super(connection);
     }
 

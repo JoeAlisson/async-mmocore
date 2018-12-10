@@ -148,8 +148,11 @@ public abstract class ReadablePacket<T> extends AbstractPacket<T> implements Run
      * @return String read
      */
 	protected final String readSizedString() {
-	    short size = readShort();
-	    return new String(data, dataIndex, size, Charset.forName("UTF-16LE"));
+	    int size = readShort() * 2;
+	    String result = new String(data, dataIndex, size, Charset.forName("UTF-16LE"));
+	    dataIndex += size;
+	    return result;
+
     }
 
     private static int pickShift(int top, int pos) { return isBigEndian ? top - pos : pos; }

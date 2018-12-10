@@ -79,7 +79,7 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
     /**
      * Sets the shutdown wait time.
      *
-     * @param waitTime - the wait time to close all connections resources after a {@link ConnectionHandler#shutdown} is called.
+     * @param waitTime - the wait time to close all connections resources after a {@link ConnectionHandler#shutdown()} is called.
      *
      * @return this
      */

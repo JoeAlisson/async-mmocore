@@ -1,10 +1,10 @@
 package org.l2j.mmocore;
 
 import java.net.SocketAddress;
+import java.nio.ByteOrder;
 
 import static java.lang.Math.max;
 import static java.lang.Runtime.getRuntime;
-import java.nio.ByteOrder;
 
 class ConnectionConfig<T extends Client<Connection<T>>> {
 

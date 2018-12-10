@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.StandardSocketOptions;
 import java.nio.channels.AsynchronousChannelGroup;
 import java.nio.channels.AsynchronousServerSocketChannel;
@@ -13,8 +12,8 @@ import java.nio.channels.CompletionHandler;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static java.util.Objects.nonNull;
 import static java.lang.Runtime.getRuntime;
+import static java.util.Objects.nonNull;
 
 public final class ConnectionHandler<T extends Client<Connection<T>>> extends Thread {
 
@@ -25,10 +24,11 @@ public final class ConnectionHandler<T extends Client<Connection<T>>> extends Th
     private final ConnectionConfig<T> config;
     private volatile boolean shutdown;
     private boolean cached;
+    private final ResourcePool resourcePool;
 
     ConnectionHandler(ConnectionConfig<T> config) throws IOException {
         this.config = config;
-        ResourcePool.initialize(config);
+        resourcePool = ResourcePool.initialize(config);
         group = createChannelGroup(config.threadPoolSize);
         listener = group.provider().openAsynchronousServerSocketChannel(group);
         listener.setOption(StandardSocketOptions.SO_REUSEADDR, true);
@@ -82,6 +82,7 @@ public final class ConnectionHandler<T extends Client<Connection<T>>> extends Th
                 channel.setOption(StandardSocketOptions.TCP_NODELAY, !config.useNagle);
                 Connection<T> connection = new Connection<>(channel, config.readHandler, config.writeHandler);
                 T client = config.clientFactory.create(connection);
+                client.setResourcePool(resourcePool);
                 connection.setClient(client);
                 client.onConnected();
                 connection.read();

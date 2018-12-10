@@ -34,6 +34,10 @@ class ReadHandler<T extends Client<Connection<T>>> implements CompletionHandler<
             return;
         }
 
+        readData(client);
+    }
+
+    private void readData(T client) {
         Connection<T> connection = client.getConnection();
         ByteBuffer buffer = connection.getReadingBuffer();
         buffer.flip();
@@ -55,6 +59,10 @@ class ReadHandler<T extends Client<Connection<T>>> implements CompletionHandler<
             return;
         }
 
+        onCompleteRead(client, connection, buffer, dataSize);
+    }
+
+    protected void onCompleteRead(T client, Connection<T> connection, ByteBuffer buffer, int dataSize) {
         boolean continueReading = true;
         try {
             if (dataSize > 0) {

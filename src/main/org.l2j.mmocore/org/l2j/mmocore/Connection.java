@@ -69,34 +69,34 @@ public class Connection<T extends Client<Connection<T>>> {
                 dataSent += channel.write(writingBuffer).get();
             } while (dataSent < dataSize);
         } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
+            logger.error(e.getLocalizedMessage(), e);
         }
     }
 
     ByteBuffer getReadingBuffer() {
         if(isNull(readingBuffer)) {
-            readingBuffer = ResourcePool.getPooledBuffer();
+            readingBuffer = client.getResourcePool().getPooledBuffer();
         }
         return readingBuffer;
     }
 
     private ByteBuffer getWritingBuffer(int length) {
         if(isNull(writingBuffer)) {
-            writingBuffer =  ResourcePool.getPooledBuffer(length);
+            writingBuffer =  client.getResourcePool().getPooledBuffer(length);
         } else if(writingBuffer.capacity() < length) {
-            ResourcePool.recycleBuffer(writingBuffer);
-            writingBuffer = ResourcePool.getPooledBuffer(length);
+            client.getResourcePool().recycleBuffer(writingBuffer);
+            writingBuffer = client.getResourcePool().getPooledBuffer(length);
         }
         return writingBuffer;
     }
 
     private void releaseReadingBuffer() {
-        ResourcePool.recycleBuffer(readingBuffer);
+        client.getResourcePool().recycleBuffer(readingBuffer);
         readingBuffer=null;
     }
 
     void releaseWritingBuffer() {
-        ResourcePool.recycleBuffer(writingBuffer);
+        client.getResourcePool().recycleBuffer(writingBuffer);
         writingBuffer = null;
     }
 

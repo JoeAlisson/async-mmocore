@@ -1,5 +1,7 @@
 package org.l2j.mmocore;
 
+import java.util.Arrays;
+
 import static java.lang.Double.doubleToRawLongBits;
 import static java.lang.Math.max;
 import static java.lang.System.arraycopy;
@@ -15,67 +17,65 @@ import static java.util.Objects.nonNull;
  */
 public abstract class WritablePacket<T extends Client<Connection<T>>> extends AbstractPacket<T> {
 
-	private byte[] staticData;
+    private byte[] staticData;
     protected WritablePacket() { }
 
-	/**
-	 * Write a<B>byte</B> to the buffer. <BR>
-	 * 8bit integer (00)
+    /**
+     * Write a<B>byte</B> to the buffer. <BR>
+     * 8bit integer (00)
      *
      * If the underlying data array can't hold a new byte its size is increased 20%
      *
-	 * @param value to be written
-	 */
-	protected final void writeByte(final byte value) {
-	    try {
+     * @param value to be written
+     */
+    protected final void writeByte(final byte value) {
+        try {
             data[dataIndex++] = value;
         } catch (IndexOutOfBoundsException e) {
-			byte[] tmp =  new byte[(int) ( (data.length + 1) * 1.2)];
-			arraycopy(data, 0, tmp, 0, data.length);
-			data = tmp;
-			data[dataIndex-1] = value;
+            data = Arrays.copyOf(data, (int) ( (data.length + 1) * 1.3));
+            data[dataIndex-1] = value;
         }
-	}
+    }
 
     /**
      * Write a int to the buffer, the int is casted to a byte;
      *
      * @param value to be written
      */
-	protected final void writeByte(final int value) {
-	    writeByte((byte) value);
+    protected final void writeByte(final int value) {
+        writeByte((byte) value);
     }
 
-	/**
-	 * Write <B>boolean</B> to the buffer. <BR>
+    /**
+     * Write <B>boolean</B> to the buffer. <BR>
      *  If the value is true so write a <B>byte</B> with value 1, otherwise 0
-	 *  8bit integer (00)
-	 * @param value to be written
-	 */
-	protected final void writeByte(final boolean value) {
-		writeByte((byte) (value ? 0x01 : 0x00));
-	}
-	
-	/**
-	 * Write <B>double</B> to the buffer. <BR>
-	 * 64bit double precision float (00 00 00 00 00 00 00 00)
-	 * @param value to be written
-	 */
-	protected final void writeDouble(final double value) {
-	    long x = doubleToRawLongBits(value);
-	    writeLong(x);
-	}
-	
-	/**
-	 * Write <B>short</B> to the buffer. <BR>
-	 * 16bit integer (00 00)
-	 * @param value to be written
-	 */
-	protected final void writeShort(final int value) {
-		short x = convertEndian((short) value);
-		writeShortParts((byte) x,
-                        (byte) (x >>> 8));
-	}
+     *  8bit integer (00)
+     * @param value to be written
+     */
+    protected final void writeByte(final boolean value) {
+        writeByte((byte) (value ? 0x01 : 0x00));
+    }
+
+    /**
+     * Write <B>double</B> to the buffer. <BR>
+     * 64bit double precision float (00 00 00 00 00 00 00 00)
+     * @param value to be written
+     */
+    protected final void writeDouble(final double value) {
+        long x = doubleToRawLongBits(value);
+        writeLong(x);
+    }
+
+    /**
+     * Write <B>short</B> to the buffer. <BR>
+     * 16bit integer (00 00)
+     * @param value to be written
+     */
+    protected final void writeShort(final int value) {
+        short x = convertEndian((short) value);
+        writeShortParts((byte) x,
+                (byte) (x >>> 8));
+    }
 
     /**
      * Write <B>boolean</B> to the buffer. <BR>
@@ -88,22 +88,22 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> extends Ab
     }
 
     private void writeShortParts(byte b0, byte b1) {
-	    writeByte(pickByte(b0, b1));
-	    writeByte(pickByte(b1, b0));
+        writeByte(pickByte(b0, b1));
+        writeByte(pickByte(b1, b0));
     }
 
     /**
-	 * Write <B>int</B> to the buffer. <BR>
-	 * 32bit integer (00 00 00 00)
-	 * @param value to be written
-	 */
-	protected final void writeInt(final int value) {
-	    int x  = convertEndian(value);
-	    writeIntParts((byte) x,
-                      (byte) (x >>> 8),
-                      (byte) (x >>> 16),
-                      (byte) (x >>> 24));
-	}
+     * Write <B>int</B> to the buffer. <BR>
+     * 32bit integer (00 00 00 00)
+     * @param value to be written
+     */
+    protected final void writeInt(final int value) {
+        int x  = convertEndian(value);
+        writeIntParts((byte) x,
+                (byte) (x >>> 8),
+                (byte) (x >>> 16),
+                (byte) (x >>> 24));
+    }
 
     /**
      * Write <B>boolean</B> to the buffer. <BR>
@@ -116,42 +116,42 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> extends Ab
     }
 
 
-	/**
-	 * Write <B>float</B> to the buffer. <BR>
-	 *  32bit float point number (00 00 00 00)
-	 * @param value to be written
-	 */
+    /**
+     * Write <B>float</B> to the buffer. <BR>
+     *  32bit float point number (00 00 00 00)
+     * @param value to be written
+     */
     protected final void writeFloat(final float value) {
         int x  = Float.floatToRawIntBits(value);
         writeInt(x);
     }
 
     private void writeIntParts(byte b0, byte b1, byte b2, byte b3) {
-	    writeByte(pickByte(b0, b3));
+        writeByte(pickByte(b0, b3));
         writeByte(pickByte(b1, b2));
         writeByte(pickByte(b2, b1));
         writeByte(pickByte(b3, b0));
     }
 
     /**
-	 * Write <B>long</B> to the buffer. <BR>
-	 * 64bit integer (00 00 00 00 00 00 00 00)
-	 * @param value to be written
-	 */
-	protected final void writeLong(final long value) {
+     * Write <B>long</B> to the buffer. <BR>
+     * 64bit integer (00 00 00 00 00 00 00 00)
+     * @param value to be written
+     */
+    protected final void writeLong(final long value) {
         long x = convertEndian(value);
         writeLongParts((byte) x,
-                       (byte) (x >>> 8),
-                       (byte) (x >>> 16),
-                       (byte) (x >>> 24),
-                       (byte) (x >>> 32),
-                       (byte) (x >>> 40),
-                       (byte) (x >>> 48),
-                       (byte) (x >>> 56));
-	}
+                (byte) (x >>> 8),
+                (byte) (x >>> 16),
+                (byte) (x >>> 24),
+                (byte) (x >>> 32),
+                (byte) (x >>> 40),
+                (byte) (x >>> 48),
+                (byte) (x >>> 56));
+    }
 
     private void writeLongParts(byte b0, byte b1, byte b2, byte b3, byte b4, byte b5, byte b6, byte b7) {
-	    writeByte(pickByte(b0, b7));
+        writeByte(pickByte(b0, b7));
         writeByte(pickByte(b1, b6));
         writeByte(pickByte(b2, b5));
         writeByte(pickByte(b3, b4));
@@ -162,14 +162,14 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> extends Ab
     }
 
     /**
-	 * Write <B>byte[]</B> to the buffer. <BR>
-	 * 8bit integer array (00 ...)
-	 * @param bytes to be written
-	 */
-	protected final void writeBytes(final byte[] bytes) {
-	    arraycopy(bytes, 0, data, dataIndex, bytes.length);
-		dataIndex += bytes.length;
-	}
+     * Write <B>byte[]</B> to the buffer. <BR>
+     * 8bit integer array (00 ...)
+     * @param bytes to be written
+     */
+    protected final void writeBytes(final byte[] bytes) {
+        arraycopy(bytes, 0, data, dataIndex, bytes.length);
+        dataIndex += bytes.length;
+    }
 
     /**
      * Write <B>char</B> to the buffer.<BR>
@@ -177,27 +177,27 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> extends Ab
      *
      * @param value the char to be put on data.
      */
-	protected  final void writeChar(final char value) {
+    protected  final void writeChar(final char value) {
         short x =  (short) convertEndian(value);
         writeShortParts((byte) x,
-                        (byte) (x >>> 8));
+                (byte) (x >>> 8));
     }
-	
-	/**
-	 * Write a <B>String</B> to the buffer with a null termination (\000).
+
+    /**
+     * Write a <B>String</B> to the buffer with a null termination (\000).
      * Each character is a 16bit char
      *
-	 * @param text to be written
-	 */
-	protected final void writeString(final CharSequence text) {
-		if (nonNull(text)) {
-			final int len = text.length();
-			for (int i = 0; i < len; i++) {
-			    writeChar(text.charAt(i));
-			}
-		}
-		writeChar('\000');
-	}
+     * @param text to be written
+     */
+    protected final void writeString(final CharSequence text) {
+        if (nonNull(text)) {
+            final int len = text.length();
+            for (int i = 0; i < len; i++) {
+                writeChar(text.charAt(i));
+            }
+        }
+        writeChar('\000');
+    }
 
     /**
      * Write <B>String</B> to the buffer preceded by a <B>short</B> 16 bit with String length and no null termination.
@@ -206,7 +206,7 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> extends Ab
      * @param text to be written
      */
     protected final void writeSizedString(final CharSequence text) {
-        if(nonNull(text)) {
+        if(nonNull(text) && text.length() > 0) {
             final int len = text.length();
             writeShort(len);
             writeString(text);
@@ -217,29 +217,29 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> extends Ab
     }
 
     int writeData() {
-		if(hasWritedStaticData()) {
-			return writedStaticData();
-		}
-		if(callPacketWrite()) {
-			if(getClass().isAnnotationPresent(StaticPacket.class)) {
-				staticData = new byte[dataIndex];
-				arraycopy(data, 0, staticData, 0, dataIndex);
-			}
-        return dataIndex;
-    }
-		return 0;
+        if(hasWritedStaticData()) {
+            return writedStaticData();
+        }
+        if(callPacketWrite()) {
+            if(getClass().isAnnotationPresent(StaticPacket.class)) {
+                staticData = new byte[dataIndex];
+                arraycopy(data, 0, staticData, 0, dataIndex);
+            }
+            return dataIndex;
+        }
+        return 0;
     }
 
-	private int writedStaticData() {
+    private int writedStaticData() {
         arraycopy(staticData, 0, data, 0, staticData.length);
         return staticData.length;
-	}
+    }
 
-	private boolean callPacketWrite() {
-		data = new byte[max(2, packetSize())];
-		dataIndex += ReadHandler.HEADER_SIZE;
-		return write();
-	}
+    private boolean callPacketWrite() {
+        data = new byte[max(2, packetSize())];
+        dataIndex += ReadHandler.HEADER_SIZE;
+        return write();
+    }
 
     private static byte pickByte(byte  le, byte  be) { return isBigEndian ? be : le; }
 
@@ -252,13 +252,13 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> extends Ab
      * @return The size of the packet to be sent.
      */
     protected int packetSize() {
-        return  ResourcePool.bufferSize;
+        return ResourcePool.DEFAULT_BUFFER_SIZE;
     }
 
     /**
      * Writes the data into the packet
      */
-	protected abstract boolean write();
+    protected abstract boolean write();
 
     void writeHeader(int dataSize) {
         int header = convertEndian((short) dataSize);
