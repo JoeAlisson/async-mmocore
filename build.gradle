@@ -9,19 +9,19 @@ plugins {
     id "net.nemerosa.versioning" version "2.8.2"
 }
 
-group = 'org.l2j'
+group = 'io.github.joealisson'
 version = '2.1.0'
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 
-ext.moduleName = 'org.l2j.mmocore'
+ext.moduleName = 'io.github.joealisson.mmocore'
 ext.revision = versioning.info.build
 ext.buildJDK = "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})".toString()
 
 sourceSets {
     main {
         java {
-            srcDirs = ['src/main/org.l2j.mmocore']
+            srcDirs = ['src/main/io.github.joealisson.mmocore']
         }
         resources {
             srcDirs = ['src/main/resources']
@@ -101,6 +101,14 @@ publishing {
                     developerConnection = 'scm:git:ssh://github.com/JoeAlisson/async-mmocore.git'
                     url = 'https://github.com/JoeAlisson/async-mmocore'
                 }
+            }
+        }
+
+        maven {
+            url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+            credentials {
+                username 'user'
+                password 'pwd'
             }
         }
     }
