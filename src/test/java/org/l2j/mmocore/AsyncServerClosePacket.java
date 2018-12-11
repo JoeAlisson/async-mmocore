@@ -8,7 +8,7 @@ public class AsyncServerClosePacket extends ReadablePacket<AsyncClient> {
 
     @Override
     public void run() {
-        client.close(null);
+        client.close(new AsyncServerClosedConnection());
         CommunicationTest.shutdown(true);
     }
 }

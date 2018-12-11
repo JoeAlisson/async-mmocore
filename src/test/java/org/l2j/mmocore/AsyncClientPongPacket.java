@@ -41,6 +41,6 @@ public class AsyncClientPongPacket extends ReadablePacket<AsyncClient> {
             CommunicationTest.shutdown(false);
         }
 
-        client.sendPacket(new AsyncClientClosePacket());
+        getClient().sendPacket(new AsyncClientClosePacket());
     }
 }

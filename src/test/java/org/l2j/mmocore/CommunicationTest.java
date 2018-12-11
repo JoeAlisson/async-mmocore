@@ -5,6 +5,8 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.ByteOrder;
+import java.nio.channels.AsynchronousSocketChannel;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.fail;
@@ -28,8 +30,11 @@ public class CommunicationTest {
         listenAddress = new InetSocketAddress(9090);
         GenericClientHandler handler = new GenericClientHandler();
 
-        builder = ConnectionBuilder.create(listenAddress, AsyncClient::new, handler, handler);
-        connector = Connector.create(AsyncClient::new, handler, handler);
+        builder = ConnectionBuilder.create(listenAddress, AsyncClient::new, handler, handler).filter(channel -> true).threadPoolSize(2).useNagle(false).shutdownWaitTime(500)
+                .bufferDefaultSize(100).bufferMinSize(40).bufferLargeSize(200).bufferMediumSize(75).bufferPoolSize(10).bufferMinPoolSize(10).bufferMediumPoolSize(8)
+                .bufferLargePoolSize(3).byteOrder(ByteOrder.LITTLE_ENDIAN);
+        connector = Connector.create(AsyncClient::new, handler, handler).bufferDefaultSize(100).bufferLargePoolSize(3).bufferLargeSize(200).bufferMediumPoolSize(8)
+                .bufferMediumSize(75).bufferMinPoolSize(10).bufferPoolSize(10).bufferMinSize(50).byteOrder(ByteOrder.LITTLE_ENDIAN);
 
     }
 
@@ -38,7 +43,7 @@ public class CommunicationTest {
         ConnectionHandler<AsyncClient> connectionHandler = builder.build();
         connectionHandler.start();
 
-        AsyncClient client = connector.connect(listenAddress);
+        AsyncClient client = connector.connect("localhost", 9090);
         client.sendPacket(new AsyncClientPingPacket());
 
         while (!shutdown) {
