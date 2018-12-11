@@ -257,6 +257,8 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> extends Ab
 
     /**
      * Writes the data into the packet
+     *
+     * @return the packet was written successful
      */
     protected abstract boolean write();
 
