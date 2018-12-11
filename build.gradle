@@ -1,12 +1,14 @@
 import java.text.SimpleDateFormat
 
 plugins {
-    id "java-library"
-    id "idea"
-    id "eclipse"
+    id 'java-library'
+    id 'idea'
+    id 'eclipse'
     id 'maven-publish'
     id 'signing'
-    id "net.nemerosa.versioning" version "2.8.2"
+    id 'net.nemerosa.versioning' version '2.8.2'
+    id 'net.saliman.cobertura' version '2.3.1'
+    id 'com.github.kt3k.coveralls' version '2.8.2'
 }
 
 group = 'io.github.joealisson'
@@ -17,6 +19,8 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 ext.moduleName = 'io.github.joealisson.mmocore'
 ext.revision = versioning.info.build
 ext.buildJDK = "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})".toString()
+
+cobertura.coverageFormats = ['html', 'xml']
 
 sourceSets {
     main {

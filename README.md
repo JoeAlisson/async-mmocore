@@ -1,9 +1,14 @@
 # async-mmocore
 ![Code Badge](https://img.shields.io/badge/Project-L2J-red.svg)
 ![Code Badge](https://img.shields.io/badge/Powered_by-Java_1.8-lightgray.svg)
-[![License badge](https://img.shields.io/badge/license-GPL-blue.svg)](https://opensource.org/licenses/AGPL-3.0)
 [![Code Badge](https://img.shields.io/badge/Versioning-Semantic-green.svg)](https://semver.org/)
+[![License badge](https://img.shields.io/badge/license-GPL-blue.svg)](https://opensource.org/licenses/AGPL-3.0)
+
 [![Build Status](https://travis-ci.org/JoeAlisson/async-mmocore.svg?branch=master)](https://travis-ci.org/JoeAlisson/async-mmocore)
+[![Coverage Status](https://coveralls.io/repos/github/JoeAlisson/async-mmocore/badge.svg?branch=master)](https://coveralls.io/github/JoeAlisson/async-mmocore?branch=master)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.joealisson/async-mmocore/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.joealisson/async-mmocore)
+
+
 
 #### The  Goal
 

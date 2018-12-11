@@ -16,3 +16,6 @@ cache:
 
 notifications:
   email: false
+
+after_success:
+  - ./gradlew cobertura coveralls
