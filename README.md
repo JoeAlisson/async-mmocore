@@ -6,6 +6,7 @@
 
 [![Build Status](https://travis-ci.org/JoeAlisson/async-mmocore.svg?branch=master)](https://travis-ci.org/JoeAlisson/async-mmocore)
 [![Coverage Status](https://coveralls.io/repos/github/JoeAlisson/async-mmocore/badge.svg?branch=master)](https://coveralls.io/github/JoeAlisson/async-mmocore?branch=master)
+[![Sonarcloud Status](https://sonarcloud.io/api/project_badges/measure?project=JoeAlisson_async-mmocore&metric=alert_status&metric=alert_status)](https://sonarcloud.io/dashboard?id=JoeAlisson_async-mmocore)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.joealisson/async-mmocore/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.joealisson/async-mmocore)
 
 

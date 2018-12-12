@@ -1,9 +1,19 @@
 language: java
+sudo: required
+
+addons:
+  sonarcloud:
+    organization: "joealisson-github"
+    token:
+      secure: "miFWLim9njHHkHjI7x+p/p2LMDHs40JO9N/u0BT7JqzlLkzK9LkL0wea5Yu1xXlxOfWJmH13loWzKOVb8wh4Ev+QwZ7XfBxgQvu5D7RvUHAR5o4G1HQLdFMLX+6qN6nEmavhyHAuuYbZLBJSdumrq1ocVqCg1sVFneyQfXaOOYN98Lab6E2moSS+3B7jE0Ew0FUAma/Pd4k4p+If05GxWOd+nuqMc2O4ro2++H8CwvWY2yOmiqvK9pZmzeyiQajyCRTarxY2Lnp3smbOHUcGi9n7iI8QhVLdyRS2cenGs7I1pbpvr/QxQpySJu00VUND87HsKCKE3J9UDWR3k5kDQiH8UqZlEtA3aHL6oHDPqYTySicKrF/eAdCQQvxua7GS4jkOafd7N6nByapN0py3hgFtxbMFVjwMA2YNjEhX1k3qjcAIA8TjbIUCsCuCBIOhXSeIuNeHD7QrDWKc450PVxTNTDGnTjnZBcgAnZHzDgD1ihZ2d9F6OnF8EmYmIUDxJ5QvQrYdtR+ia0YTtFpFzXTPJkfXaR/E5bMm/f/MmBkTIRUfkI/VsmVWCu0roIaQVq2+zcLNWzGlaL/diPAdjn2hwEeO3nE5BajtCYw6rMN438jMW2MLqPZRgwt2bX0PJJy/9JbbWA8yopAHeeWf8tlI5Cbxbrj81W8z3rHA3c4="
+script:
+  - sonar-scanner
 
 jdk:
   - oraclejdk8
 
-script: ./gradlew build --daemon
+install:
+  - ./gradlew build -x signArchives
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
@@ -13,6 +23,7 @@ cache:
   directories:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
+    - $HOME/.sonar/cache
 
 notifications:
   email: false

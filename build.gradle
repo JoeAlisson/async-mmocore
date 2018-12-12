@@ -54,7 +54,7 @@ jar {
 }
 
 task jarSources(type:Jar){
-    classifier = 'source'
+    classifier = 'sources'
     from sourceSets.main.allSource
 }
 
@@ -64,7 +64,7 @@ task javadocJar(type: Jar) {
 }
 
 artifacts {
-    archives javadocJar, jarSources
+    archives javadocJar, jarSources, jar
 }
 
 signing {
@@ -99,15 +99,15 @@ uploadArchives {
                 }
                 developers {
                     developer {
-                        id = 'joeAlisson'
+                        id = 'JoeAlisson'
                         name = 'Alisson Oliveira'
                         email = 'joe.alisson@gmail.com'
                     }
                 }
                 scm {
                     connection = 'scm:git:git://github.com/JoeAlisson/async-mmocore.git'
-                    developerConnection = 'scm:git:ssh://github.com/JoeAlisson/async-mmocore.git'
-                    url = 'https://github.com/JoeAlisson/async-mmocore'
+                    developerConnection = 'scm:git:ssh://github.com:JoeAlisson/async-mmocore.git'
+                    url = 'https://github.com/JoeAlisson/async-mmocore/tree/master'
                 }
             }
         }
