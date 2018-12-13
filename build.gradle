@@ -6,7 +6,9 @@ plugins {
     id "eclipse"
     id 'maven'
     id 'signing'
-    id "net.nemerosa.versioning" version "2.8.2"
+    id 'net.nemerosa.versioning' version '2.8.2'
+    id 'net.saliman.cobertura' version '2.5.4'
+    id 'com.github.kt3k.coveralls' version '2.8.2'
 }
 
 group = 'io.github.joealisson'
@@ -17,6 +19,8 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 ext.moduleName = 'io.github.joealisson.mmocore'
 ext.revision = versioning.info.build
 ext.buildJDK = "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})".toString()
+
+cobertura.coverageFormats = ['html', 'xml']
 
 sourceSets {
     main {
@@ -85,9 +89,8 @@ uploadArchives {
             }
 
             pom.project {
-                name 'Example Application'
+                name 'Async Mmocore'
                 packaging 'jar'
-                // optionally artifactId can be defined here 
                 description 'The Goal of the async-mmocore is to provide a way to handle MMO connections abstracting the networking layer complexity.'
                 url 'https://github.com/JoeAlisson/async-mmocore'
 
