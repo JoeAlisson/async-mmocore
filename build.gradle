@@ -20,7 +20,7 @@ ext.moduleName = 'io.github.joealisson.mmocore'
 ext.revision = versioning.info.build
 ext.buildJDK = "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})".toString()
 
-cobertura.coverageFormats = ['html', 'xml']
+cobertura.coverageFormats = ['xml', 'html']
 
 sourceSets {
     main {
