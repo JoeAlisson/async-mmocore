@@ -15,7 +15,7 @@ public final class DataWrapper extends ReadablePacket<Object> {
     }
 
     /**
-     * @throws - this method does nothing just throw UnsupportedOperationException
+     * @throws UnsupportedOperationException - this method does nothing just throw
      */
     @Override
     public void run() {

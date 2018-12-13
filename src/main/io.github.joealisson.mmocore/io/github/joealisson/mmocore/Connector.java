@@ -3,8 +3,10 @@ package io.github.joealisson.mmocore;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
+import java.nio.channels.AsynchronousChannelGroup;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
@@ -13,6 +15,7 @@ import static java.util.Objects.isNull;
 public class Connector<T extends Client<Connection<T>>>  {
 
     private ConnectionConfig<T> config;
+    private static final int THREAD_POOL_SIZE = 2;
 
     public static <T extends Client<Connection<T>>> Connector<T> create(ClientFactory<T> clientFactory, PacketHandler<T> packetHandler, PacketExecutor<T> executor)  {
         Connector<T> builder = new Connector<>();
@@ -76,7 +79,8 @@ public class Connector<T extends Client<Connection<T>>>  {
     }
 
     public T connect(InetSocketAddress socketAddress) throws IOException, ExecutionException, InterruptedException {
-        AsynchronousSocketChannel channel = AsynchronousSocketChannel.open();
+        AsynchronousChannelGroup group = AsynchronousChannelGroup.withFixedThreadPool(THREAD_POOL_SIZE, Executors.defaultThreadFactory());
+        AsynchronousSocketChannel channel = group.provider().openAsynchronousSocketChannel(group);
         channel.connect(socketAddress).get();
         Connection<T> connection = new Connection<>(channel, config.readHandler, new WriteHandler<>());
         T client = config.clientFactory.create(connection);
