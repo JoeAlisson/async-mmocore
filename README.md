@@ -1,13 +1,30 @@
 # async-mmocore
-![Code Badge](https://img.shields.io/badge/Project-L2J-red.svg)
-![Code Badge](https://img.shields.io/badge/Powered_by-Java_1.8-lightgray.svg)
-[![Code Badge](https://img.shields.io/badge/Versioning-Semantic-green.svg)](https://semver.org/)
-[![License badge](https://img.shields.io/badge/license-GPL-blue.svg)](https://opensource.org/licenses/AGPL-3.0)
+![Code Badge](https://img.shields.io/badge/Project-L2J-red.svg?logo=github&logoColor=white)
+![Code Badge](https://img.shields.io/badge/Powered_by-Java_1.8-lightgray.svg?logo=java&logoColor=white)
+[![Code Badge](https://img.shields.io/badge/Versioning-Semantic-green.svg?logo=git&logoColor=white)](https://semver.org/)
+[![License badge](https://img.shields.io/badge/license-GPL-blue.svg?logo=gnu&logoColor=white)](https://opensource.org/licenses/AGPL-3.0)
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.joealisson/async-mmocore/badge.svg)](https://maven-badges.herokuapp.com)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.joealisson/async-mmocore/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.joealisson/async-mmocore)
 [![Build Status](https://travis-ci.org/JoeAlisson/async-mmocore.svg?branch=master)](https://travis-ci.org/JoeAlisson/async-mmocore)
 [![Coverage Status](https://coveralls.io/repos/github/JoeAlisson/async-mmocore/badge.svg?branch=master)](https://coveralls.io/github/JoeAlisson/async-mmocore?branch=master)
 [![Sonarcloud Status](https://sonarcloud.io/api/project_badges/measure?project=JoeAlisson_async-mmocore&metric=alert_status)](https://sonarcloud.io/dashboard?id=JoeAlisson_async-mmocore)
+
+#### Maven Coordinates
+
+* Maven
+```java
+<dependency>
+  <groupId>io.github.joealisson</groupId>
+  <artifactId>async-mmocore</artifactId>
+  <version>2.1.0</version>
+</dependency>
+```
+
+* Gradle
+
+```groovy
+compile 'io.github.joealisson:async-mmocore:2.1.0'
+```
 
 
 #### The  Goal
