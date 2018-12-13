@@ -54,6 +54,7 @@ public final class ConnectionHandler<T extends Client<Connection<T>>> extends Th
                     Thread.sleep(config.shutdownWaitTime);
                 } catch (InterruptedException e) {
                     logger.warn(e.getLocalizedMessage(), e);
+                    Thread.currentThread().interrupt();
                 }
             }
         }
@@ -69,28 +70,6 @@ public final class ConnectionHandler<T extends Client<Connection<T>>> extends Th
         }
     }
 
-    private void acceptConnection(AsynchronousSocketChannel channel) {
-        if(nonNull(channel) && channel.isOpen()) {
-            try {
-                logger.debug("Accepting connection from {}", channel);
-                if(nonNull(config.acceptFilter) && !config.acceptFilter.accept(channel)) {
-                    channel.close();
-                    logger.debug("Rejected connection");
-                    return;
-                }
-
-                channel.setOption(StandardSocketOptions.TCP_NODELAY, !config.useNagle);
-                Connection<T> connection = new Connection<>(channel, config.readHandler, config.writeHandler);
-                T client = config.clientFactory.create(connection);
-                client.setResourcePool(resourcePool);
-                connection.setClient(client);
-                client.onConnected();
-                connection.read();
-            } catch (Exception  e) {
-                logger.error(e.getLocalizedMessage(), e);
-            }
-        }
-    }
 
     public void shutdown() {
         logger.debug("Shutting ConnectionHandler down");
@@ -110,6 +89,29 @@ public final class ConnectionHandler<T extends Client<Connection<T>>> extends Th
         @Override
         public void failed(Throwable t, Void attachment) {
             logger.error(t.getLocalizedMessage(), t);
+        }
+
+        private void acceptConnection(AsynchronousSocketChannel channel) {
+            if(nonNull(channel) && channel.isOpen()) {
+                try {
+                    logger.debug("Accepting connection from {}", channel);
+                    if(nonNull(config.acceptFilter) && !config.acceptFilter.accept(channel)) {
+                        channel.close();
+                        logger.debug("Rejected connection");
+                        return;
+                    }
+
+                    channel.setOption(StandardSocketOptions.TCP_NODELAY, !config.useNagle);
+                    Connection<T> connection = new Connection<>(channel, config.readHandler, config.writeHandler);
+                    T client = config.clientFactory.create(connection);
+                    client.setResourcePool(resourcePool);
+                    connection.setClient(client);
+                    client.onConnected();
+                    connection.read();
+                } catch (Exception  e) {
+                    logger.error(e.getLocalizedMessage(), e);
+                }
+            }
         }
     }
 }

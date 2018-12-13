@@ -241,7 +241,7 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> extends Ab
         return write();
     }
 
-    private static byte pickByte(byte  le, byte  be) { return isBigEndian ? be : le; }
+    private static byte pickByte(byte  le, byte  be) { return IS_BIG_ENDIAN ? be : le; }
 
     /**
      * By default this method return the size of the bufferSize configured.

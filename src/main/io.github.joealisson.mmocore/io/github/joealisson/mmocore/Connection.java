@@ -70,6 +70,7 @@ public class Connection<T extends Client<Connection<T>>> {
             } while (dataSent < dataSize);
         } catch (InterruptedException | ExecutionException e) {
             logger.error(e.getLocalizedMessage(), e);
+            Thread.currentThread().interrupt();
         }
     }
 

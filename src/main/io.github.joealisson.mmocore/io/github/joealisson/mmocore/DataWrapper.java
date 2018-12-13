@@ -15,10 +15,12 @@ public final class DataWrapper extends ReadablePacket<Object> {
     }
 
     /**
-     * does nothing
+     * @throws - this method does nothing just throw UnsupportedOperationException
      */
     @Override
-    public void run() { }
+    public void run() {
+        throw new UnsupportedOperationException();
+    }
 
     static DataWrapper wrap(byte[] data) {
         return new DataWrapper(data);

@@ -4,7 +4,7 @@ import java.nio.ByteOrder;
 
 public abstract class AbstractPacket<T> {
 
-    static final boolean isBigEndian = ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN;
+    static final boolean IS_BIG_ENDIAN = ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN;
     byte[] data;
     int dataIndex;
 
@@ -19,18 +19,18 @@ public abstract class AbstractPacket<T> {
     }
 
     static short convertEndian(short n) {
-        return !isBigEndian ? n : Short.reverseBytes(n);
+        return !IS_BIG_ENDIAN ? n : Short.reverseBytes(n);
     }
 
     static int convertEndian(int n) {
-        return !isBigEndian ? n : Integer.reverseBytes(n);
+        return !IS_BIG_ENDIAN ? n : Integer.reverseBytes(n);
     }
 
     static long convertEndian(long n) {
-        return !isBigEndian ? n : Long.reverseBytes(n);
+        return !IS_BIG_ENDIAN ? n : Long.reverseBytes(n);
     }
 
     static char convertEndian(char n) {
-        return !isBigEndian ? n : Character.reverseBytes(n);
+        return !IS_BIG_ENDIAN ? n : Character.reverseBytes(n);
     }
 }

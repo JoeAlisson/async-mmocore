@@ -127,16 +127,21 @@ public abstract class Client<T extends Connection<?>> {
         packetsToWrite.clear();
         if(nonNull(packet)) {
             putClientOnPacket(packet);
-            while (!writing.compareAndSet(false, true)) {
-                try {
-                    wait(500);
-                } catch (InterruptedException e) {
-                    logger.debug(e.getLocalizedMessage(), e);
-                }
-            }
+            ensureCanWrite();
             write(packet, true);
         }
         disconnect();
+    }
+
+    private synchronized void ensureCanWrite() {
+        while (!writing.compareAndSet(false, true)) {
+            try {
+                wait(500);
+            } catch (InterruptedException e) {
+                logger.warn(e.getLocalizedMessage(), e);
+                Thread.currentThread().interrupt();
+            }
+        }
     }
 
     protected final void disconnect() {

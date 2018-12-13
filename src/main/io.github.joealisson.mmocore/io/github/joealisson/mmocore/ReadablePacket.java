@@ -1,6 +1,7 @@
 package io.github.joealisson.mmocore;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import static java.lang.Byte.toUnsignedInt;
 import static java.lang.Byte.toUnsignedLong;
@@ -139,7 +140,7 @@ public abstract class ReadablePacket<T> extends AbstractPacket<T> implements Run
 	    while (dataIndex < data.length &&  readChar() != '\000'){
 			size += 2;
         }
-	    return new String(data, start, size, Charset.forName("UTF-16LE"));
+	    return new String(data, start, size, StandardCharsets.UTF_16LE);
 	}
 
     /**
@@ -149,13 +150,13 @@ public abstract class ReadablePacket<T> extends AbstractPacket<T> implements Run
      */
 	protected final String readSizedString() {
 	    int size = readShort() * 2;
-	    String result = new String(data, dataIndex, size, Charset.forName("UTF-16LE"));
+	    String result = new String(data, dataIndex, size, StandardCharsets.UTF_16LE);
 	    dataIndex += size;
 	    return result;
 
     }
 
-    private static int pickShift(int top, int pos) { return isBigEndian ? top - pos : pos; }
+    private static int pickShift(int top, int pos) { return IS_BIG_ENDIAN ? top - pos : pos; }
 
     protected abstract boolean read();
 
