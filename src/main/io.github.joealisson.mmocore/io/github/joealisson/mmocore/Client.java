@@ -107,6 +107,8 @@ public abstract class Client<T extends Connection<?>> {
         try {
             write(packet, false);
         } catch (Exception e) {
+            logger.error(e.getLocalizedMessage(), e);
+            writing.getAndSet(false);
             tryWriteNextPacket();
         }
     }

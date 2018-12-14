@@ -9,24 +9,6 @@
 [![Coverage Status](https://coveralls.io/repos/github/JoeAlisson/async-mmocore/badge.svg?branch=master)](https://coveralls.io/github/JoeAlisson/async-mmocore?branch=master)
 [![Sonarcloud Status](https://sonarcloud.io/api/project_badges/measure?project=JoeAlisson_async-mmocore&metric=alert_status)](https://sonarcloud.io/dashboard?id=JoeAlisson_async-mmocore)
 
-#### Maven Coordinates
-
-* Maven
-```java
-<dependency>
-  <groupId>io.github.joealisson</groupId>
-  <artifactId>async-mmocore</artifactId>
-  <version>2.1.0</version>
-</dependency>
-```
-
-* Gradle
-
-```groovy
-compile 'io.github.joealisson:async-mmocore:2.1.0'
-```
-
-
 #### The  Goal
 
 The _**Async-mmocore**_ is primary designed to **Massive Multiplayer Online (MMO) Game Servers**. 

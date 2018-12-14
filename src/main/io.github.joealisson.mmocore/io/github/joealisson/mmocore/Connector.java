@@ -24,22 +24,22 @@ public class Connector<T extends Client<Connection<T>>>  {
     }
 
     public Connector<T> bufferDefaultSize(int bufferSize) {
-        config.bufferDefaultSize = min(max(bufferSize, config.bufferMinSize), ConnectionConfig.BUFFER_MAX_SIZE);
+        config.bufferDefaultSize = min(bufferSize, ConnectionConfig.BUFFER_MAX_SIZE);
         return this;
     }
 
     public Connector<T> bufferMinSize(int bufferSize) {
-        config.bufferMinSize = min(max(config.bufferMinSize, bufferSize), ConnectionConfig.BUFFER_MAX_SIZE);
+        config.bufferMinSize = min(bufferSize, ConnectionConfig.BUFFER_MAX_SIZE);
         return this;
     }
 
     public Connector<T> bufferMediumSize(int bufferSize) {
-        config.bufferMediumSize = min(max(bufferSize, config.bufferMinSize), ConnectionConfig.BUFFER_MAX_SIZE);
+        config.bufferMediumSize = min(bufferSize, ConnectionConfig.BUFFER_MAX_SIZE);
         return this;
     }
 
     public Connector<T> bufferLargeSize(int bufferSize) {
-        config.bufferLargeSize = min(max(bufferSize, config.bufferMinSize), ConnectionConfig.BUFFER_MAX_SIZE);
+        config.bufferLargeSize = min(bufferSize, ConnectionConfig.BUFFER_MAX_SIZE);
         return this;
     }
 

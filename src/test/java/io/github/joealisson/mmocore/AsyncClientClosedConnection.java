@@ -22,5 +22,6 @@ public class AsyncClientClosedConnection extends ReadablePacket<AsyncClient> {
                 return false;
             }
         });
+        CommunicationTest.shutdown(true);
     }
 }

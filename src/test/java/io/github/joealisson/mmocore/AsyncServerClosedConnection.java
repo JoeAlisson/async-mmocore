@@ -8,6 +8,7 @@ public class AsyncServerClosedConnection extends WritablePacket<AsyncClient> {
         writeShort(0x01);
         writeInt(0x02);
         writeString(client.getHostAddress());
-        return false;
+        writeBytes(new byte[20]);
+        return true;
     }
 }

@@ -10,9 +10,9 @@ class ConnectionConfig<T extends Client<Connection<T>>> {
 
     static final int BUFFER_MAX_SIZE = 64 * 1024;
     int bufferDefaultSize = 9 * 1024;
-    int bufferMinSize = 4 * 1024;
-    int bufferMediumSize = 1024;
-    int bufferLargeSize = 64;
+    int bufferMinSize = 1024;
+    int bufferMediumSize = 4 * 1024;
+    int bufferLargeSize = BUFFER_MAX_SIZE;
 
     int bufferPoolSize = 100;
     int bufferMinPoolSize = 100;

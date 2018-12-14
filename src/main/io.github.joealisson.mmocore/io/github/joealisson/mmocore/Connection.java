@@ -122,6 +122,10 @@ public class Connection<T extends Client<Connection<T>>> {
     }
 
     boolean isOpen() {
-        return channel.isOpen();
+        try {
+            return channel.isOpen() && nonNull(channel.getRemoteAddress());
+        } catch (IOException e) {
+            return false;
+        }
     }
 }
