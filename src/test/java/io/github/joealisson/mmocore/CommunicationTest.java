@@ -26,8 +26,6 @@ public class CommunicationTest {
         CommunicationTest.success = success;
     }
 
-
-
     @Before
     public void SetUp() {
         listenAddress = new InetSocketAddress(9090);

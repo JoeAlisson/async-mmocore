@@ -14,7 +14,6 @@ public class AsyncClientClosedConnection extends ReadablePacket<AsyncClient> {
 
     @Override
     public void run() {
-        client.close(null);
         client.close(new WritablePacket<AsyncClient>() {
             @Override
             protected boolean write() {
@@ -22,6 +21,7 @@ public class AsyncClientClosedConnection extends ReadablePacket<AsyncClient> {
                 return false;
             }
         });
+        client.close(null);
         CommunicationTest.shutdown(true);
     }
 }

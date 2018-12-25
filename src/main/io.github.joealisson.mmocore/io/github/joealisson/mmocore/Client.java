@@ -138,7 +138,7 @@ public abstract class Client<T extends Connection<?>> {
     private synchronized void ensureCanWrite() {
         while (!writing.compareAndSet(false, true)) {
             try {
-                wait(500);
+                wait(100);
             } catch (InterruptedException e) {
                 logger.warn(e.getLocalizedMessage(), e);
                 Thread.currentThread().interrupt();

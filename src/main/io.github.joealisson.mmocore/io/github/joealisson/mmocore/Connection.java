@@ -84,9 +84,6 @@ public class Connection<T extends Client<Connection<T>>> {
     private ByteBuffer getWritingBuffer(int length) {
         if(isNull(writingBuffer)) {
             writingBuffer =  client.getResourcePool().getPooledBuffer(length);
-        } else if(writingBuffer.capacity() < length) {
-            client.getResourcePool().recycleBuffer(writingBuffer);
-            writingBuffer = client.getResourcePool().getPooledBuffer(length);
         }
         return writingBuffer;
     }
@@ -124,7 +121,7 @@ public class Connection<T extends Client<Connection<T>>> {
     boolean isOpen() {
         try {
             return channel.isOpen() && nonNull(channel.getRemoteAddress());
-        } catch (IOException e) {
+        } catch (Exception e) {
             return false;
         }
     }
