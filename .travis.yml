@@ -1,5 +1,5 @@
 language: java
-sudo: required
+sudo: false
 
 addons:
   sonarcloud:
@@ -10,9 +10,6 @@ addons:
 jdk:
   - oraclejdk8
 
-install:
-  - ./gradlew build
-
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
@@ -22,10 +19,16 @@ cache:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
     - $HOME/.sonar/cache
+    - $HOME/.m2/repository
+    - $HOME/.gradle
+    - .gradle
 
 notifications:
   email: false
 
+script:
+  - ./gradlew build
+  - ./gradlew sonarqube
+
 after_success:
-  - ./gradlew cobertura coveralls
   - sonar-scanner
