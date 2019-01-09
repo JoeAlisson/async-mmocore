@@ -11,7 +11,7 @@ jdk:
   - oraclejdk8
 
 install:
-  - ./gradlew build -x signArchives
+  - ./gradlew build
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
