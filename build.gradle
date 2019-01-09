@@ -90,7 +90,8 @@ publishing {
 
             pom {
                 name = 'Async Mmocore'
-                description = 'The Goal of the async-mmocore is to provide a way to handle MMO connections abstracting the networking layer complexity.'url = 'https://github.com/JoeAlisson/async-mmocore'
+                description = 'The Goal of the async-mmocore is to provide a way to handle MMO connections abstracting the networking layer complexity.'
+                url = 'https://github.com/JoeAlisson/async-mmocore'
                 licenses {
                     license {
                         name = 'GNU General Public License v3.0'
