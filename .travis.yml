@@ -10,6 +10,9 @@ addons:
 jdk:
   - oraclejdk8
 
+git:
+  depth: 99999
+
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
@@ -28,7 +31,6 @@ notifications:
 
 script:
   - ./gradlew build
-  - ./gradlew sonarqube
 
 after_success:
   - sonar-scanner
