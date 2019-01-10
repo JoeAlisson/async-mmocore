@@ -3,11 +3,16 @@
 ![Code Badge](https://img.shields.io/badge/Powered_by-Java_1.8-lightgray.svg?logo=java&logoColor=white)
 [![Code Badge](https://img.shields.io/badge/Versioning-Semantic-green.svg?logo=git&logoColor=white)](https://semver.org/)
 [![License badge](https://img.shields.io/badge/license-GPL-blue.svg?logo=gnu&logoColor=white)](https://opensource.org/licenses/AGPL-3.0)
-
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.joealisson/async-mmocore/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.joealisson/async-mmocore)
+
+
 [![Build Status](https://travis-ci.org/JoeAlisson/async-mmocore.svg?branch=master)](https://travis-ci.org/JoeAlisson/async-mmocore)
-[![Coverage Status](https://coveralls.io/repos/github/JoeAlisson/async-mmocore/badge.svg?branch=master)](https://coveralls.io/github/JoeAlisson/async-mmocore?branch=master)
-[![Sonarcloud Status](https://sonarcloud.io/api/project_badges/measure?project=JoeAlisson_async-mmocore&metric=alert_status)](https://sonarcloud.io/dashboard?id=JoeAlisson_async-mmocore)
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=JoeAlisson_async-mmocore&metric=alert_status)](https://sonarcloud.io/dashboard?id=JoeAlisson_async-mmocore)
+[![SonarCloud Coverage](https://sonarcloud.io/api/project_badges/measure?project=JoeAlisson_async-mmocore&metric=coverage)](https://sonarcloud.io/component_measures?id=JoeAlisson_async-mmocore&metric=Coverage)
+[![SonarCloud Bugs](https://sonarcloud.io/api/project_badges/measure?project=JoeAlisson_async-mmocore&metric=bugs)](https://sonarcloud.io/component_measures/metric/reliability_rating/list?id=JoeAlisson_async-mmocore)
+[![SonarCloud Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=JoeAlisson_async-mmocore&metric=vulnerabilities)](https://sonarcloud.io/component_measures/metric/security_rating/list?id=JoeAlisson_async-mmocore)
+
+
 
 #### The  Goal
 
