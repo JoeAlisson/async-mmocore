@@ -1,6 +1,7 @@
 package io.github.joealisson.mmocore;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
@@ -15,9 +16,11 @@ class ResourcePool {
 
     private final Map<Integer, Queue<ByteBuffer>> buffers = new HashMap<>();
     private final ConnectionConfig config;
+    private final boolean nativeOrder;
 
     private ResourcePool(ConnectionConfig config) {
         this.config = config;
+        this.nativeOrder = config.byteOrder == ByteOrder.nativeOrder();
     }
 
     ByteBuffer getPooledBuffer() {
@@ -79,6 +82,10 @@ class ResourcePool {
             poolSize = config.bufferLargePoolSize;
         }
         return poolSize;
+    }
+
+    public boolean isNativeOrder() {
+        return nativeOrder;
     }
 
     static ResourcePool initialize(ConnectionConfig config) {

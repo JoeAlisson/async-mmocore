@@ -3,7 +3,7 @@ package io.github.joealisson.mmocore;
 /**
  * This class is a data wrapper that supply a basic interface that facilitates the reading of the incoming data.
  */
-public final class DataWrapper extends ReadablePacket<Object> {
+public final class DataWrapper extends ReadablePacket {
 
     private DataWrapper(byte[] data) {
         this.data = data;
@@ -15,11 +15,11 @@ public final class DataWrapper extends ReadablePacket<Object> {
     }
 
     /**
-     * @throws UnsupportedOperationException - this method does nothing just throw
+     * does nothing
      */
     @Override
     public void run() {
-        throw new UnsupportedOperationException();
+        // do nothing
     }
 
     static DataWrapper wrap(byte[] data) {

@@ -15,12 +15,16 @@ import static java.lang.Float.intBitsToFloat;
  * The first and second bytes is a 16 bits integer holding the size of the packet.
  *
  */
-public abstract class ReadablePacket<T> extends AbstractPacket<T> implements Runnable {
+public abstract class ReadablePacket<T extends Client<Connection<T>>> extends AbstractPacket<T> implements Runnable {
 
     protected ReadablePacket() {
-        // no direc instances
+        // no direct instances
     }
 
+    /**
+     *
+     * @return the available data to be read
+     */
     protected final int availableData() {
         return data.length - dataIndex;
     }
@@ -157,7 +161,7 @@ public abstract class ReadablePacket<T> extends AbstractPacket<T> implements Run
 
     }
 
-    private static int pickShift(int top, int pos) { return IS_BIG_ENDIAN ? top - pos : pos; }
+    private static int pickShift(int top, int pos) { return IS_NATIVE_BIG_ENDIAN ? top - pos : pos; }
 
     protected abstract boolean read();
 }

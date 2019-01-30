@@ -2,9 +2,9 @@ package io.github.joealisson.mmocore;
 
 import java.nio.ByteOrder;
 
-public abstract class AbstractPacket<T> {
+public abstract class AbstractPacket<T extends Client<Connection<T>>> {
 
-    static final boolean IS_BIG_ENDIAN = ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN;
+    static final boolean IS_NATIVE_BIG_ENDIAN = ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN;
     byte[] data;
     int dataIndex;
 
@@ -18,19 +18,23 @@ public abstract class AbstractPacket<T> {
         return client;
     }
 
-    static short convertEndian(short n) {
-        return !IS_BIG_ENDIAN ? n : Short.reverseBytes(n);
+    short convertEndian(short n) {
+        return isNativeEndian() ? n : Short.reverseBytes(n);
     }
 
-    static int convertEndian(int n) {
-        return !IS_BIG_ENDIAN ? n : Integer.reverseBytes(n);
+    int convertEndian(int n) {
+        return isNativeEndian() ? n : Integer.reverseBytes(n);
     }
 
-    static long convertEndian(long n) {
-        return !IS_BIG_ENDIAN ? n : Long.reverseBytes(n);
+    long convertEndian(long n) {
+        return isNativeEndian() ? n : Long.reverseBytes(n);
     }
 
-    static char convertEndian(char n) {
-        return !IS_BIG_ENDIAN ? n : Character.reverseBytes(n);
+    char convertEndian(char n) {
+        return  isNativeEndian() ? n : Character.reverseBytes(n);
+    }
+
+    boolean isNativeEndian() {
+        return client.getResourcePool().isNativeOrder();
     }
 }
