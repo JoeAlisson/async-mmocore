@@ -2,6 +2,8 @@ package io.github.joealisson.mmocore;
 
 import java.nio.ByteOrder;
 
+import static java.util.Objects.isNull;
+
 public abstract class AbstractPacket<T extends Client<Connection<T>>> {
 
     static final boolean IS_NATIVE_BIG_ENDIAN = ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN;
@@ -35,6 +37,6 @@ public abstract class AbstractPacket<T extends Client<Connection<T>>> {
     }
 
     boolean isNativeEndian() {
-        return client.getResourcePool().isNativeOrder();
+        return isNull(client) || client.getResourcePool().isNativeOrder();
     }
 }
