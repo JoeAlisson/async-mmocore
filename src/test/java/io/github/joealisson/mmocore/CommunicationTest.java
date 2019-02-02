@@ -1,6 +1,7 @@
 package io.github.joealisson.mmocore;
 
 import org.awaitility.Awaitility;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -19,7 +20,8 @@ public class CommunicationTest {
     private static boolean success = true;
     private ConnectionBuilder<AsyncClient> builder;
     private Connector<AsyncClient> connector;
-    private InetSocketAddress listenAddress;
+    private InetSocketAddress listenAddress = new InetSocketAddress(9090);
+    ConnectionHandler<AsyncClient> connectionHandler;
 
     static void shutdown(boolean success) {
         shutdown.getAndSet(true);
@@ -28,7 +30,6 @@ public class CommunicationTest {
 
     @Before
     public void SetUp() {
-        listenAddress = new InetSocketAddress(9090);
         GenericClientHandler handler = new GenericClientHandler();
 
         builder = ConnectionBuilder.create(listenAddress, AsyncClient::new, handler, handler).filter(channel -> true).threadPoolSize(2).useNagle(false).shutdownWaitTime(500)
@@ -41,18 +42,25 @@ public class CommunicationTest {
 
     @Test
     public void testIntegration() throws IOException, ExecutionException, InterruptedException {
-        ConnectionHandler<AsyncClient> connectionHandler = builder.build();
+        connectionHandler = builder.build();
         connectionHandler.start();
 
         AsyncClient client = connector.connect("localhost", 9090);
         client.sendPacket(new AsyncClientPingPacket());
 
-        Awaitility.waitAtMost(30, TimeUnit.SECONDS).untilTrue(shutdown);
+        Awaitility.waitAtMost(1000, TimeUnit.SECONDS).untilTrue(shutdown);
 
         connectionHandler.shutdown();
         connectionHandler.join();
         if(!success) {
             fail();
+        }
+    }
+
+    @After
+    public void tearDown() {
+        if(!shutdown.get()) {
+            connectionHandler.shutdown();
         }
     }
 }

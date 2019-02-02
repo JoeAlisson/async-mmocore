@@ -1,5 +1,7 @@
 package io.github.joealisson.mmocore;
 
+import java.nio.ByteBuffer;
+
 public class AsyncClientClosedConnection extends ReadablePacket<AsyncClient> {
     private final byte[] bytes;
 
@@ -8,7 +10,7 @@ public class AsyncClientClosedConnection extends ReadablePacket<AsyncClient> {
     }
 
     @Override
-    protected boolean read() {
+    protected boolean read(ByteBuffer buffer) {
         return true;
     }
 
@@ -16,8 +18,8 @@ public class AsyncClientClosedConnection extends ReadablePacket<AsyncClient> {
     public void run() {
         client.close(new WritablePacket<AsyncClient>() {
             @Override
-            protected boolean write() {
-                writeBytes(bytes);
+            protected boolean write(AsyncClient client, ByteBuffer buffer) {
+                buffer.put(bytes);
                 return false;
             }
         });

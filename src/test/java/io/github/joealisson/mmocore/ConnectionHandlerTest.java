@@ -15,7 +15,7 @@ public class ConnectionHandlerTest {
     public void testCachedThreadPoolHandler() throws IOException, ExecutionException, InterruptedException {
         InetSocketAddress listenAddress = new InetSocketAddress(9090);
         GenericClientHandler handler = new GenericClientHandler();
-        ConnectionBuilder<AsyncClient> builder = ConnectionBuilder.create(listenAddress, AsyncClient::new, handler, handler).threadPoolSize(-1);
+        ConnectionBuilder<AsyncClient> builder = ConnectionBuilder.create(listenAddress, AsyncClient::new, handler, handler).threadPoolSize(-1).shutdownWaitTime(100);
         ConnectionHandler<AsyncClient> connectionHandler = builder.build();
         Connector<AsyncClient> connector = Connector.create(AsyncClient::new, handler, handler);
         connectionHandler.start();
@@ -34,7 +34,7 @@ public class ConnectionHandlerTest {
     public void testRefuseConnection() throws IOException, ExecutionException, InterruptedException {
         InetSocketAddress listenAddress = new InetSocketAddress(9090);
         GenericClientHandler handler = new GenericClientHandler();
-        ConnectionBuilder<AsyncClient> builder = ConnectionBuilder.create(listenAddress, AsyncClient::new, handler, handler).filter(channel -> false);
+        ConnectionBuilder<AsyncClient> builder = ConnectionBuilder.create(listenAddress, AsyncClient::new, handler, handler).filter(channel -> false).shutdownWaitTime(100);
         ConnectionHandler<AsyncClient> connectionHandler = builder.build();
         Connector<AsyncClient> connector = Connector.create(AsyncClient::new, handler, handler);
         connectionHandler.start();

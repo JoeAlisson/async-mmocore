@@ -3,8 +3,10 @@ package io.github.joealisson.mmocore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.ByteBuffer;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.util.Objects.isNull;
@@ -14,12 +16,15 @@ public abstract class Client<T extends Connection<?>> {
 
     private static final Logger logger = LoggerFactory.getLogger(Client.class);
 
+    static final int HEADER_SIZE = 2;
+
     private final T connection;
     private Queue<WritablePacket<? extends Client<T>>> packetsToWrite = new ConcurrentLinkedQueue<>();
     private int dataSentSize;
     private AtomicBoolean writing = new AtomicBoolean(false);
     private volatile boolean isClosing;
     private ResourcePool resourcePool;
+    private ByteBuffer buffer;
 
     /**
      * Construct a new Client
@@ -50,14 +55,8 @@ public abstract class Client<T extends Connection<?>> {
         if(!isConnected() || isNull(packet)) {
             return;
         }
-        putClientOnPacket(packet);
         packetsToWrite.add(packet);
         tryWriteNextPacket();
-    }
-
-    @SuppressWarnings("unchecked")
-    private void putClientOnPacket(WritablePacket packet) {
-        packet.client = this;
     }
 
     private void tryWriteNextPacket() {
@@ -67,39 +66,8 @@ public abstract class Client<T extends Connection<?>> {
                 writing.getAndSet(false);
                 logger.debug("no packet found");
             } else {
-                WritablePacket<? extends Client<T>> packet = packetsToWrite.poll();
-                write(packet);
+                write(packetsToWrite.poll());
             }
-        }
-    }
-
-    void resumeSend(int result) {
-        dataSentSize-= result;
-        connection.write();
-    }
-
-    void finishWriting() {
-        connection.releaseWritingBuffer();
-        writing.getAndSet(false);
-        tryWriteNextPacket();
-    }
-
-    private void write(WritablePacket packet, boolean sync) {
-        if(isNull(packet)) {
-            return;
-        }
-
-        int dataSize = packet.writeData();
-
-        if(dataSize <= 0) {
-            return;
-        }
-
-        dataSentSize  = encrypt(packet.data, ReadHandler.HEADER_SIZE, dataSize - ReadHandler.HEADER_SIZE) + ReadHandler.HEADER_SIZE;
-        if(dataSentSize > 0) {
-            packet.writeHeader(dataSentSize);
-            connection.write(packet.data, 0, dataSentSize, sync);
-            logger.debug("Sending packet {} to {}", packet, this);
         }
     }
 
@@ -108,9 +76,36 @@ public abstract class Client<T extends Connection<?>> {
             write(packet, false);
         } catch (Exception e) {
             logger.error(e.getLocalizedMessage(), e);
-            writing.getAndSet(false);
-            tryWriteNextPacket();
+            finishWriting();
         }
+    }
+
+    private void write(WritablePacket packet, boolean sync) throws ExecutionException, InterruptedException {
+        getBuffer(packet.size()).position(HEADER_SIZE);
+        @SuppressWarnings("unchecked")
+        int dataSize = packet.writeData(this, buffer);
+
+        if(dataSize <= 0) {
+            finishWriting();
+            return;
+        }
+
+        dataSentSize  = encrypt(buffer.array(), HEADER_SIZE, dataSize - HEADER_SIZE) + HEADER_SIZE;
+        if(dataSentSize > HEADER_SIZE) {
+            buffer.putShort(0, (short) dataSentSize).position(dataSentSize);
+            buffer.flip();
+            connection.write(buffer, sync);
+            logger.debug("Sending packet {} to {}", packet.toString(), this);
+        } else {
+            finishWriting();
+        }
+    }
+
+    private ByteBuffer getBuffer(int size) {
+        if(isNull(buffer)) {
+            buffer = size > HEADER_SIZE ? resourcePool.getPooledBuffer(size) : resourcePool.getPooledBuffer();
+        }
+        return buffer;
     }
 
     /**
@@ -128,21 +123,32 @@ public abstract class Client<T extends Connection<?>> {
         logger.debug("Closing client connection {} with packet {}", this, packet);
         packetsToWrite.clear();
         if(nonNull(packet)) {
-            putClientOnPacket(packet);
-            ensureCanWrite();
-            write(packet, true);
+            try {
+                ensureCanWrite();
+                write(packet, true);
+            } catch (ExecutionException | InterruptedException e) {
+                logger.warn(e.getLocalizedMessage(), e);
+                Thread.currentThread().interrupt();
+            }
         }
         disconnect();
     }
 
-    private synchronized void ensureCanWrite() {
+    void resumeSend(int result) {
+        dataSentSize-= result;
+        connection.write();
+    }
+
+    void finishWriting() {
+        connection.releaseWritingBuffer();
+        resourcePool.recycleBuffer(buffer);
+        writing.getAndSet(false);
+        tryWriteNextPacket();
+    }
+
+    private synchronized void ensureCanWrite() throws InterruptedException {
         while (!writing.compareAndSet(false, true)) {
-            try {
-                wait(100);
-            } catch (InterruptedException e) {
-                logger.warn(e.getLocalizedMessage(), e);
-                Thread.currentThread().interrupt();
-            }
+            wait(500);
         }
     }
 

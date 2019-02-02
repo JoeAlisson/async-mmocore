@@ -11,21 +11,21 @@ import java.util.concurrent.ExecutionException;
 
 public class ReadHandlerTest {
 
-    ConnectionBuilder<AsyncClient>  connectionBuilder;
-    InetSocketAddress address;
-    Connector<AsyncClient> connector;
+    private ConnectionBuilder<AsyncClient>  connectionBuilder;
+    private InetSocketAddress address;
+    private Connector<AsyncClient> connector;
 
     @Before
     public void setUp() {
         address = new InetSocketAddress(9090);
-        connectionBuilder = ConnectionBuilder.create(address, AsyncClient::new, (data, client) -> null, packet -> { });
+        connectionBuilder = ConnectionBuilder.create(address, AsyncClient::new, (data, client) -> null, (packet) -> { });
         connector = Connector.create(AsyncClient::new, null, null);
     }
 
 
     @Test
     public void testFailed() throws InterruptedException, ExecutionException, IOException {
-        ConnectionHandler<AsyncClient> connectionHandler = connectionBuilder.build();
+        ConnectionHandler<AsyncClient> connectionHandler = connectionBuilder.shutdownWaitTime(100).build();
         connectionHandler.start();
         AsyncClient client = connector.connect(address);
         ReadHandler<AsyncClient> handler = new ReadHandler<>(null, null);
@@ -38,7 +38,7 @@ public class ReadHandlerTest {
 
     @Test
     public void testCompletedDiconnected() throws InterruptedException, ExecutionException, IOException {
-        ConnectionHandler<AsyncClient> connectionHandler = connectionBuilder.build();
+        ConnectionHandler<AsyncClient> connectionHandler = connectionBuilder.shutdownWaitTime(100).build();
         connectionHandler.start();
         AsyncClient client = connector.connect(address);
         client.disconnect();
@@ -50,7 +50,7 @@ public class ReadHandlerTest {
 
     @Test
     public void testCompletedWithoutData() throws InterruptedException, ExecutionException, IOException {
-        ConnectionHandler<AsyncClient> connectionHandler = connectionBuilder.build();
+        ConnectionHandler<AsyncClient> connectionHandler = connectionBuilder.shutdownWaitTime(100).build();
         connectionHandler.start();
         AsyncClient client = connector.connect(address);
         ReadHandler<AsyncClient> handler = new ReadHandler<>(null, null);
@@ -67,7 +67,7 @@ public class ReadHandlerTest {
 
     @Test
     public void testCompletedWithoutEnoughData() throws InterruptedException, ExecutionException, IOException {
-        ConnectionHandler<AsyncClient> connectionHandler = connectionBuilder.build();
+        ConnectionHandler<AsyncClient> connectionHandler = connectionBuilder.shutdownWaitTime(100).build();
         connectionHandler.start();
         AsyncClient client = connector.connect(address);
         ReadHandler<AsyncClient> handler = new ReadHandler<>(null, null);
@@ -86,10 +86,10 @@ public class ReadHandlerTest {
 
     @Test
     public void testTwoPacketOnce() throws IOException, ExecutionException, InterruptedException {
-        ConnectionHandler<AsyncClient> connectionHandler = connectionBuilder.build();
+        ConnectionHandler<AsyncClient> connectionHandler = connectionBuilder.shutdownWaitTime(100).build();
         connectionHandler.start();
         AsyncClient client = connector.connect(address);
-        ReadHandler<AsyncClient> handler = new ReadHandler<>( (data, client1) ->  null, packet -> { });
+        ReadHandler<AsyncClient> handler = new ReadHandler<>( (data, client1) ->  null, (packet) -> { });
         ByteBuffer buffer = client.getConnection().getReadingBuffer();
         buffer.putShort((short) 4);
         buffer.put((byte) 10);

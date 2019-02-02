@@ -1,10 +1,11 @@
 package io.github.joealisson.mmocore;
 
-import java.util.Arrays;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
-import static java.lang.Double.doubleToRawLongBits;
-import static java.lang.Math.max;
-import static java.lang.System.arraycopy;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 /**
@@ -15,188 +16,30 @@ import static java.util.Objects.nonNull;
  * The first and second bytes is a 16 bits integer holding the size of the packet.
  *
  */
-public abstract class WritablePacket<T extends Client<Connection<T>>> extends AbstractPacket<T> {
+public abstract class WritablePacket<T extends Client<Connection<T>>> {
 
     private byte[] staticData;
     protected WritablePacket() { }
-
-    /**
-     * Write a<B>byte</B> to the buffer. <BR>
-     * 8bit integer (00)
-     *
-     * If the underlying data array can't hold a new byte its size is increased 20%
-     *
-     * @param value to be written
-     */
-    protected final void writeByte(final byte value) {
-        try {
-            data[dataIndex++] = value;
-        } catch (IndexOutOfBoundsException e) {
-            data = Arrays.copyOf(data, (int) ( (data.length + 1) * 1.3));
-            data[dataIndex-1] = value;
-        }
-    }
-
-    /**
-     * Write a int to the buffer, the int is casted to a byte;
-     *
-     * @param value to be written
-     */
-    protected final void writeByte(final int value) {
-        writeByte((byte) value);
-    }
-
-    /**
-     * Write <B>boolean</B> to the buffer. <BR>
-     *  If the value is true so write a <B>byte</B> with value 1, otherwise 0
-     *  8bit integer (00)
-     * @param value to be written
-     */
-    protected final void writeByte(final boolean value) {
-        writeByte((byte) (value ? 0x01 : 0x00));
-    }
-
-    /**
-     * Write <B>double</B> to the buffer. <BR>
-     * 64bit double precision float (00 00 00 00 00 00 00 00)
-     * @param value to be written
-     */
-    protected final void writeDouble(final double value) {
-        long x = doubleToRawLongBits(value);
-        writeLong(x);
-    }
-
-    /**
-     * Write <B>short</B> to the buffer. <BR>
-     * 16bit integer (00 00)
-     * @param value to be written
-     */
-    protected final void writeShort(final int value) {
-        short x = convertEndian((short) value);
-        writeShortParts((byte) x,
-                (byte) (x >>> 8));
-    }
-
-    /**
-     * Write <B>boolean</B> to the buffer. <BR>
-     * If the value is true so write a <B>byte</B> with value 1, otherwise 0
-     *  16bit integer (00 00)
-     * @param value to be written
-     */
-    protected final void writeShort(final boolean value) {
-        writeShort(value ? 0x01 : 0x00);
-    }
-
-    private void writeShortParts(byte b0, byte b1) {
-        writeByte(pickByte(b0, b1));
-        writeByte(pickByte(b1, b0));
-    }
-
-    /**
-     * Write <B>int</B> to the buffer. <BR>
-     * 32bit integer (00 00 00 00)
-     * @param value to be written
-     */
-    protected final void writeInt(final int value) {
-        int x  = convertEndian(value);
-        writeIntParts((byte) x,
-                (byte) (x >>> 8),
-                (byte) (x >>> 16),
-                (byte) (x >>> 24));
-    }
-
-    /**
-     * Write <B>boolean</B> to the buffer. <BR>
-     * If the value is true so write a <B>byte</B> with value 1, otherwise 0
-     *  32bit integer (00 00 00 00)
-     * @param value to be written
-     */
-    protected final void writeInt(final boolean value) {
-        writeInt(value ? 0x01 : 0x00);
-    }
-
-
-    /**
-     * Write <B>float</B> to the buffer. <BR>
-     *  32bit float point number (00 00 00 00)
-     * @param value to be written
-     */
-    protected final void writeFloat(final float value) {
-        int x  = Float.floatToRawIntBits(value);
-        writeInt(x);
-    }
-
-    private void writeIntParts(byte b0, byte b1, byte b2, byte b3) {
-        writeByte(pickByte(b0, b3));
-        writeByte(pickByte(b1, b2));
-        writeByte(pickByte(b2, b1));
-        writeByte(pickByte(b3, b0));
-    }
-
-    /**
-     * Write <B>long</B> to the buffer. <BR>
-     * 64bit integer (00 00 00 00 00 00 00 00)
-     * @param value to be written
-     */
-    protected final void writeLong(final long value) {
-        long x = convertEndian(value);
-        writeLongParts((byte) x,
-                (byte) (x >>> 8),
-                (byte) (x >>> 16),
-                (byte) (x >>> 24),
-                (byte) (x >>> 32),
-                (byte) (x >>> 40),
-                (byte) (x >>> 48),
-                (byte) (x >>> 56));
-    }
-
-    private void writeLongParts(byte b0, byte b1, byte b2, byte b3, byte b4, byte b5, byte b6, byte b7) {
-        writeByte(pickByte(b0, b7));
-        writeByte(pickByte(b1, b6));
-        writeByte(pickByte(b2, b5));
-        writeByte(pickByte(b3, b4));
-        writeByte(pickByte(b4, b3));
-        writeByte(pickByte(b5, b2));
-        writeByte(pickByte(b6, b1));
-        writeByte(pickByte(b7, b0));
-    }
-
-    /**
-     * Write <B>byte[]</B> to the buffer. <BR>
-     * 8bit integer array (00 ...)
-     * @param bytes to be written
-     */
-    protected final void writeBytes(final byte[] bytes) {
-        arraycopy(bytes, 0, data, dataIndex, bytes.length);
-        dataIndex += bytes.length;
-    }
-
-    /**
-     * Write <B>char</B> to the buffer.<BR>
-     * 16 bit char
-     *
-     * @param value the char to be put on data.
-     */
-    protected  final void writeChar(final char value) {
-        short x =  (short) convertEndian(value);
-        writeShortParts((byte) x,
-                (byte) (x >>> 8));
-    }
 
     /**
      * Write a <B>String</B> to the buffer with a null termination (\000).
      * Each character is a 16bit char
      *
      * @param text to be written
+     * @param buffer where the text will be written
      */
-    protected final void writeString(final CharSequence text) {
-        if (nonNull(text)) {
-            final int len = text.length();
-            for (int i = 0; i < len; i++) {
-                writeChar(text.charAt(i));
-            }
+    protected final void writeString(final CharSequence text, final ByteBuffer buffer) {
+        if(isNull(text)) {
+            buffer.putChar('\000');
+            return;
         }
-        writeChar('\000');
+        writeStringWithCharset(text, buffer);
+        buffer.putChar('\000');
+    }
+
+    private void writeStringWithCharset(CharSequence text, ByteBuffer buffer) {
+        Charset charset = buffer.order() == ByteOrder.BIG_ENDIAN  ?  StandardCharsets.UTF_16BE : StandardCharsets.UTF_16LE;
+        buffer.put(text.toString().getBytes(charset));
     }
 
     /**
@@ -204,73 +47,62 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> extends Ab
      * Each character is a 16bit char.
      *
      * @param text to be written
+     * @param buffer where the text will be written
      */
-    protected final void writeSizedString(final CharSequence text) {
-        if(nonNull(text) && text.length() > 0) {
-            final int len = text.length();
-            writeShort(len);
-            writeString(text);
-            dataIndex -= 2; // the termination char is not necessary
+    protected final void writeSizedString(final CharSequence text, final ByteBuffer buffer) {
+        if(nonNull(text) &&text.length() > 0) {
+            buffer.putShort((short) text.length());
+            writeStringWithCharset(text, buffer);
         } else {
-            writeShort(0);
+            buffer.putShort((short) 0);
         }
     }
 
-    int writeData() {
+    int writeData(T client, ByteBuffer buffer) {
         if(hasWritedStaticData()) {
-            return writedStaticData();
+            return writedStaticData(buffer);
         }
-        if(callPacketWrite()) {
+        if(write(client, buffer)) {
+            int dataPos = buffer.position();
             if(getClass().isAnnotationPresent(StaticPacket.class)) {
-                staticData = new byte[dataIndex];
-                arraycopy(data, 0, staticData, 0, dataIndex);
+                staticData = new byte[dataPos];
+                buffer.rewind();
+                buffer.get(staticData);
             }
-            return dataIndex;
+            return dataPos;
         }
         return 0;
     }
 
-    private int writedStaticData() {
-        arraycopy(staticData, 0, data, 0, staticData.length);
+    private int writedStaticData(ByteBuffer buffer) {
+        buffer.clear();
+        buffer.put(staticData);
         return staticData.length;
     }
 
-    private boolean callPacketWrite() {
-        data = new byte[max(2, packetSize())];
-        dataIndex += ReadHandler.HEADER_SIZE;
-        return write();
+    private boolean hasWritedStaticData() {
+        return getClass().isAnnotationPresent(StaticPacket.class) && nonNull(staticData);
     }
 
-    private static byte pickByte(byte  le, byte  be) { return IS_NATIVE_BIG_ENDIAN ? be : le; }
-
     /**
-     * By default this method return the size of the bufferSize configured.
      *
-     * If the size of the packet can be calculated, its high recommended to override this method to return the exactly packet size.
-     * This way less resource are used a each packet improving the memory and cpu usage.
-     *
-     * @return The size of the packet to be sent.
+     * @return the packet size
      */
-    protected int packetSize() {
-        return ResourcePool.DEFAULT_BUFFER_SIZE;
+    protected int size() {
+        return -1;
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName();
     }
 
     /**
      * Writes the data into the packet
      *
      * @return the packet was written successful
+     * @param client client to send data
+     * @param buffer buffer to write data to
      */
-    protected abstract boolean write();
-
-    void writeHeader(int dataSize) {
-        int header = convertEndian((short) dataSize);
-        byte tmp = (byte) (header >>> 8);
-        data[0] = pickByte((byte) header, tmp);
-        data[1] = pickByte(tmp, (byte) header);
-
-    }
-
-    private boolean hasWritedStaticData() {
-        return getClass().isAnnotationPresent(StaticPacket.class) && nonNull(staticData);
-    }
+    protected abstract boolean write(T client, ByteBuffer buffer);
 }

@@ -7,12 +7,12 @@ import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousCloseException;
 import java.nio.channels.CompletionHandler;
 
+import static io.github.joealisson.mmocore.Client.HEADER_SIZE;
 import static java.util.Objects.nonNull;
 
 class ReadHandler<T extends Client<Connection<T>>> implements CompletionHandler<Integer, T> {
 
     private static final Logger logger = LoggerFactory.getLogger(ReadHandler.class);
-    static final int HEADER_SIZE = 2;
 
     private final PacketHandler<T> packetHandler;
     private final PacketExecutor<T> executor;
@@ -62,7 +62,7 @@ class ReadHandler<T extends Client<Connection<T>>> implements CompletionHandler<
         onCompleteRead(client, connection, buffer, dataSize);
     }
 
-    protected void onCompleteRead(T client, Connection<T> connection, ByteBuffer buffer, int dataSize) {
+    private void onCompleteRead(T client, Connection<T> connection, ByteBuffer buffer, int dataSize) {
         boolean continueReading = true;
         try {
             if (dataSize > 0) {
@@ -89,27 +89,29 @@ class ReadHandler<T extends Client<Connection<T>>> implements CompletionHandler<
         }
     }
 
-    private void parseAndExecutePacket(T client, ByteBuffer buffer, int dataSize) {
+    private void parseAndExecutePacket(T client, ByteBuffer incomingBuffer, int dataSize) {
         logger.debug("Trying to parse data");
-        byte[] data = new byte[dataSize];
 
-        buffer.get(data, 0, dataSize);
-        boolean decrypted = client.decrypt(data, 0, dataSize);
+        ByteBuffer buffer = client.getResourcePool().getPooledBuffer(dataSize);
+        int limit = incomingBuffer.limit();
+        incomingBuffer.limit(incomingBuffer.position() + dataSize);
+
+        buffer.put(incomingBuffer);
+        incomingBuffer.limit(limit);
+        boolean decrypted = client.decrypt(buffer.array(), 0, dataSize);
 
         if(decrypted) {
-            DataWrapper wrapper = DataWrapper.wrap(data);
-            ReadablePacket<T> packet = packetHandler.handlePacket(wrapper, client);
-            logger.debug("Parsed data to packet {}", packet);
-            execute(client, packet, wrapper);
+            buffer.flip();
+            ReadablePacket<T> packet = packetHandler.handlePacket(buffer, client);
+            logger.debug("Data parsed to packet {}", packet);
+            execute(client, packet, buffer);
         }
     }
 
-    private void execute(T client, ReadablePacket<T> packet, DataWrapper wrapper) {
+    private void execute(T client, ReadablePacket<T> packet, ByteBuffer buffer) {
         if(nonNull(packet)) {
-            packet.client = client;
-            packet.data = wrapper.data;
-            packet.dataIndex = wrapper.dataIndex;
-            if(packet.read()) {
+            if(packet.read(buffer)) {
+                packet.client = client;
                 logger.debug("packet {} was read from client {}", packet, client);
                 executor.execute(packet);
             }

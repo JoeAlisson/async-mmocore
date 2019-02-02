@@ -1,5 +1,7 @@
 package io.github.joealisson.mmocore;
 
+import static java.util.Objects.nonNull;
+
 public class AsyncClient extends Client<Connection<AsyncClient>> {
 
     public AsyncClient(Connection<AsyncClient> connection) {
@@ -28,6 +30,9 @@ public class AsyncClient extends Client<Connection<AsyncClient>> {
 
 
     public void sendPacket(WritablePacket<AsyncClient> packet) {
+        if(nonNull(packet)) {
+            System.out.println("Sending " + packet.toString());
+        }
         writePacket(packet);
     }
 }

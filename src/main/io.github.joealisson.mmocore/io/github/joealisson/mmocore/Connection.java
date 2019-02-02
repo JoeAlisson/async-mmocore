@@ -40,14 +40,14 @@ public class Connection<T extends Client<Connection<T>>> {
         }
     }
 
-    final void write(byte[] data, int offset, int length, boolean sync) {
+    final void write(ByteBuffer buffer, boolean sync) throws ExecutionException, InterruptedException {
         if(!channel.isOpen()) {
             return;
         }
 
-        ByteBuffer buffer = getWritingBuffer(length);
-        buffer.put(data, offset, length);
-        buffer.flip();
+        ByteBuffer directBuffer = getDirectWritingBuffer(buffer.limit());
+        directBuffer.put(buffer);
+        directBuffer.flip();
         if(sync) {
             writeSync();
         } else {
@@ -61,29 +61,24 @@ public class Connection<T extends Client<Connection<T>>> {
         }
     }
 
-    private void writeSync() {
-        try {
-            int dataSize = client.getDataSentSize();
-            int dataSent = 0;
-            do {
-                dataSent += channel.write(writingBuffer).get();
-            } while (dataSent < dataSize);
-        } catch (InterruptedException | ExecutionException e) {
-            logger.error(e.getLocalizedMessage(), e);
-            Thread.currentThread().interrupt();
-        }
+    private void writeSync() throws ExecutionException, InterruptedException {
+        int dataSize = client.getDataSentSize();
+        int dataSent = 0;
+        do {
+            dataSent += channel.write(writingBuffer).get();
+        } while (dataSent < dataSize);
     }
 
     ByteBuffer getReadingBuffer() {
         if(isNull(readingBuffer)) {
-            readingBuffer = client.getResourcePool().getPooledBuffer();
+            readingBuffer = client.getResourcePool().getPooledDirectBuffer();
         }
         return readingBuffer;
     }
 
-    private ByteBuffer getWritingBuffer(int length) {
+    private ByteBuffer getDirectWritingBuffer(int length) {
         if(isNull(writingBuffer)) {
-            writingBuffer =  client.getResourcePool().getPooledBuffer(length);
+            writingBuffer =  client.getResourcePool().getPooledDirectBuffer(length);
         }
         return writingBuffer;
     }

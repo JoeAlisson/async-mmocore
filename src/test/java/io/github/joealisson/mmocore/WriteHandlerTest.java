@@ -12,7 +12,7 @@ public class WriteHandlerTest {
     @Test
     public void testCompletedWithNegative() throws InterruptedException, ExecutionException, IOException {
         InetSocketAddress socketAddress = new InetSocketAddress(9090);
-        ConnectionHandler<AsyncClient> handler = ConnectionBuilder.create(socketAddress, AsyncClient::new, null, null).build();
+        ConnectionHandler<AsyncClient> handler = ConnectionBuilder.create(socketAddress, AsyncClient::new, null, null).shutdownWaitTime(100).build();
         handler.start();
         AsyncClient client = Connector.create(AsyncClient::new, null, null).connect(socketAddress);
         WriteHandler<AsyncClient> writeHandler = new WriteHandler<>();
@@ -26,7 +26,7 @@ public class WriteHandlerTest {
     @Test
     public void testCompleted() throws InterruptedException, ExecutionException, IOException {
         InetSocketAddress socketAddress = new InetSocketAddress(9090);
-        ConnectionHandler<AsyncClient> handler = ConnectionBuilder.create(socketAddress, AsyncClient::new, null, null).build();
+        ConnectionHandler<AsyncClient> handler = ConnectionBuilder.create(socketAddress, AsyncClient::new, null, null).shutdownWaitTime(100).build();
         handler.start();
         AsyncClient client = Connector.create(AsyncClient::new, null, null).connect(socketAddress);
         client.sendPacket(new AsyncClientPingPacket());
@@ -42,7 +42,7 @@ public class WriteHandlerTest {
     @Test
     public void testFailed() throws InterruptedException, IOException, ExecutionException {
         InetSocketAddress socketAddress = new InetSocketAddress(9090);
-        ConnectionHandler<AsyncClient> handler = ConnectionBuilder.create(socketAddress, AsyncClient::new, null, null).build();
+        ConnectionHandler<AsyncClient> handler = ConnectionBuilder.create(socketAddress, AsyncClient::new, null, null).shutdownWaitTime(100).build();
         handler.start();
         AsyncClient client = Connector.create(AsyncClient::new, null, null).connect(socketAddress);
         WriteHandler<AsyncClient> writeHandler = new WriteHandler<>();

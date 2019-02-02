@@ -4,9 +4,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
 
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-
 /**
  * Builds the {@link ConnectionHandler} responsible to manage all incoming connections.
  *
@@ -96,7 +93,7 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
      * @return this.
      */
     public ConnectionBuilder<T> bufferDefaultSize(int bufferSize) {
-        config.bufferDefaultSize = min(bufferSize, ConnectionConfig.BUFFER_MAX_SIZE);
+        config.bufferDefaultSize = bufferSize;
         return this;
     }
 
@@ -108,7 +105,7 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
      * @return this.
      */
     public ConnectionBuilder<T> bufferMinSize(int bufferSize) {
-        config.bufferMinSize = min(bufferSize, ConnectionConfig.BUFFER_MAX_SIZE);
+        config.bufferMinSize = bufferSize;
         return this;
     }
 
@@ -120,7 +117,7 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
      * @return this.
      */
     public ConnectionBuilder<T> bufferLargeSize(int bufferSize) {
-        config.bufferLargeSize = min(bufferSize, ConnectionConfig.BUFFER_MAX_SIZE);
+        config.bufferLargeSize = bufferSize;
         return this;
     }
 
@@ -132,7 +129,7 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
      * @return this.
      */
     public ConnectionBuilder<T> bufferMediumSize(int bufferSize) {
-        config.bufferMediumSize = min(bufferSize, ConnectionConfig.BUFFER_MAX_SIZE);
+        config.bufferMediumSize = bufferSize;
         return this;
     }
 

@@ -1,8 +1,11 @@
 package io.github.joealisson.mmocore;
 
+import java.nio.ByteBuffer;
+
 public class AsyncServerClosePacket extends ReadablePacket<AsyncClient> {
+
     @Override
-    protected boolean read() {
+    protected boolean read(ByteBuffer buffer) {
         return true;
     }
 

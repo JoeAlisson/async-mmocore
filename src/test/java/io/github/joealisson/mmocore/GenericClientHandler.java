@@ -1,5 +1,6 @@
 package io.github.joealisson.mmocore;
 
+import java.nio.ByteBuffer;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -11,7 +12,7 @@ public class GenericClientHandler implements PacketHandler<AsyncClient>, PacketE
 
 
     @Override
-    public ReadablePacket<AsyncClient> handlePacket(DataWrapper wrapper, AsyncClient client) {
+    public ReadablePacket<AsyncClient> handlePacket(ByteBuffer wrapper, AsyncClient client) {
         int opcode = Byte.toUnsignedInt(wrapper.get());
         ReadablePacket<AsyncClient> packet = null;
         if(opcode == 0x01) {
@@ -22,12 +23,12 @@ public class GenericClientHandler implements PacketHandler<AsyncClient>, PacketE
             packet = new AsyncServerClosePacket();
         } else if (opcode == 0x04) {
             byte[] bytes = new byte[0];
-            if(wrapper.available() >= 2) {
+            if(wrapper.remaining() >= 2) {
                 short op2 =  wrapper.getShort();
                 if(op2 == 0x01) {
                     int op3 = wrapper.getInt();
                     if(op3 == 0x02) {
-                       bytes =  wrapper.expose();
+                       bytes =  wrapper.array();
                     }
                 }
             }

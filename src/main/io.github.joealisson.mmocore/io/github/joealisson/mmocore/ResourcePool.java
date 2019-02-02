@@ -1,7 +1,6 @@
 package io.github.joealisson.mmocore;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
@@ -12,60 +11,74 @@ import static java.util.Objects.nonNull;
 
 class ResourcePool {
 
-    static final int DEFAULT_BUFFER_SIZE = 4 * 1024;
-
+    private final Map<Integer, Queue<ByteBuffer>> directBuffers = new HashMap<>();
     private final Map<Integer, Queue<ByteBuffer>> buffers = new HashMap<>();
     private final ConnectionConfig config;
-    private final boolean nativeOrder;
 
     private ResourcePool(ConnectionConfig config) {
         this.config = config;
-        this.nativeOrder = config.byteOrder == ByteOrder.nativeOrder();
+    }
+
+    ByteBuffer getPooledDirectBuffer() {
+        return getSizedBuffer(config.bufferDefaultSize, true);
     }
 
     ByteBuffer getPooledBuffer() {
-        return getSizedBuffer(config.bufferDefaultSize);
+        return getSizedBuffer(config.bufferDefaultSize, false);
+    }
+
+    ByteBuffer getPooledDirectBuffer(int size) {
+        return getSizedBuffer(determineBufferSize(size), true);
     }
 
     ByteBuffer getPooledBuffer(int size) {
-        size = determineBufferSize(size);
-        return getSizedBuffer(size);
+        return getSizedBuffer(determineBufferSize(size), false);
     }
 
-    private ByteBuffer getSizedBuffer(int size) {
-        Queue<ByteBuffer> queue = queueFromSize(size);
+    private ByteBuffer getSizedBuffer(int size, boolean direct) {
+        Queue<ByteBuffer> queue = queueFromSize(size, direct);
         ByteBuffer buffer = queue.poll();
-        return nonNull(buffer) ? buffer : ByteBuffer.allocateDirect(size).order(config.byteOrder);
+        if(isNull(buffer)) {
+            return direct ? ByteBuffer.allocateDirect(size).order(config.byteOrder) : ByteBuffer.allocate(size).order(config.byteOrder);
+        }
+        return buffer;
     }
 
-    private Queue<ByteBuffer> queueFromSize(int size) {
-        Queue<ByteBuffer> queue = buffers.get(size);
+    private Queue<ByteBuffer> queueFromSize(int size, boolean direct) {
+        Queue<ByteBuffer> queue = direct ? directBuffers.get(size) : buffers.get(size);
         if(isNull(queue)) {
             queue = new ConcurrentLinkedQueue<>();
-            buffers.put(size, queue);
+            if(direct) {
+                directBuffers.put(size, queue);
+            } else {
+                buffers.put(size, queue);
+            }
         }
         return queue;
     }
 
     private int determineBufferSize(int size) {
+        int newSize = config.bufferDefaultSize;
         if(size <= config.bufferMinSize) {
-            size = config.bufferMinSize;
+            newSize = config.bufferMinSize;
         } else if( size <= config.bufferMediumSize) {
-            size = config.bufferMediumSize;
+            newSize = config.bufferMediumSize;
         } else if( size <= config.bufferLargeSize) {
-            size = config.bufferLargeSize;
-        } else {
-            size = config.bufferDefaultSize;
+            newSize = config.bufferLargeSize;
         }
-        return size;
+        return newSize;
     }
 
     void recycleBuffer(ByteBuffer buffer) {
         if (nonNull(buffer)) {
-            int size = buffer.capacity();
-            int poolSize = determinePoolSize(size);
-            Queue<ByteBuffer> queue = buffers.get(buffer.capacity());
-            if(nonNull(queue) && queue.size() < poolSize) {
+            Queue<ByteBuffer> queue;
+            int poolSize =  determinePoolSize(buffer.capacity());
+            if(buffer.isDirect()) {
+                queue = directBuffers.get(buffer.capacity());
+            } else {
+                queue = buffers.get(buffer.capacity());
+            }
+            if (nonNull(queue) && queue.size() < poolSize) {
                 buffer.clear();
                 queue.add(buffer);
             }
@@ -82,10 +95,6 @@ class ResourcePool {
             poolSize = config.bufferLargePoolSize;
         }
         return poolSize;
-    }
-
-    public boolean isNativeOrder() {
-        return nativeOrder;
     }
 
     static ResourcePool initialize(ConnectionConfig config) {

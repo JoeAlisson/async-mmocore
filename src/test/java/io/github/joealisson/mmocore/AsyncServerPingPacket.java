@@ -2,6 +2,8 @@ package io.github.joealisson.mmocore;
 
 import org.junit.Assert;
 
+import java.nio.ByteBuffer;
+
 public class AsyncServerPingPacket extends ReadablePacket<AsyncClient> {
 
     private long varLong;
@@ -12,17 +14,21 @@ public class AsyncServerPingPacket extends ReadablePacket<AsyncClient> {
     private byte varByte;
     private String varString;
     private String varSizedString;
+    private String emptyString;
+    private String emptySizedString;
 
     @Override
-    protected boolean read() {
-        varLong = readLong();
-        varDouble = readDouble();
-        varInt = readInt();
-        varFloat = readFloat();
-        varShort = readShort();
-        varByte = readByte();
-        varString = readString();
-        varSizedString = readSizedString();
+    protected boolean read(ByteBuffer buffer) {
+        varLong = buffer.getLong();
+        varDouble = buffer.getDouble();
+        varInt = buffer.getInt();
+        varFloat = buffer.getFloat();
+        varShort = buffer.getShort();
+        varByte = buffer.get();
+        varString = readString(buffer);
+        emptyString = readString(buffer);
+        varSizedString = readSizedString(buffer);
+        emptySizedString = readSizedString(buffer);
         return true;
     }
 
@@ -36,7 +42,9 @@ public class AsyncServerPingPacket extends ReadablePacket<AsyncClient> {
             Assert.assertEquals(Short.MAX_VALUE, varShort);
             Assert.assertEquals(Byte.MAX_VALUE, varByte);
             Assert.assertEquals("Ping", varString);
+            Assert.assertEquals("", emptyString);
             Assert.assertEquals("Packet", varSizedString);
+            Assert.assertEquals("", emptySizedString);
         } catch (Exception e) {
             CommunicationTest.shutdown(false);
         }

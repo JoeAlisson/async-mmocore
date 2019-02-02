@@ -8,8 +8,6 @@ import java.nio.channels.AsynchronousSocketChannel;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
-import static java.lang.Math.max;
-import static java.lang.Math.min;
 import static java.util.Objects.isNull;
 
 public class Connector<T extends Client<Connection<T>>>  {
@@ -24,22 +22,22 @@ public class Connector<T extends Client<Connection<T>>>  {
     }
 
     public Connector<T> bufferDefaultSize(int bufferSize) {
-        config.bufferDefaultSize = min(bufferSize, ConnectionConfig.BUFFER_MAX_SIZE);
+        config.bufferDefaultSize = bufferSize;
         return this;
     }
 
     public Connector<T> bufferMinSize(int bufferSize) {
-        config.bufferMinSize = min(bufferSize, ConnectionConfig.BUFFER_MAX_SIZE);
+        config.bufferMinSize = bufferSize;
         return this;
     }
 
     public Connector<T> bufferMediumSize(int bufferSize) {
-        config.bufferMediumSize = min(bufferSize, ConnectionConfig.BUFFER_MAX_SIZE);
+        config.bufferMediumSize = bufferSize;
         return this;
     }
 
     public Connector<T> bufferLargeSize(int bufferSize) {
-        config.bufferLargeSize = min(bufferSize, ConnectionConfig.BUFFER_MAX_SIZE);
+        config.bufferLargeSize = bufferSize;
         return this;
     }
 
