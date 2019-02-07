@@ -101,7 +101,6 @@ public class Connection<T extends Client<Connection<T>>> {
         } catch (IOException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
-
     }
 
     String getRemoteAddress() {

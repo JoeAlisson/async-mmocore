@@ -45,6 +45,9 @@ public final class ConnectionHandler<T extends Client<Connection<T>>> extends Th
         return AsynchronousChannelGroup.withFixedThreadPool(threadPoolSize, Executors.defaultThreadFactory());
     }
 
+    /**
+     * Start to listen connections.
+     */
     @Override
     public void run() {
         listener.accept(null, new AcceptConnectionHandler());
@@ -71,6 +74,11 @@ public final class ConnectionHandler<T extends Client<Connection<T>>> extends Th
     }
 
 
+    /**
+     * Shutdown the connection listener, the thread pool and all associated resources.
+     *
+     * This method closes all established connections.
+     */
     public void shutdown() {
         logger.debug("Shutting ConnectionHandler down");
         shutdown = true;

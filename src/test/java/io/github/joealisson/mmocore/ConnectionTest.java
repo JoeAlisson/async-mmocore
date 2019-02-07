@@ -33,7 +33,9 @@ public class ConnectionTest {
         handler.start();
         AsyncClient client = Connector.create(AsyncClient::new, null, null).connect(socketAddress);
         Connection<AsyncClient> connection = client.getConnection();
+        connection.close();
         handler.shutdown();
+        handler.join();
         Assert.assertFalse(connection.isOpen());
         Assert.assertEquals("", connection.getRemoteAddress());
     }

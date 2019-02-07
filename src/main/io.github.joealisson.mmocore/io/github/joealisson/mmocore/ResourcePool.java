@@ -58,15 +58,15 @@ class ResourcePool {
     }
 
     private int determineBufferSize(int size) {
-        int newSize = config.bufferDefaultSize;
-        if(size <= config.bufferMinSize) {
-            newSize = config.bufferMinSize;
+        int bufferSize = config.bufferDefaultSize;
+        if(size <= config.bufferSmallSize) {
+            bufferSize = config.bufferSmallSize;
         } else if( size <= config.bufferMediumSize) {
-            newSize = config.bufferMediumSize;
+            bufferSize = config.bufferMediumSize;
         } else if( size <= config.bufferLargeSize) {
-            newSize = config.bufferLargeSize;
+            bufferSize = config.bufferLargeSize;
         }
-        return newSize;
+        return bufferSize;
     }
 
     void recycleBuffer(ByteBuffer buffer) {
@@ -87,8 +87,8 @@ class ResourcePool {
 
     private int determinePoolSize(int size) {
         int poolSize = config.bufferPoolSize;
-        if(size == config.bufferMinSize) {
-            poolSize = config.bufferMinPoolSize;
+        if(size == config.bufferSmallSize) {
+            poolSize = config.bufferSmallPoolSize;
         } else if( size == config.bufferMediumSize) {
             poolSize = config.bufferMediumPoolSize;
         } else if( size == config.bufferLargePoolSize) {

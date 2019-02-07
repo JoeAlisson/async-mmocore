@@ -80,9 +80,9 @@ public abstract class Client<T extends Connection<?>> {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void write(WritablePacket packet, boolean sync) throws ExecutionException, InterruptedException {
-        getBuffer(packet.size()).position(HEADER_SIZE);
-        @SuppressWarnings("unchecked")
+        getBuffer(packet.size(this)).position(HEADER_SIZE);
         int dataSize = packet.writeData(this, buffer);
 
         if(dataSize <= 0) {
@@ -142,6 +142,7 @@ public abstract class Client<T extends Connection<?>> {
     void finishWriting() {
         connection.releaseWritingBuffer();
         resourcePool.recycleBuffer(buffer);
+        buffer = null;
         writing.getAndSet(false);
         tryWriteNextPacket();
     }
@@ -169,7 +170,10 @@ public abstract class Client<T extends Connection<?>> {
         return connection.getRemoteAddress();
     }
 
-    protected boolean isConnected() {
+    /**
+     * @return if client still connected
+     */
+    public boolean isConnected() {
         return connection.isOpen() && !isClosing;
     }
 

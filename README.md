@@ -38,7 +38,7 @@ Packets greater than this can be lead to unexpected behaviour.
 
 The client Class is a representation of a external connection. Thus it's the unique source of incoming packets and the target of the outcome packets.
 
-The Client Class must implement the [abstract class Client](https://github.com/JoeAlisson/async-mmocore/blob/master/src/main/org.l2j.mmocore/org/l2j/mmocore/Client.java) 
+The Client Class must implement the [abstract class Client](https://github.com/JoeAlisson/async-mmocore/blob/master/src/main/io.github.joealisson.mmocore/io/github/joealisson/mmocore/Client.java) 
 
 ```java
 public class ClientImpl extends Client<Connection<ClientImpl>> {
@@ -77,7 +77,7 @@ public class ClientImpl extends Client<Connection<ClientImpl>> {
 
 The Client Factory instantiate the new incoming connections. 
 
-The Client Factory must implement the [interface ClientFactory](https://github.com/JoeAlisson/async-mmocore/blob/master/src/main/org.l2j.mmocore/org/l2j/mmocore/ClientFactory.java)
+The Client Factory must implement the [interface ClientFactory](https://github.com/JoeAlisson/async-mmocore/blob/master/src/main/io.github.joealisson.mmocore/io/github/joealisson/mmocore/ClientFactory.java)
 
 ```java
 public class ClientFactoryImpl implements ClientFactory<ClientImpl> {
@@ -93,13 +93,13 @@ public class ClientFactoryImpl implements ClientFactory<ClientImpl> {
 
 The Packet Handler converts the incoming data into a **ReadablePacket**.
 
-The Packet Handler must implement the [interface PacketHandler](https://github.com/JoeAlisson/async-mmocore/blob/master/src/main/org.l2j.mmocore/org/l2j/mmocore/PacketHandler.java)
+The Packet Handler must implement the [interface PacketHandler](https://github.com/JoeAlisson/async-mmocore/blob/master/src/main/io.github.joealisson.mmocore/io/github/joealisson/mmocore/PacketHandler.java)
 ```java
 public class PacketHandlerImpl implements PacketHandler<ClientImpl> {
     
      @Override
-    public ReadablePacket<ClientImpl> handlePacket(DataWrapper wrapper, ClientImpl client) {
-        ReadablePacket<ClientImpl> packet = convertToPacket(wrapper, client);
+    public ReadablePacket<ClientImpl> handlePacket(ByteBuffer buffer, ClientImpl client) {
+        ReadablePacket<ClientImpl> packet = convertToPacket(buffer, client);
         return packet;
     }
 }
@@ -113,7 +113,7 @@ The Packet Executor executes the incoming Packets.
 **Although the packet can be execute in the same Thread, it's highly recommended that the Executors executes the packet on a apart Thread.
 Thats because the Thread that calls the _execute_ method is the same that process the network I/O operations. Thus these threads must be short-living and execute only no-blocking operations.**
 
-The Packet Executor must implement the [interface PacketExecutor](https://github.com/JoeAlisson/async-mmocore/blob/master/src/main/org.l2j.mmocore/org/l2j/mmocore/PacketExecutor.java)
+The Packet Executor must implement the [interface PacketExecutor](https://github.com/JoeAlisson/async-mmocore/blob/master/src/main/io.github.joealisson.mmocore/io/github/joealisson/mmocore/PacketExecutor.java)
 
 ```java
 public class PacketExecutorImpl implements PacketExecutor<ClientImpl> {
@@ -141,16 +141,16 @@ public class ServerHandler {
 
 * ##### Sending a Packet
 
-To send a Packet it's necessary to implement the [abstract class WritablePacket](https://github.com/JoeAlisson/async-mmocore/blob/master/src/main/org.l2j.mmocore/org/l2j/mmocore/WritablePacket.java)
+To send a Packet it's necessary to implement the [abstract class WritablePacket](https://github.com/JoeAlisson/async-mmocore/blob/master/src/main/io.github.joealisson.mmocore/io/github/joealisson/mmocore/WritablePacket.java)
 
 ```java
 public class ServerInfo implements WritablePacket<ClientImpl> {
     @Override
-    protected void write() {
-        writeByte(this.getServerId());
-        writeString(this.getServerName());
-        writeLong(this.getServerCurrentTime());
-        writeInt(this.getServerCurrentUsers());
+    protected void write(ClientImpl client, ByteBuffer buffer) {
+        buffer.put(this.getServerId());
+        writeString(this.getServerName(), buffer);
+        buffer.putLong(this.getServerCurrentTime());
+        buffer.putInt(this.getServerCurrentUsers());
         
     }
 }
@@ -168,3 +168,20 @@ public class ServerHandler {
 * ##### Receiving a Packet
 
 The receiving packet is almost all done by the **Async-mmocore**. The only part that needs to be implemented to fully read are the steps described in [Define a Packet Handler Implementation](#define-a-packet-handler-implementation) and [Define a Packet Executor Implementation](#define-a-packet-executor-implementation) sections.  
+```java
+public class ReceivedServerInfo implements ReadablePacket<ClientImpl> {
+    
+    @Override
+    protected void read(ByteBuffer buffer) {
+        this.serverId = buffer.get();
+        this.serverName = readString(buffer);
+        this.serverCurrentTime = buffer.getLong();
+        this.serverCurrentUsers = buffer.getInt();
+    }
+    
+    @Override
+    public void run() {
+        showServerInfoToClient();
+    }
+}
+```

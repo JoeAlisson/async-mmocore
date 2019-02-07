@@ -87,8 +87,9 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> {
     /**
      *
      * @return the packet size
+     * @param client the client
      */
-    protected int size() {
+    protected int size(T client) {
         return -1;
     }
 

@@ -67,6 +67,7 @@ class ReadHandler<T extends Client<Connection<T>>> implements CompletionHandler<
         try {
             if (dataSize > 0) {
                 parseAndExecutePacket(client, buffer, dataSize);
+
                 if (!buffer.hasRemaining()) {
                     buffer.clear();
                 } else {
@@ -104,17 +105,17 @@ class ReadHandler<T extends Client<Connection<T>>> implements CompletionHandler<
             buffer.flip();
             ReadablePacket<T> packet = packetHandler.handlePacket(buffer, client);
             logger.debug("Data parsed to packet {}", packet);
-            execute(client, packet, buffer);
+            if(nonNull(packet)) {
+                packet.client = client;
+                execute(packet, buffer);
+            }
         }
     }
 
-    private void execute(T client, ReadablePacket<T> packet, ByteBuffer buffer) {
-        if(nonNull(packet)) {
-            if(packet.read(buffer)) {
-                packet.client = client;
-                logger.debug("packet {} was read from client {}", packet, client);
-                executor.execute(packet);
-            }
+    private void execute(ReadablePacket<T> packet, ByteBuffer buffer) {
+        if(packet.read(buffer)) {
+            logger.debug("packet {} was read from client {}", packet, packet.client);
+            executor.execute(packet);
         }
      }
 
@@ -124,7 +125,7 @@ class ReadHandler<T extends Client<Connection<T>>> implements CompletionHandler<
             client.disconnect();
         }
         if(! (e instanceof AsynchronousCloseException)) {
-            // client just closes the connection, doesn't to be logged
+            // client just closes the connection, doesn't need to be logged
             logger.error(e.getLocalizedMessage(), e);
         }
 

@@ -60,10 +60,6 @@ task jarSources(type:Jar){
     from sourceSets.main.allSource
 }
 
-javadoc {
-    options.addBooleanOption('html5', true)
-}
-
 task javadocJar(type: Jar) {
     classifier = 'javadoc'
     from javadoc

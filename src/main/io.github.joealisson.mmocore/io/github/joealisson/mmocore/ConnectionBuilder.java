@@ -50,6 +50,8 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
      * If the size is less than or equal to zero or greater than {@link Short#MAX_VALUE} then a cachedThreadPool is used.
      * Otherwise a FixedThreadPool with the size set is used.
      *
+     * The default value is the quantity of available processors minus 2.
+     *
      * @param size - the size to be Set
      *
      * @return this
@@ -64,6 +66,8 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
      * Defines if small outgoing packets must be combined to be sent all at once. This improves the network performance,
      * but can cause lags on clients waiting for the packet.
      *
+     * The default value is false.
+     *
      * @param useNagle - true if the Nagle's algorithm must be used.
      *
      * @return this.
@@ -74,7 +78,9 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
     }
 
     /**
-     * Sets the shutdown wait time.
+     * Sets the shutdown wait time in milliseconds.
+     *
+     * The default value is 5 seconds.
      *
      * @param waitTime - the wait time to close all connections resources after a {@link ConnectionHandler#shutdown()} is called.
      *
@@ -86,7 +92,9 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
     }
 
     /**
-     * Sets the size limit of the data sent/received. The size must be as bigger as the biggest packet received.
+     * Sets the size limit of the data buffer sent/received. The size must be as bigger as the biggest packet received.
+     *
+     * The default value is 8KB.
      *
      * @param bufferSize - the buffer size to be set
      *
@@ -98,19 +106,23 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
     }
 
     /**
-     * Sets the min size of the data sent/received.
+     * Sets the small size of the data buffer sent/received.
+     *
+     * The default value is 1KB.
      *
      * @param bufferSize - the buffer size to be set
      *
      * @return this.
      */
-    public ConnectionBuilder<T> bufferMinSize(int bufferSize) {
-        config.bufferMinSize = bufferSize;
+    public ConnectionBuilder<T> bufferSmallSize(int bufferSize) {
+        config.bufferSmallSize = bufferSize;
         return this;
     }
 
     /**
-     * Sets the large size of the data sent/received.
+     * Sets the large size of the data buffer sent/received.
+     *
+     * The default value is 4KB.
      *
      * @param bufferSize - the buffer size to be set
      *
@@ -122,7 +134,9 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
     }
 
     /**
-     * Sets the medium size of the data sent/received.
+     * Sets the medium size of the data buffer sent/received.
+     *
+     * The default value is 2KB.
      *
      * @param bufferSize - the buffer size to be set
      *
@@ -133,13 +147,14 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
         return this;
     }
 
-
     /**
      * Sets the maximum amount of buffer with default size that can be holder on the BufferPool.
      * A small value can be lead to buffer overhead creation.
      * Otherwise a too big size can be lead to unwanted memory usage.
      *
      * The size must be restricted related to the number of expected clients and taking considerations of system resources.
+     *
+     * The default value is 100.
      *
      * @param bufferPoolSize - the size of the buffer pool size.
      *
@@ -151,18 +166,20 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
     }
 
     /**
-     * Sets the maximum amount of buffer with min size that can be holder on the BufferPool.
+     * Sets the maximum amount of buffer with small size that can be holder on the BufferPool.
      * A small value can be lead to buffer overhead creation.
      * Otherwise a too big size can be lead to unwanted memory usage.
      *
      * The size must be restricted related to the number of expected clients and taking considerations of system resources.
      *
+     * The default value is 100.
+     *
      * @param bufferPoolSize - the size of the buffer pool size.
      *
      * @return this
      */
-    public ConnectionBuilder<T> bufferMinPoolSize(int bufferPoolSize) {
-        config.bufferMinPoolSize = bufferPoolSize;
+    public ConnectionBuilder<T> bufferSmallPoolSize(int bufferPoolSize) {
+        config.bufferSmallPoolSize = bufferPoolSize;
         return this;
     }
 
@@ -172,6 +189,8 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
      * Otherwise a too big size can be lead to unwanted memory usage.
      *
      * The size must be restricted related to the number of expected clients and taking considerations of system resources.
+     *
+     * The default value is 50.
      *
      * @param bufferPoolSize - the size of the buffer pool size.
      *
@@ -189,6 +208,8 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
      *
      * The size must be restricted related to the number of expected clients and taking considerations of system resources.
      *
+     * The default value is 25.
+     *
      * @param bufferPoolSize - the size of the buffer pool size.
      *
      * @return this
@@ -201,6 +222,8 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
     /**
      * Sets the byte order used to send and receive packets.
      *
+     * The default value is {@link ByteOrder#LITTLE_ENDIAN}
+     *
      * @param order - the order to be used.
      *
      * @return this.
@@ -209,7 +232,6 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
         config.byteOrder = order;
         return  this;
     }
-
 
     /**
      * Builds a new ConnectionHandler based on the options configured.

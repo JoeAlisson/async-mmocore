@@ -23,6 +23,7 @@ public abstract class ReadablePacket<T extends Client<Connection<T>>> implements
 
     /**
      * Reads <B>String</B> from the buffer.
+     * @param buffer that contains the String
      * @return String read
      */
     protected final String readString(ByteBuffer buffer)  {
@@ -37,6 +38,7 @@ public abstract class ReadablePacket<T extends Client<Connection<T>>> implements
     /**
      *
      * Reads a predefined length <B>String</B> from the buffer.
+     * @param buffer that contains the String
      * @return String read
      */
     protected final String readSizedString(ByteBuffer buffer) {

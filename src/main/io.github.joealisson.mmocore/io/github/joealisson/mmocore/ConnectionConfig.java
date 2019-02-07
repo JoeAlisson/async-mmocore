@@ -8,14 +8,14 @@ import static java.lang.Runtime.getRuntime;
 
 class ConnectionConfig<T extends Client<Connection<T>>> {
 
-    int bufferDefaultSize = 9 * 1024;
-    int bufferMinSize = 1024;
-    int bufferMediumSize = 4 * 1024;
-    int bufferLargeSize = 64 * 1024;
+    int bufferDefaultSize = 8 * 1024;
+    int bufferSmallSize = 1024;
+    int bufferMediumSize = 2 * 1024;
+    int bufferLargeSize = 4 * 1024;
     int bufferPoolSize = 100;
-    int bufferMinPoolSize = 100;
+    int bufferSmallPoolSize = 100;
     int bufferMediumPoolSize = 50;
-    int bufferLargePoolSize = 10;
+    int bufferLargePoolSize = 25;
 
     long shutdownWaitTime = 5000;
     ByteOrder byteOrder = ByteOrder.LITTLE_ENDIAN;

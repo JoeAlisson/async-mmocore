@@ -33,10 +33,10 @@ public class CommunicationTest {
         GenericClientHandler handler = new GenericClientHandler();
 
         builder = ConnectionBuilder.create(listenAddress, AsyncClient::new, handler, handler).filter(channel -> true).threadPoolSize(2).useNagle(false).shutdownWaitTime(500)
-                .bufferDefaultSize(300).bufferMinSize(40).bufferLargeSize(100).bufferMediumSize(50).bufferPoolSize(10).bufferMinPoolSize(10).bufferMediumPoolSize(8)
+                .bufferDefaultSize(300).bufferSmallSize(40).bufferLargeSize(100).bufferMediumSize(50).bufferPoolSize(10).bufferSmallPoolSize(10).bufferMediumPoolSize(8)
                 .bufferLargePoolSize(3).byteOrder(ByteOrder.LITTLE_ENDIAN);
         connector = Connector.create(AsyncClient::new, handler, handler).bufferDefaultSize(300).bufferLargePoolSize(3).bufferLargeSize(100).bufferMediumPoolSize(8)
-                .bufferMediumSize(50).bufferMinPoolSize(10).bufferPoolSize(10).bufferMinSize(40).byteOrder(ByteOrder.LITTLE_ENDIAN);
+                .bufferMediumSize(50).bufferSmallPoolSize(10).bufferPoolSize(10).bufferSmallSize(40).byteOrder(ByteOrder.LITTLE_ENDIAN);
 
     }
 
