@@ -73,7 +73,6 @@ public final class ConnectionHandler<T extends Client<Connection<T>>> extends Th
         }
     }
 
-
     /**
      * Shutdown the connection listener, the thread pool and all associated resources.
      *

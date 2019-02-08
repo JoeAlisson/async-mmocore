@@ -185,3 +185,18 @@ public class ReceivedServerInfo implements ReadablePacket<ClientImpl> {
     }
 }
 ```
+
+#### Client Side
+
+The class Connector was designed to provides client side asynchronous connection support. It works just like ConnectionBuilder, so you must define the ClientFactory, the PacketHandler and the PacketExecutor implementations.
+
+```java
+public class ConnectionFactory {
+
+    public static ClientImpl create(String host, int port) {
+        ClientImpl client = Connector.create(clientFactory, packetHandler, packetExecutor).connect(new InetSocketAddress(host, port));
+        return client;
+    }
+
+}
+```

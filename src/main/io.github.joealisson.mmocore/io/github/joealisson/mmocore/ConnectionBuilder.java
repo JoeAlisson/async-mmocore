@@ -160,7 +160,7 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
      *
      * @return this
      */
-    public ConnectionBuilder<T> bufferPoolSize(int bufferPoolSize) {
+        public ConnectionBuilder<T> bufferPoolSize(int bufferPoolSize) {
         config.bufferPoolSize = bufferPoolSize;
         return this;
     }

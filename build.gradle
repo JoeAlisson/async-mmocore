@@ -11,7 +11,7 @@ plugins {
 }
 
 group = 'io.github.joealisson'
-version = '2.2.0-SNAPSHOT'
+version = '2.2.0'
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 
