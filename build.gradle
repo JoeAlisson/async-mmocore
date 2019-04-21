@@ -11,7 +11,7 @@ plugins {
 }
 
 group = 'io.github.joealisson'
-version = '2.2.0'
+version = '2.2.1-SNAPSHOT'
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 
@@ -51,7 +51,8 @@ jar {
                    'Build-Timestamp': new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
                    'Build-Revision' : revision,
                    'Build-Version'  : version,
-                   'Build-Jdk'      : buildJDK)
+                   'Build-Jdk'      : buildJDK,
+                   'Automatic-Module-Name': moduleName)
     }
 }
 

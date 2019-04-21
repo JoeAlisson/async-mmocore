@@ -13,6 +13,7 @@
 [![SonarCloud Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=JoeAlisson_async-mmocore&metric=vulnerabilities)](https://sonarcloud.io/component_measures/metric/security_rating/list?id=JoeAlisson_async-mmocore)
 
 
+[Para mais detalhes, participe da discussão sobre o assunto no fórum L2jBrasil](https://www.l2jbrasil.com/index.php?/topic/130598-mmocore-20-ass%C3%ADncrono/)
 
 #### The  Goal
 
