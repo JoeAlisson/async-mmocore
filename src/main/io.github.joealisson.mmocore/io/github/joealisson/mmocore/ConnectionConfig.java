@@ -50,7 +50,7 @@ class ConnectionConfig<T extends Client<Connection<T>>> {
     private void loadProperties(String propertyFileName) {
         final Path path = Paths.get(propertyFileName);
 
-        try(final InputStream inputStream = Files.isRegularFile(path) ? Files.newInputStream(path) : getClass().getResourceAsStream(propertyFileName)) {
+        try(final InputStream inputStream = path.toFile().isFile() ? Files.newInputStream(path) : getClass().getResourceAsStream(propertyFileName)) {
             if(nonNull(inputStream)) {
                 Properties properties = new Properties();
                 properties.load(inputStream);
@@ -59,7 +59,7 @@ class ConnectionConfig<T extends Client<Connection<T>>> {
                 throw new IllegalArgumentException("Cannot find property file: " + propertyFileName);
             }
         } catch (IOException e) {
-            throw new RuntimeException("Failed to read property file", e);
+            throw new IllegalArgumentException("Failed to read property file", e);
         }
     }
 
