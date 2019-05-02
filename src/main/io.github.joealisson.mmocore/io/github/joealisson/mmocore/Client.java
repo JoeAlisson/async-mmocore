@@ -109,6 +109,16 @@ public abstract class Client<T extends Connection<?>> {
     }
 
     /**
+     * close the underlying Connection to the client.
+     *
+     * All pending packets are cancelled.
+     *
+     */
+    public void close() {
+        close(null);
+    }
+
+    /**
      * Sends the packet and close the underlying Connection to the client.
      *
      * All others pending packets are cancelled.

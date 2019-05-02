@@ -39,7 +39,7 @@ public class ClientTest {
         handler.start();
         AsyncClient client = Connector.create(AsyncClient::new, ((buffer, client1) -> null), incomingPacket -> { }).connect(socketAddress);
         client.close(new PacketStatic());
-        client.close(null);
+        client.close();
         handler.shutdown();
         handler.join();
     }
