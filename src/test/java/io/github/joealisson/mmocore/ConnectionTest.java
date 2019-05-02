@@ -1,5 +1,6 @@
 package io.github.joealisson.mmocore;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -10,6 +11,8 @@ import java.nio.channels.AsynchronousSocketChannel;
 import java.util.concurrent.ExecutionException;
 
 public class ConnectionTest {
+
+    private AsyncClient connectionClient;
 
     @Test
     public void testWriteWithClosedChannel() throws IOException, ExecutionException, InterruptedException {
@@ -41,16 +44,27 @@ public class ConnectionTest {
     }
 
     @Test
-    public void testWriteSync() throws IOException, ExecutionException, InterruptedException {
+    public void testWriteSyncBeforeClose() throws IOException, ExecutionException, InterruptedException {
         InetSocketAddress socketAddress = new InetSocketAddress(9090);
-        ConnectionHandler<AsyncClient> handler = ConnectionBuilder.create(socketAddress, AsyncClient::new, null, null).shutdownWaitTime(100).build();
+        ConnectionHandler<AsyncClient> handler = ConnectionBuilder.create(socketAddress, this::buildClient, (buffer, client1) ->  { client1.receivedPacket = buffer ; return null;}, null).shutdownWaitTime(100).build();
         handler.start();
-        AsyncClient client = Connector.create(AsyncClient::new, null, null).connect(socketAddress);
+        AsyncClient client = Connector.create(AsyncClient::new,  null, null).connect(socketAddress);
         try {
-            client.getConnection().write(ByteBuffer.wrap(new byte[10]), true);
+            client.close(new AsyncClientClosePacket());
+            Assert.assertNotNull(connectionClient.receivedPacket);
         } finally {
             handler.shutdown();
             handler.join();
         }
+    }
+
+    private AsyncClient buildClient(Connection<AsyncClient> tConnection) {
+        connectionClient = new AsyncClient(tConnection);
+        return connectionClient;
+    }
+
+    @After
+    public void tearDown() {
+        connectionClient = null;
     }
 }

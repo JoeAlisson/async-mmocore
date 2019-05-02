@@ -138,6 +138,7 @@ public abstract class Client<T extends Connection<?>> {
                 write(packet, true);
             } catch (ExecutionException | InterruptedException e) {
                 logger.warn(e.getLocalizedMessage(), e);
+                disconnect();
                 Thread.currentThread().interrupt();
             }
         }
