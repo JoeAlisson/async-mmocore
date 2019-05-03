@@ -31,25 +31,30 @@ public class ConnectionTest {
 
     @Test
     public void testRemoteAddressWithClosedChannel() throws IOException, ExecutionException, InterruptedException {
-        InetSocketAddress socketAddress = new InetSocketAddress(9090);
+        InetSocketAddress socketAddress = new InetSocketAddress("127.0.0.1", 9090);
         ConnectionHandler<AsyncClient> handler = ConnectionBuilder.create(socketAddress, AsyncClient::new, null, null).shutdownWaitTime(100).build();
-        handler.start();
-        AsyncClient client = Connector.create(AsyncClient::new, null, null).connect(socketAddress);
-        Connection<AsyncClient> connection = client.getConnection();
-        connection.close();
-        handler.shutdown();
-        handler.join();
-        Assert.assertFalse(connection.isOpen());
-        Assert.assertEquals("", connection.getRemoteAddress());
+        try {
+            handler.start();
+            AsyncClient client = Connector.create(AsyncClient::new, null, null).connect(socketAddress);
+            Connection<AsyncClient> connection = client.getConnection();
+            connection.close();
+
+            Assert.assertFalse(connection.isOpen());
+            Assert.assertEquals("", connection.getRemoteAddress());
+        } finally {
+            handler.shutdown();
+            handler.join();
+        }
     }
 
     @Test
     public void testWriteSyncBeforeClose() throws IOException, ExecutionException, InterruptedException {
-        InetSocketAddress socketAddress = new InetSocketAddress(9090);
+        InetSocketAddress socketAddress = new InetSocketAddress("127.0.0.1", 9090);
         ConnectionHandler<AsyncClient> handler = ConnectionBuilder.create(socketAddress, this::buildClient, (buffer, client1) ->  { client1.receivedPacket = buffer ; return null;}, null).shutdownWaitTime(100).build();
-        handler.start();
-        AsyncClient client = Connector.create(AsyncClient::new,  null, null).connect(socketAddress);
         try {
+            handler.start();
+            AsyncClient client = Connector.create(AsyncClient::new,  null, null).connect(socketAddress);
+
             client.close(new AsyncClientClosePacket());
             Assert.assertNotNull(connectionClient.receivedPacket);
         } finally {

@@ -11,115 +11,124 @@ import java.util.concurrent.ExecutionException;
 
 public class ClientTest {
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testNullInitialize() {
-        try {
-            new AsyncClient(null);
-            Assert.fail("Should Throw an IllegalArgument Exception");
-        } catch (IllegalArgumentException e) {
-            // expected
-        }
+        new AsyncClient(null);
     }
 
     @Test
     public void testRemoteAddress() throws InterruptedException, ExecutionException, IOException {
         InetSocketAddress socketAddress = new InetSocketAddress("127.0.0.1",9090);
         ConnectionHandler<AsyncClient> handler = ConnectionBuilder.create(socketAddress, AsyncClient::new, (buffer, client) -> null, incomingPacket -> { }).shutdownWaitTime(100).build();
-        handler.start();
-        AsyncClient client = Connector.create(AsyncClient::new, ((buffer, client1) -> null), incomingPacket -> { }).connect(socketAddress);
-        Assert.assertEquals("127.0.0.1", client.getHostAddress());
-        handler.shutdown();
-        handler.join();
+        try {
+            handler.start();
+            AsyncClient client = Connector.create(AsyncClient::new, ((buffer, client1) -> null), incomingPacket -> {
+            }).connect(socketAddress);
+            Assert.assertEquals("127.0.0.1", client.getHostAddress());
+        } finally {
+            handler.shutdown();
+            handler.join();
+        }
     }
 
     @Test
     public void testCloseAlreadyClosed() throws InterruptedException, ExecutionException, IOException {
         InetSocketAddress socketAddress = new InetSocketAddress("127.0.0.1",9090);
         ConnectionHandler<AsyncClient> handler = ConnectionBuilder.create(socketAddress, AsyncClient::new, (buffer, client) -> null, incomingPacket -> { }).shutdownWaitTime(100).build();
-        handler.start();
-        AsyncClient client = Connector.create(AsyncClient::new, ((buffer, client1) -> null), incomingPacket -> { }).connect(socketAddress);
-        client.close(new PacketStatic());
-        client.close();
-        handler.shutdown();
-        handler.join();
+        try {
+            handler.start();
+            AsyncClient client = Connector.create(AsyncClient::new, ((buffer, client1) -> null), incomingPacket -> {
+            }).connect(socketAddress);
+            client.close(new PacketStatic());
+            client.close();
+        } finally {
+            handler.shutdown();
+            handler.join();
+        }
     }
 
-
-
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testClosedConnection() throws IOException {
         try(AsynchronousSocketChannel channel = AsynchronousSocketChannel.open()) {
             Connection<AsyncClient> connection = new Connection<>(channel, null, null);
             new AsyncClient(connection);
-            Assert.fail("Should Throw an IllegalArgument Exception");
-        } catch (IllegalArgumentException e) {
-            // expected
         }
     }
 
     @Test
     public void testWriteNullPacket() throws IOException, ExecutionException, InterruptedException {
-        InetSocketAddress socketAddress = new InetSocketAddress(9090);
+        InetSocketAddress socketAddress = new InetSocketAddress("127.0.0.1", 9090);
         ConnectionHandler<AsyncClient> handler = ConnectionBuilder.create(socketAddress, AsyncClient::new, null, null).shutdownWaitTime(100).build();
-        handler.start();
-        AsyncClient client = Connector.create(AsyncClient::new, null, null).connect(socketAddress);
-        client.sendPacket(null);
-        handler.shutdown();
-        handler.join();
+        try {
+            handler.start();
+            AsyncClient client = Connector.create(AsyncClient::new, null, null).connect(socketAddress);
+            client.sendPacket(null);
+        } finally {
+            handler.shutdown();
+            handler.join();
+        }
     }
 
     @Test
     public void testWriteWithException() throws InterruptedException, ExecutionException, IOException {
-        InetSocketAddress socketAddress = new InetSocketAddress(9090);
+        InetSocketAddress socketAddress = new InetSocketAddress("127.0.0.1", 9090);
         ConnectionHandler<AsyncClient> handler = ConnectionBuilder.create(socketAddress, AsyncClient::new, null, null).shutdownWaitTime(100).build();
-        handler.start();
-        AsyncClient client = Connector.create(AsyncClient::new, null, null).connect(socketAddress);
-        client.writePacket(new WritablePacket<AsyncClient>() {
-            @Override
-            protected boolean write(AsyncClient client, ByteBuffer buffer) {
-                throw new IllegalStateException();
-            }
-        });
-        handler.shutdown();
-        handler.join();
+        try {
+            handler.start();
+            AsyncClient client = Connector.create(AsyncClient::new, null, null).connect(socketAddress);
+            client.writePacket(new WritablePacket<AsyncClient>() {
+                @Override
+                protected boolean write(AsyncClient client, ByteBuffer buffer) {
+                    throw new IllegalStateException();
+                }
+            });
+        } finally {
+            handler.shutdown();
+            handler.join();
+        }
     }
-
 
     @Test
     public void testEncriptationFailed() throws InterruptedException, ExecutionException, IOException {
-        InetSocketAddress socketAddress = new InetSocketAddress(9090);
+        InetSocketAddress socketAddress = new InetSocketAddress("127.0.0.1",9090);
         ConnectionHandler<EncriptationFailClient> handler = ConnectionBuilder.create(socketAddress, EncriptationFailClient::new, null, null).shutdownWaitTime(100).build();
-        handler.start();
-        EncriptationFailClient client = Connector.create(EncriptationFailClient::new, null, null).connect(socketAddress);
-        client.writePacket(new WritablePacket<EncriptationFailClient>() {
-            @Override
-            protected boolean write(EncriptationFailClient client, ByteBuffer buffer) {
-                buffer.putLong(90);
-                buffer.putLong(80);
-                return true;
-            }
-        });
-        handler.shutdown();
-        handler.join();
+        try {
+            handler.start();
+            EncriptationFailClient client = Connector.create(EncriptationFailClient::new, null, null).connect(socketAddress);
+            client.writePacket(new WritablePacket<EncriptationFailClient>() {
+                @Override
+                protected boolean write(EncriptationFailClient client, ByteBuffer buffer) {
+                    buffer.putLong(90);
+                    buffer.putLong(80);
+                    return true;
+                }
+            });
+        } finally {
+            handler.shutdown();
+            handler.join();
+        }
     }
-
 
     @Test
     public void testStaticPacket() throws IOException, ExecutionException, InterruptedException {
-        InetSocketAddress socketAddress = new InetSocketAddress(9090);
+        InetSocketAddress socketAddress = new InetSocketAddress("127.0.0.1", 9090);
         ConnectionHandler<AsyncClient> handler = ConnectionBuilder.create(socketAddress, AsyncClient::new, (buffer, client) -> null, incomingPacket -> { }).shutdownWaitTime(100).build();
-        handler.start();
+        try {
+            handler.start();
 
-        PacketStatic packet = new PacketStatic();
-        AsyncClient client = Connector.create(AsyncClient::new, ((buffer, client1) -> null), incomingPacket -> { }).connect(socketAddress);
-        client.writePacket(packet);
-        client.close(packet);
-        handler.shutdown();
-        handler.join();
+            PacketStatic packet = new PacketStatic();
+            AsyncClient client = Connector.create(AsyncClient::new, ((buffer, client1) -> null), incomingPacket -> {
+            }).connect(socketAddress);
+            client.writePacket(packet);
+            client.close(packet);
+        } finally {
+            handler.shutdown();
+            handler.join();
+        }
     }
 
     @StaticPacket
-    class PacketStatic extends WritablePacket<AsyncClient> {
+    class PacketStatic extends SendablePacket {
 
         @Override
         protected boolean write(AsyncClient client, ByteBuffer buffer) {

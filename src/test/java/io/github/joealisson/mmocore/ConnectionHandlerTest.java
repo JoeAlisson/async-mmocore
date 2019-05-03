@@ -18,9 +18,10 @@ public class ConnectionHandlerTest {
         ConnectionBuilder<AsyncClient> builder = ConnectionBuilder.create(listenAddress, AsyncClient::new, handler, handler).threadPoolSize(-1).shutdownWaitTime(100);
         ConnectionHandler<AsyncClient> connectionHandler = builder.build();
         Connector<AsyncClient> connector = Connector.create(AsyncClient::new, handler, handler);
-        connectionHandler.start();
-        AsyncClient client = connector.connect("", 9090);
         try {
+            connectionHandler.start();
+            AsyncClient client = connector.connect("127.0.0.1", 9090);
+
              client.sendPacket(new AsyncClientClosePacket());
             Awaitility.waitAtMost(30, TimeUnit.SECONDS).until(() -> !client.isConnected());
             Assert.assertFalse(client.isConnected());
@@ -37,9 +38,10 @@ public class ConnectionHandlerTest {
         ConnectionBuilder<AsyncClient> builder = ConnectionBuilder.create(listenAddress, AsyncClient::new, handler, handler).filter(channel -> false).shutdownWaitTime(100);
         ConnectionHandler<AsyncClient> connectionHandler = builder.build();
         Connector<AsyncClient> connector = Connector.create(AsyncClient::new, handler, handler);
-        connectionHandler.start();
-        AsyncClient client = connector.connect(null, 9090);
         try {
+            connectionHandler.start();
+            AsyncClient client = connector.connect("127.0.0.1", 9090);
+
             Awaitility.waitAtMost(30, TimeUnit.SECONDS).until(() -> !client.isConnected());
             Assert.assertFalse(client.isConnected());
         }finally {
