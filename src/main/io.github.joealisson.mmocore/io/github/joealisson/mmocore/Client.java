@@ -136,6 +136,7 @@ public abstract class Client<T extends Connection<?>> {
             try {
                 ensureCanWrite();
                 write(packet, true);
+                Thread.sleep(200); // Give the client a chance to be aware of the last packet
             } catch (ExecutionException | InterruptedException e) {
                 logger.warn(e.getLocalizedMessage(), e);
                 disconnect();
@@ -160,7 +161,7 @@ public abstract class Client<T extends Connection<?>> {
 
     private synchronized void ensureCanWrite() throws InterruptedException {
         while (!writing.compareAndSet(false, true)) {
-            wait(500);
+            Thread.sleep(200);
         }
     }
 
