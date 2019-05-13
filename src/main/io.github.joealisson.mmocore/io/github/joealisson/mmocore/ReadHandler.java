@@ -3,6 +3,7 @@ package io.github.joealisson.mmocore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousCloseException;
 import java.nio.channels.CompletionHandler;
@@ -124,9 +125,9 @@ class ReadHandler<T extends Client<Connection<T>>> implements CompletionHandler<
         if(client.isConnected()) {
             client.disconnect();
         }
-        if(! (e instanceof AsynchronousCloseException)) {
+        if(! (e instanceof IOException)) {
             // client just closes the connection, doesn't need to be logged
-            logger.error(e.getLocalizedMessage(), e);
+            logger.warn(e.getLocalizedMessage(), e);
         }
 
     }

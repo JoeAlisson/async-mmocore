@@ -95,7 +95,7 @@ public final class ConnectionHandler<T extends Client<Connection<T>>> extends Th
 
         @Override
         public void failed(Throwable t, Void attachment) {
-            logger.error(t.getLocalizedMessage(), t);
+            logger.warn(t.getLocalizedMessage(), t);
         }
 
         private void acceptConnection(AsynchronousSocketChannel channel) {
