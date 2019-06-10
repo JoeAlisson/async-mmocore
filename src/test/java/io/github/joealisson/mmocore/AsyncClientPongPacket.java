@@ -2,8 +2,6 @@ package io.github.joealisson.mmocore;
 
 import org.junit.Assert;
 
-import java.nio.ByteBuffer;
-
 public class AsyncClientPongPacket extends ReadablePacket<AsyncClient> {
 
     private long varLong;
@@ -16,15 +14,15 @@ public class AsyncClientPongPacket extends ReadablePacket<AsyncClient> {
     private String varSizedString;
 
     @Override
-    protected boolean read(ByteBuffer buffer) {
-        varLong = buffer.getLong();
-        varDouble = buffer.getDouble();
-        varInt = buffer.getInt();
-        varFloat = buffer.getFloat();
-        varShort = buffer.getShort();
-        varByte = buffer.get();
-        varString = readString(buffer);
-        varSizedString = readSizedString(buffer);
+    protected boolean read() {
+        varLong = readLong();
+        varDouble = readDouble();
+        varInt = readInt();
+        varFloat = readFloat();
+        varShort = readShort();
+        varByte = readByte();
+        varString = readString();
+        varSizedString = readSizedString();
         return true;
     }
 

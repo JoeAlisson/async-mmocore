@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.channels.AsynchronousCloseException;
 import java.nio.channels.CompletionHandler;
 
 class WriteHandler<T extends Client<Connection<T>>> implements CompletionHandler<Integer, T> {

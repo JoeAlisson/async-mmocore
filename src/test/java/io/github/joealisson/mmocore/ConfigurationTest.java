@@ -26,7 +26,6 @@ public class ConfigurationTest {
         assertEquals(250, config.bufferLargePoolSize);
         assertEquals(50 * 1000L, config.shutdownWaitTime);
         assertEquals(6, config.threadPoolSize);
-        assertEquals(BIG_ENDIAN, config.byteOrder);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -43,7 +42,6 @@ public class ConfigurationTest {
         assertEquals(25, config.bufferLargePoolSize);
         assertEquals(5 * 1000L, config.shutdownWaitTime);
         assertEquals(max(1, getRuntime().availableProcessors() - 2), config.threadPoolSize);
-        assertEquals(LITTLE_ENDIAN, config.byteOrder);
     }
 
     @After

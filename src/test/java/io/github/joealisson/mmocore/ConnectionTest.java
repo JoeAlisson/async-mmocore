@@ -6,7 +6,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.util.concurrent.ExecutionException;
 
@@ -19,7 +18,7 @@ public class ConnectionTest {
         AsynchronousSocketChannel channel = AsynchronousSocketChannel.open();
         Connection<AsyncClient> connection = new Connection<>(channel,null, null);
         channel.close();
-        connection.write(ByteBuffer.wrap(new byte[10]), false);
+        connection.write(new byte[10], 10, false);
     }
 
     @Test

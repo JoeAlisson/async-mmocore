@@ -1,12 +1,10 @@
 package io.github.joealisson.mmocore;
 
-import java.nio.ByteBuffer;
-
 import static java.util.Objects.nonNull;
 
 public class AsyncClient extends Client<Connection<AsyncClient>> {
 
-    public ByteBuffer receivedPacket;
+    public PacketBuffer receivedPacket;
 
     public AsyncClient(Connection<AsyncClient> connection) {
         super(connection);

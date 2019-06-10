@@ -7,7 +7,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.ByteOrder;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -21,7 +20,7 @@ public class CommunicationTest {
     private ConnectionBuilder<AsyncClient> builder;
     private Connector<AsyncClient> connector;
     private InetSocketAddress listenAddress = new InetSocketAddress(9090);
-    ConnectionHandler<AsyncClient> connectionHandler;
+    private ConnectionHandler<AsyncClient> connectionHandler;
 
     static void shutdown(boolean success) {
         shutdown.getAndSet(true);
@@ -34,9 +33,9 @@ public class CommunicationTest {
 
         builder = ConnectionBuilder.create(listenAddress, AsyncClient::new, handler, handler).filter(channel -> true).threadPoolSize(2).useNagle(false).shutdownWaitTime(500)
                 .bufferDefaultSize(300).bufferSmallSize(40).bufferLargeSize(100).bufferMediumSize(50).bufferPoolSize(10).bufferSmallPoolSize(10).bufferMediumPoolSize(8)
-                .bufferLargePoolSize(3).byteOrder(ByteOrder.LITTLE_ENDIAN);
+                .bufferLargePoolSize(3);
         connector = Connector.create(AsyncClient::new, handler, handler).bufferDefaultSize(300).bufferLargePoolSize(3).bufferLargeSize(100).bufferMediumPoolSize(8)
-                .bufferMediumSize(50).bufferSmallPoolSize(10).bufferPoolSize(10).bufferSmallSize(40).byteOrder(ByteOrder.LITTLE_ENDIAN);
+                .bufferMediumSize(50).bufferSmallPoolSize(10).bufferPoolSize(10).bufferSmallSize(40);
 
     }
 
@@ -48,7 +47,7 @@ public class CommunicationTest {
         AsyncClient client = connector.connect("localhost", 9090);
         client.sendPacket(new AsyncClientPingPacket());
 
-        Awaitility.waitAtMost(1000, TimeUnit.SECONDS).untilTrue(shutdown);
+        Awaitility.waitAtMost(10, TimeUnit.SECONDS).untilTrue(shutdown);
 
         connectionHandler.shutdown();
         connectionHandler.join();

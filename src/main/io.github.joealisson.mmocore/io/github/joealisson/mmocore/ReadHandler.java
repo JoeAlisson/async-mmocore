@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.AsynchronousCloseException;
 import java.nio.channels.CompletionHandler;
 
 import static io.github.joealisson.mmocore.Client.HEADER_SIZE;
@@ -94,27 +93,24 @@ class ReadHandler<T extends Client<Connection<T>>> implements CompletionHandler<
     private void parseAndExecutePacket(T client, ByteBuffer incomingBuffer, int dataSize) {
         logger.debug("Trying to parse data");
 
-        ByteBuffer buffer = client.getResourcePool().getPooledBuffer(dataSize);
-        int limit = incomingBuffer.limit();
-        incomingBuffer.limit(incomingBuffer.position() + dataSize);
+        byte[] data = new byte[dataSize];
+        incomingBuffer.get(data);
 
-        buffer.put(incomingBuffer);
-        incomingBuffer.limit(limit);
-        boolean decrypted = client.decrypt(buffer.array(), 0, dataSize);
+        boolean decrypted = client.decrypt(data, 0, dataSize);
 
         if(decrypted) {
-            buffer.flip();
+            PacketBuffer buffer = PacketBuffer.of(data, 0);
             ReadablePacket<T> packet = packetHandler.handlePacket(buffer, client);
             logger.debug("Data parsed to packet {}", packet);
             if(nonNull(packet)) {
-                packet.client = client;
-                execute(packet, buffer);
+                packet.init(client, buffer);
+                execute(packet);
             }
         }
     }
 
-    private void execute(ReadablePacket<T> packet, ByteBuffer buffer) {
-        if(packet.read(buffer)) {
+    private void execute(ReadablePacket<T> packet) {
+        if(packet.read()) {
             logger.debug("packet {} was read from client {}", packet, packet.client);
             executor.execute(packet);
         }

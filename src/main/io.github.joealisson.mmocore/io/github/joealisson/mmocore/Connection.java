@@ -40,13 +40,12 @@ public class Connection<T extends Client<Connection<T>>> {
         }
     }
 
-    final void write(ByteBuffer buffer, boolean sync) throws ExecutionException, InterruptedException {
+    final void write(byte[] data, int size, boolean sync) throws ExecutionException, InterruptedException {
         if(!channel.isOpen()) {
             return;
         }
-
-        ByteBuffer directBuffer = getDirectWritingBuffer(buffer.limit());
-        directBuffer.put(buffer);
+        ByteBuffer directBuffer = getDirectWritingBuffer(size);
+        directBuffer.put(data, 0, size);
         directBuffer.flip();
         if(sync) {
             writeSync();
@@ -78,7 +77,10 @@ public class Connection<T extends Client<Connection<T>>> {
 
     private ByteBuffer getDirectWritingBuffer(int length) {
         if(isNull(writingBuffer)) {
-            writingBuffer =  client.getResourcePool().getPooledDirectBuffer(length);
+            writingBuffer = client.getResourcePool().getPooledDirectBuffer(length);
+        } else if(writingBuffer.clear().limit() < length) {
+            releaseWritingBuffer();
+            writingBuffer = client.getResourcePool().getPooledDirectBuffer(length);
         }
         return writingBuffer;
     }

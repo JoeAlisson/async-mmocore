@@ -1,6 +1,5 @@
 package io.github.joealisson.mmocore;
 
-import java.nio.ByteBuffer;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -10,10 +9,9 @@ public class GenericClientHandler implements PacketHandler<AsyncClient>, PacketE
 
     private ThreadPoolExecutor threadPool = new ThreadPoolExecutor(2, 2, 15L,TimeUnit.SECONDS, new LinkedBlockingQueue<>(), Executors.defaultThreadFactory());
 
-
     @Override
-    public ReadablePacket<AsyncClient> handlePacket(ByteBuffer wrapper, AsyncClient client) {
-        int opcode = Byte.toUnsignedInt(wrapper.get());
+    public ReadablePacket<AsyncClient> handlePacket(PacketBuffer buffer, AsyncClient client) {
+        int opcode = Byte.toUnsignedInt(buffer.read());
         ReadablePacket<AsyncClient> packet = null;
         if(opcode == 0x01) {
             packet = new AsyncServerPingPacket();
@@ -23,12 +21,12 @@ public class GenericClientHandler implements PacketHandler<AsyncClient>, PacketE
             packet = new AsyncServerClosePacket();
         } else if (opcode == 0x04) {
             byte[] bytes = new byte[0];
-            if(wrapper.remaining() >= 2) {
-                short op2 =  wrapper.getShort();
+            if(buffer.remaining() >= 2) {
+                short op2 =  buffer.readShort();
                 if(op2 == 0x01) {
-                    int op3 = wrapper.getInt();
+                    int op3 = buffer.readInt();
                     if(op3 == 0x02) {
-                       bytes =  wrapper.array();
+                       bytes =  buffer.expose();
                     }
                 }
             }

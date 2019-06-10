@@ -5,6 +5,7 @@ import java.nio.channels.AsynchronousSocketChannel;
 /**
  * The filter of incoming connections.
  */
+@FunctionalInterface
 public interface ConnectionFilter {
 
     /**

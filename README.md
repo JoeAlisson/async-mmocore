@@ -1,6 +1,6 @@
 # async-mmocore
 ![Code Badge](https://img.shields.io/badge/Project-L2J-red.svg?logo=github&logoColor=white)
-![Code Badge](https://img.shields.io/badge/Powered_by-Java_1.8-lightgray.svg?logo=java&logoColor=white)
+![Code Badge](https://img.shields.io/badge/Powered_by-Java_11-lightgray.svg?logo=java&logoColor=white)
 [![Code Badge](https://img.shields.io/badge/Versioning-Semantic-green.svg?logo=git&logoColor=white)](https://semver.org/)
 [![License badge](https://img.shields.io/badge/license-GPL-blue.svg?logo=gnu&logoColor=white)](https://opensource.org/licenses/AGPL-3.0)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.joealisson/async-mmocore/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.joealisson/async-mmocore)

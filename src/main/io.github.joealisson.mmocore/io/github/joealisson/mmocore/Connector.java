@@ -2,7 +2,6 @@ package io.github.joealisson.mmocore;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.ByteOrder;
 import java.nio.channels.AsynchronousChannelGroup;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.util.concurrent.ExecutionException;
@@ -157,20 +156,6 @@ public class Connector<T extends Client<Connection<T>>>  {
      */
     public Connector<T> bufferLargePoolSize(int bufferPoolSize) {
         config.bufferLargePoolSize = bufferPoolSize;
-        return this;
-    }
-
-    /**
-     * Sets the byte order used to send and receive packets.
-     *
-     * The default value is {@link ByteOrder#LITTLE_ENDIAN}
-     *
-     * @param order - the order to be used.
-     *
-     * @return this.
-     */
-    public Connector<T> byteOrder(ByteOrder order) {
-        config.byteOrder = order;
         return this;
     }
 

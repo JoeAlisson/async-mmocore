@@ -3,7 +3,6 @@ package io.github.joealisson.mmocore;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.SocketAddress;
-import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,7 +23,6 @@ class ConnectionConfig<T extends Client<Connection<T>>> {
     int bufferMediumPoolSize = 50;
     int bufferLargePoolSize = 25;
     long shutdownWaitTime = 5000;
-    ByteOrder byteOrder = ByteOrder.LITTLE_ENDIAN;
     int threadPoolSize;
     boolean useNagle;
 
@@ -50,7 +48,7 @@ class ConnectionConfig<T extends Client<Connection<T>>> {
     private void loadProperties(String propertyFileName) {
         final Path path = Paths.get(propertyFileName);
 
-        try(final InputStream inputStream = path.toFile().isFile() ? Files.newInputStream(path) : getClass().getResourceAsStream(propertyFileName)) {
+        try(final InputStream inputStream = Files.isRegularFile(path) ? Files.newInputStream(path) : getClass().getResourceAsStream(propertyFileName)) {
             if(nonNull(inputStream)) {
                 Properties properties = new Properties();
                 properties.load(inputStream);
@@ -74,11 +72,6 @@ class ConnectionConfig<T extends Client<Connection<T>>> {
         bufferLargePoolSize = parseInt(properties, "bufferLargePoolSize", 25);
         shutdownWaitTime = parseInt(properties, "shutdownWaitTime", 5) * 1000L;
         threadPoolSize = parseInt(properties, "threadPoolSize", threadPoolSize);
-
-        String order = properties.getProperty("byteOrder", "LITTLE_ENDIAN");
-        if("BIG_ENDIAN".equalsIgnoreCase(order)) {
-            byteOrder = ByteOrder.BIG_ENDIAN;
-        }
     }
 
     private int parseInt(Properties properties, String propertyName, int defaultValue) {

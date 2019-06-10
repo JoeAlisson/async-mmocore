@@ -5,7 +5,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.util.concurrent.ExecutionException;
 
@@ -76,9 +75,9 @@ public class ClientTest {
         try {
             handler.start();
             AsyncClient client = Connector.create(AsyncClient::new, null, null).connect(socketAddress);
-            client.writePacket(new WritablePacket<AsyncClient>() {
+            client.writePacket(new WritablePacket<>() {
                 @Override
-                protected boolean write(AsyncClient client, ByteBuffer buffer) {
+                protected boolean write(AsyncClient client) {
                     throw new IllegalStateException();
                 }
             });
@@ -95,11 +94,11 @@ public class ClientTest {
         try {
             handler.start();
             EncriptationFailClient client = Connector.create(EncriptationFailClient::new, null, null).connect(socketAddress);
-            client.writePacket(new WritablePacket<EncriptationFailClient>() {
+            client.writePacket(new WritablePacket<>() {
                 @Override
-                protected boolean write(EncriptationFailClient client, ByteBuffer buffer) {
-                    buffer.putLong(90);
-                    buffer.putLong(80);
+                protected boolean write(EncriptationFailClient client) {
+                    writeLong(90);
+                    writeLong(80);
                     return true;
                 }
             });
@@ -131,9 +130,9 @@ public class ClientTest {
     class PacketStatic extends SendablePacket {
 
         @Override
-        protected boolean write(AsyncClient client, ByteBuffer buffer) {
-            buffer.putInt(20);
-            buffer.putLong(50);
+        protected boolean write(AsyncClient client) {
+            writeInt(20);
+            writeLong(50);
             return true;
         }
     }

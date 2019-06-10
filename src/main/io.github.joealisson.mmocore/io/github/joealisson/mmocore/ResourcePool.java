@@ -1,6 +1,7 @@
 package io.github.joealisson.mmocore;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
@@ -11,8 +12,8 @@ import static java.util.Objects.nonNull;
 
 class ResourcePool {
 
-    private final Map<Integer, Queue<ByteBuffer>> directBuffers = new HashMap<>();
-    private final Map<Integer, Queue<ByteBuffer>> buffers = new HashMap<>();
+    private final Map<Integer, Queue<ByteBuffer>> buffers = new HashMap<>(4);
+
     private final ConnectionConfig config;
 
     private ResourcePool(ConnectionConfig config) {
@@ -20,39 +21,27 @@ class ResourcePool {
     }
 
     ByteBuffer getPooledDirectBuffer() {
-        return getSizedBuffer(config.bufferDefaultSize, true);
-    }
-
-    ByteBuffer getPooledBuffer() {
-        return getSizedBuffer(config.bufferDefaultSize, false);
+        return getSizedBuffer(config.bufferDefaultSize);
     }
 
     ByteBuffer getPooledDirectBuffer(int size) {
-        return getSizedBuffer(determineBufferSize(size), true);
+        return getSizedBuffer(determineBufferSize(size));
     }
 
-    ByteBuffer getPooledBuffer(int size) {
-        return getSizedBuffer(determineBufferSize(size), false);
-    }
-
-    private ByteBuffer getSizedBuffer(int size, boolean direct) {
-        Queue<ByteBuffer> queue = queueFromSize(size, direct);
+    private ByteBuffer getSizedBuffer(int size) {
+        Queue<ByteBuffer> queue = queueFromSize(size);
         ByteBuffer buffer = queue.poll();
         if(isNull(buffer)) {
-            return direct ? ByteBuffer.allocateDirect(size).order(config.byteOrder) : ByteBuffer.allocate(size).order(config.byteOrder);
+            return ByteBuffer.allocateDirect(size).order(ByteOrder.LITTLE_ENDIAN);
         }
         return buffer;
     }
 
-    private Queue<ByteBuffer> queueFromSize(int size, boolean direct) {
-        Queue<ByteBuffer> queue = direct ? directBuffers.get(size) : buffers.get(size);
+    private Queue<ByteBuffer> queueFromSize(int size) {
+        Queue<ByteBuffer> queue =  buffers.get(size);
         if(isNull(queue)) {
             queue = new ConcurrentLinkedQueue<>();
-            if(direct) {
-                directBuffers.put(size, queue);
-            } else {
-                buffers.put(size, queue);
-            }
+            buffers.put(size, queue);
         }
         return queue;
     }
@@ -73,11 +62,7 @@ class ResourcePool {
         if (nonNull(buffer)) {
             Queue<ByteBuffer> queue;
             int poolSize =  determinePoolSize(buffer.capacity());
-            if(buffer.isDirect()) {
-                queue = directBuffers.get(buffer.capacity());
-            } else {
-                queue = buffers.get(buffer.capacity());
-            }
+            queue = buffers.get(buffer.capacity());
             if (nonNull(queue) && queue.size() < poolSize) {
                 buffer.clear();
                 queue.add(buffer);
@@ -95,6 +80,10 @@ class ResourcePool {
             poolSize = config.bufferLargePoolSize;
         }
         return poolSize;
+    }
+
+    int getSmallSize() {
+        return config.bufferSmallSize;
     }
 
     static ResourcePool initialize(ConnectionConfig config) {
