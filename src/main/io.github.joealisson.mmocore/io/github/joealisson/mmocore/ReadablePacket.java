@@ -2,7 +2,6 @@ package io.github.joealisson.mmocore;
 
 import java.nio.charset.StandardCharsets;
 
-import static io.github.joealisson.mmocore.util.ByteUtils.convertEndian;
 import static java.lang.Byte.toUnsignedInt;
 import static java.lang.Byte.toUnsignedLong;
 import static java.lang.Double.longBitsToDouble;
@@ -68,13 +67,20 @@ public abstract class ReadablePacket<T extends Client<Connection<T>>> implements
         return buffer.data[buffer.index++];
     }
 
+    /**
+     * Reads <B>byte</B> from the buffer
+     * @return true if byte is equal 1
+     */
+    protected final boolean readByteAsBoolean() {
+        return  readByte() == 1;
+    }
 
     /**
      *  Reads <B>char</B> from the buffer
      * @return char read
      */
     protected final char readChar() {
-        return convertEndian((char) readShort());
+        return (char) readShort();
     }
 
     /**
@@ -97,6 +103,15 @@ public abstract class ReadablePacket<T extends Client<Connection<T>>> implements
     }
 
     /**
+     * Reads <B>short</B> from the buffer. <BR>
+     * 16bit integer (00 00)
+     * @return  true if the short equals 1
+     */
+    protected final boolean readShortAsBoolean()  {
+        return readShort() == 1;
+    }
+
+    /**
      * Reads <B>float</B> from the buffer. <BR>
      * 32bit precision float (00 00 00 00)
      * @return float read
@@ -116,6 +131,15 @@ public abstract class ReadablePacket<T extends Client<Connection<T>>> implements
                 readUnsignedByte() << 16 |
                 readUnsignedByte() << 24 ;
 
+    }
+
+    /**
+     * Reads <B>int</B> from the buffer. <BR>
+     * 32bit integer (00 00 00 00)
+     * @return true if int equals 1
+     */
+    protected final boolean readIntAsBoolean() {
+        return readInt() == 1;
     }
 
     /**

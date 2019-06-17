@@ -30,7 +30,6 @@ public class AsyncClient extends Client<Connection<AsyncClient>> {
 
     }
 
-
     public void sendPacket(WritablePacket<AsyncClient> packet) {
         if(nonNull(packet)) {
             System.out.println("Sending " + packet.toString());

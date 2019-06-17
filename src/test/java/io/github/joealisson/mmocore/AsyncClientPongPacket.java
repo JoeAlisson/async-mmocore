@@ -15,14 +15,14 @@ public class AsyncClientPongPacket extends ReadablePacket<AsyncClient> {
 
     @Override
     protected boolean read() {
-        varLong = readLong();
-        varDouble = readDouble();
-        varInt = readInt();
-        varFloat = readFloat();
-        varShort = readShort();
-        varByte = readByte();
-        varString = readString();
-        varSizedString = readSizedString();
+            varLong = readLong();
+            varDouble = readDouble();
+            varInt = readInt();
+            varFloat = readFloat();
+            varShort = readShort();
+            varByte = readByte();
+            varString = readString();
+            varSizedString = readSizedString();
         return true;
     }
 

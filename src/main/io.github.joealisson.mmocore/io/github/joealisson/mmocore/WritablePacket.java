@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import static io.github.joealisson.mmocore.util.ByteUtils.convertEndian;
 import static java.lang.Double.doubleToRawLongBits;
 import static java.lang.Math.max;
 import static java.util.Objects.isNull;
@@ -228,7 +227,7 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> {
 
     void writeHeader(int header) {
         PacketBuffer buffer = threadLocal.get();
-        short size = convertEndian( (short) header);
+        short size =  (short) header;
         buffer.data[0] = (byte) size;
         buffer.data[1] = (byte) (size >>> 8);
 

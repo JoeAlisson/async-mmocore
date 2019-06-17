@@ -3,6 +3,7 @@ package io.github.joealisson.mmocore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
@@ -49,7 +50,7 @@ public abstract class Client<T extends Connection<?>> {
      *
      * @param packet to be sent.
      */
-    protected void writePacket(WritablePacket<? extends Client<T>> packet) {
+    protected final void writePacket(WritablePacket<? extends Client<T>> packet) {
         if(!isConnected() || isNull(packet)) {
             return;
         }

@@ -1,6 +1,5 @@
 package io.github.joealisson.mmocore;
 
-import static io.github.joealisson.mmocore.util.ByteUtils.convertEndian;
 import static java.lang.Byte.toUnsignedInt;
 
 public class PacketBuffer {
@@ -38,7 +37,7 @@ public class PacketBuffer {
      * @return short read
      */
     public short readShort()  {
-        return convertEndian((short) (readUnsigned() | readUnsigned() << 8));
+        return (short) (readUnsigned() | readUnsigned() << 8);
     }
 
     private int readUnsigned() {
@@ -51,10 +50,10 @@ public class PacketBuffer {
      * @return int read
      */
     public final int readInt() {
-        return convertEndian(readUnsigned()  |
+        return readUnsigned()  |
                             readUnsigned() << 8  |
                             readUnsigned() << 16 |
-                            readUnsigned() << 24 );
+                            readUnsigned() << 24;
 
     }
 

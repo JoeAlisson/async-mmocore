@@ -17,16 +17,21 @@ public class AsyncServerPingPacket extends ReadablePacket<AsyncClient> {
 
     @Override
     protected boolean read() {
-        varLong = readLong();
-        varDouble = readDouble();
-        varInt = readInt();
-        varFloat = readFloat();
-        varShort = readShort();
-        varByte = readByte();
-        varString = readString();
-        emptyString = readString();
-        varSizedString = readSizedString();
-        emptySizedString = readSizedString();
+        if(available() > 0) {
+            varLong = readLong();
+            varDouble = readDouble();
+            varInt = readInt();
+            varFloat = readFloat();
+            varShort = readShort();
+            varByte = readByte();
+            varString = readString();
+            emptyString = readString();
+            varSizedString = readSizedString();
+            emptySizedString = readSizedString();
+            readByteAsBoolean();
+            readShortAsBoolean();
+            readIntAsBoolean();
+        }
         return true;
     }
 
