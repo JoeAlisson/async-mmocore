@@ -89,12 +89,16 @@ public abstract class Client<T extends Connection<?>> {
             return;
         }
 
-        byte[] data = packet.data();
-        dataSentSize  = encrypt(data, HEADER_SIZE, dataSize - HEADER_SIZE) + HEADER_SIZE;
+        var buffer = packet.buffer();
+        dataSentSize = encryptedSize(dataSize - HEADER_SIZE) + HEADER_SIZE;
+        if(dataSentSize  > buffer.data.length) {
+            buffer.data = Arrays.copyOf(buffer.data, dataSentSize);
+        }
+        buffer.data  = encrypt(buffer.data, HEADER_SIZE, dataSentSize);
         if(dataSentSize > HEADER_SIZE) {
             packet.writeHeader(dataSentSize);
             packet.releaseData();
-            connection.write(data, dataSentSize, sync);
+            connection.write(buffer.data, dataSentSize, sync);
             LOGGER.debug("Sending packet {} to {}", packet.toString(), this);
         } else {
             finishWriting();
@@ -188,6 +192,12 @@ public abstract class Client<T extends Connection<?>> {
         return resourcePool;
     }
 
+    /**
+     * @param dataSize the data size to be encrypted
+     *
+     * @return the size of the data after encrypted
+     */
+    public abstract int encryptedSize(int dataSize);
 
     /**
      * Encrypt the data in-place.
@@ -196,9 +206,9 @@ public abstract class Client<T extends Connection<?>> {
      * @param offset - the initial index to be encrypted
      * @param size - the length of data to be encrypted
      *
-     * @return The data size after encrypted
+     * @return The data after encrypted
      */
-    public abstract int encrypt(byte[] data, int offset, int size);
+    public abstract byte[] encrypt(byte[] data, int offset, int size);
 
     /**
      * Decrypt the data in-place

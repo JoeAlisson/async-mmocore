@@ -240,8 +240,8 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> {
         return getClass().isAnnotationPresent(StaticPacket.class) && nonNull(staticData);
     }
 
-    byte[] data() {
-        return threadLocal.get().data;
+    PacketBuffer buffer() {
+        return threadLocal.get();
     }
 
     void releaseData() {
