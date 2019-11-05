@@ -99,11 +99,9 @@ public class Connection<T extends Client<Connection<T>>> {
         releaseReadingBuffer();
         releaseWritingBuffer();
         try {
-            channel.shutdownInput();
-            channel.shutdownOutput();
             channel.close();
         } catch (IOException e) {
-            logger.error(e.getLocalizedMessage(), e);
+            logger.warn(e.getLocalizedMessage(), e);
         }
     }
 

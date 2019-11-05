@@ -94,7 +94,7 @@ public abstract class Client<T extends Connection<?>> {
         if(dataSentSize  > buffer.data.length) {
             buffer.data = Arrays.copyOf(buffer.data, dataSentSize);
         }
-        buffer.data  = encrypt(buffer.data, HEADER_SIZE, dataSentSize);
+        buffer.data = encrypt(buffer.data, HEADER_SIZE, dataSize - HEADER_SIZE);
         if(dataSentSize > HEADER_SIZE) {
             packet.writeHeader(dataSentSize);
             packet.releaseData();
