@@ -226,7 +226,7 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> {
         return 0;
     }
 
-    void writeHeader(int header) {
+    void writeHeaderAndRecord(int header) {
         PacketBuffer buffer = THREAD_LOCAL.get();
         short size =  (short) header;
         buffer.data[0] = (byte) size;

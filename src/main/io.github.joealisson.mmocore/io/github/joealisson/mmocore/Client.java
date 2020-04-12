@@ -6,11 +6,9 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 
 /**
  * @author JoeAlisson
@@ -68,44 +66,51 @@ public abstract class Client<T extends Connection<?>> {
                 connection.releaseWritingBuffer();
                 writing.set(false);
                 LOGGER.debug("no packet found");
+                if(isClosing) {
+                    disconnect();
+                }
             } else {
                 write(packetsToWrite.poll());
             }
         }
     }
 
-    private void write(WritablePacket<? extends Client<T>> packet) {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private void write(WritablePacket packet) {
         try {
-            write(packet, false);
+            int dataSize = packet.writeData(this);
+
+            if(dataSize <= 0) {
+                finishWriting();
+                return;
+            }
+
+            var payloadSize = dataSize - HEADER_SIZE;
+            dataSentSize = encryptedSize(payloadSize) + HEADER_SIZE;
+
+            if(dataSentSize <= HEADER_SIZE) {
+                finishWriting();
+                return;
+            }
+
+            encryptAndWrite(packet, payloadSize);
         } catch (Exception e) {
-            LOGGER.error(e.getLocalizedMessage(), e);
+            LOGGER.error(e.getMessage(), e);
             finishWriting();
+        } finally {
+            packet.releaseData();
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private void write(WritablePacket packet, boolean sync) throws ExecutionException, InterruptedException {
-        int dataSize = packet.writeData(this);
-
-        if(dataSize <= 0) {
-            finishWriting();
-            return;
-        }
-
+    private void encryptAndWrite(WritablePacket<? extends Client<T>> packet, int payloadSize) {
         var buffer = packet.buffer();
-        dataSentSize = encryptedSize(dataSize - HEADER_SIZE) + HEADER_SIZE;
-        if(dataSentSize  > buffer.data.length) {
+        if(dataSentSize > buffer.data.length) {
             buffer.data = Arrays.copyOf(buffer.data, dataSentSize);
         }
-        buffer.data = encrypt(buffer.data, HEADER_SIZE, dataSize - HEADER_SIZE);
-        if(dataSentSize > HEADER_SIZE) {
-            packet.writeHeader(dataSentSize);
-            packet.releaseData();
-            connection.write(buffer.data, dataSentSize, sync);
-            LOGGER.debug("Sending packet {} to {}", packet.toString(), this);
-        } else {
-            finishWriting();
-        }
+        buffer.data = encrypt(buffer.data, HEADER_SIZE, payloadSize);
+        packet.writeHeaderAndRecord(dataSentSize);
+        connection.write(buffer.data, dataSentSize);
+        LOGGER.debug("Sending packet {} to {}", packet, this);
     }
 
     /**
@@ -129,24 +134,10 @@ public abstract class Client<T extends Connection<?>> {
         if(!isConnected()) {
             return;
         }
+        packetsToWrite.clear();
+        packetsToWrite.add(packet);
         isClosing = true;
         LOGGER.debug("Closing client connection {} with packet {}", this, packet);
-        packetsToWrite.clear();
-        try {
-            if(nonNull(packet)) {
-                try {
-                    ensureCanWrite();
-                    write(packet, true);
-                    Thread.sleep(1000); // Give the client a chance to be aware of the last packet
-                } catch (ExecutionException | InterruptedException e) {
-                    LOGGER.warn(e.getMessage(), e);
-                    Thread.currentThread().interrupt();
-                }
-            }
-        } finally {
-            disconnect();
-        }
-
     }
 
     void resumeSend(int result) {
@@ -157,12 +148,6 @@ public abstract class Client<T extends Connection<?>> {
     void finishWriting() {
         writing.set(false);
         tryWriteNextPacket();
-    }
-
-    private void ensureCanWrite() throws InterruptedException {
-        while (!writing.compareAndSet(false, true)) {
-            wait(1000);
-        }
     }
 
     protected final void disconnect() {

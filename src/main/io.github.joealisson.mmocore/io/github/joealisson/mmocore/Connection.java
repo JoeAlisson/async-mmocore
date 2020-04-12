@@ -43,18 +43,14 @@ public class Connection<T extends Client<Connection<T>>> {
         }
     }
 
-    final void write(byte[] data, int size, boolean sync) throws ExecutionException, InterruptedException {
+    final void write(byte[] data, int size) {
         if(!channel.isOpen()) {
             return;
         }
         ByteBuffer directBuffer = getDirectWritingBuffer(size);
         directBuffer.put(data, 0, size);
         directBuffer.flip();
-        if(sync) {
-            writeSync();
-        } else {
-            write();
-        }
+        write();
     }
 
     final void write() {

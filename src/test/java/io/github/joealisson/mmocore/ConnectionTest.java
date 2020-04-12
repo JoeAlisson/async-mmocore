@@ -18,7 +18,7 @@ public class ConnectionTest {
         AsynchronousSocketChannel channel = AsynchronousSocketChannel.open();
         Connection<AsyncClient> connection = new Connection<>(channel,null, null);
         channel.close();
-        connection.write(new byte[10], 10, false);
+        connection.write(new byte[10], 10);
     }
 
     @Test
