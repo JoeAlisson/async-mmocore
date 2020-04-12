@@ -159,9 +159,9 @@ public abstract class Client<T extends Connection<?>> {
         tryWriteNextPacket();
     }
 
-    private synchronized void ensureCanWrite() throws InterruptedException {
+    private void ensureCanWrite() throws InterruptedException {
         while (!writing.compareAndSet(false, true)) {
-            Thread.sleep(1000);
+            wait(1000);
         }
     }
 

@@ -2,8 +2,8 @@ package io.github.joealisson.mmocore;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static java.lang.Double.doubleToRawLongBits;
 import static java.lang.Math.max;
@@ -21,8 +21,8 @@ import static java.util.Objects.nonNull;
  */
 public abstract class WritablePacket<T extends Client<Connection<T>>> {
 
-    private static final Map<Class<?>, Integer> packetInfo = new HashMap<>();
-    private static final ThreadLocal<PacketBuffer> threadLocal = new ThreadLocal<>();
+    private static final Map<Class<?>, Integer> packetInfo = new ConcurrentHashMap<>();
+    private static final ThreadLocal<PacketBuffer> THREAD_LOCAL = new ThreadLocal<>();
 
     private byte[] staticData;
 
@@ -39,7 +39,7 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> {
         if(isNull(bytes)) {
             return;
         }
-        PacketBuffer buffer  = threadLocal.get();
+        PacketBuffer buffer  = THREAD_LOCAL.get();
         ensureSize(buffer, bytes.length);
 
         System.arraycopy(bytes, 0, buffer.data, buffer.index, bytes.length);
@@ -61,7 +61,7 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> {
      * @param value to be written
      */
     protected final void writeByte(final byte value) {
-        PacketBuffer buffer = threadLocal.get();
+        PacketBuffer buffer = THREAD_LOCAL.get();
         ensureSize(buffer, 1);
         buffer.data[buffer.index++] = value;
     }
@@ -210,14 +210,14 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> {
 
     int writeData(T client) {
         if(hasWritedStaticData()) {
-            threadLocal.set(PacketBuffer.of(Arrays.copyOf(staticData, staticData.length), staticData.length));
+            THREAD_LOCAL.set(PacketBuffer.of(Arrays.copyOf(staticData, staticData.length), staticData.length));
             return staticData.length;
         }
 
-        threadLocal.set(PacketBuffer.of( packetInfo.getOrDefault(getClass(), client.getResourcePool().getSmallSize())));
+        THREAD_LOCAL.set(PacketBuffer.of( packetInfo.getOrDefault(getClass(), client.getResourcePool().getSmallSize())));
 
         if(write(client)) {
-            PacketBuffer buffer = threadLocal.get();
+            PacketBuffer buffer = THREAD_LOCAL.get();
             if(getClass().isAnnotationPresent(StaticPacket.class)) {
                 staticData = Arrays.copyOf(buffer.data, buffer.index);
             }
@@ -227,14 +227,12 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> {
     }
 
     void writeHeader(int header) {
-        PacketBuffer buffer = threadLocal.get();
+        PacketBuffer buffer = THREAD_LOCAL.get();
         short size =  (short) header;
         buffer.data[0] = (byte) size;
         buffer.data[1] = (byte) (size >>> 8);
 
-        synchronized (packetInfo) {
-            packetInfo.compute(getClass(), (k, v) -> isNull(v) ? header : max(v, header));
-        }
+        packetInfo.compute(getClass(), (k, v) -> isNull(v) ? header : max(v, header));
     }
 
     private boolean hasWritedStaticData() {
@@ -242,11 +240,11 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> {
     }
 
     PacketBuffer buffer() {
-        return threadLocal.get();
+        return THREAD_LOCAL.get();
     }
 
     void releaseData() {
-        threadLocal.remove();
+        THREAD_LOCAL.remove();
     }
 
     @Override
