@@ -1,5 +1,6 @@
 package io.github.joealisson.mmocore;
 
+import org.awaitility.Awaitility;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
@@ -8,6 +9,9 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+
+import static java.util.Objects.nonNull;
 
 public class ConnectionTest {
 
@@ -47,7 +51,7 @@ public class ConnectionTest {
     }
 
     @Test
-    public void testWriteSyncBeforeClose() throws IOException, ExecutionException, InterruptedException {
+    public void testWriteBeforeClose() throws IOException, ExecutionException, InterruptedException {
         InetSocketAddress socketAddress = new InetSocketAddress("127.0.0.1", 9090);
         ConnectionHandler<AsyncClient> handler = ConnectionBuilder.create(socketAddress, this::buildClient, (buffer, client1) ->  { client1.receivedPacket = buffer ; return null;}, null).shutdownWaitTime(100).build();
         try {
@@ -55,7 +59,7 @@ public class ConnectionTest {
             AsyncClient client = Connector.create(AsyncClient::new,  null, null).connect(socketAddress);
 
             client.close(new AsyncClientClosePacket());
-            Assert.assertNotNull(connectionClient.receivedPacket);
+            Awaitility.waitAtMost(10, TimeUnit.SECONDS).until(() -> nonNull(connectionClient.receivedPacket));
         } finally {
             handler.shutdown();
             handler.join();

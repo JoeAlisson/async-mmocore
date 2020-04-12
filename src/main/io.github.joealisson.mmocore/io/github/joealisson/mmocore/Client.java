@@ -138,6 +138,7 @@ public abstract class Client<T extends Connection<?>> {
         packetsToWrite.add(packet);
         isClosing = true;
         LOGGER.debug("Closing client connection {} with packet {}", this, packet);
+        tryWriteNextPacket();
     }
 
     void resumeSend(int result) {

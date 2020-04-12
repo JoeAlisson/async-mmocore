@@ -11,7 +11,7 @@ jdk:
   - openjdk11
 
 git:
-  depth: 99999
+  depth: false
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock

@@ -77,6 +77,17 @@ task javadocJar(type: Jar) {
     from javadoc
 }
 
+jacocoTestReport {
+    reports {
+        xml.enabled true
+    }
+}
+
+plugins.withType(JacocoPlugin) {
+    tasks["test"].finalizedBy 'jacocoTestReport'
+}
+
+
 publishing {
     publications {
 

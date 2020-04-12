@@ -15,11 +15,11 @@ import static org.junit.Assert.fail;
 
 public class CommunicationTest {
 
-    private static AtomicBoolean shutdown = new AtomicBoolean(false);
+    private static final AtomicBoolean shutdown = new AtomicBoolean(false);
     private static boolean success = true;
     private ConnectionBuilder<AsyncClient> builder;
     private Connector<AsyncClient> connector;
-    private InetSocketAddress listenAddress = new InetSocketAddress(9090);
+    private final InetSocketAddress listenAddress = new InetSocketAddress(9090);
     private ConnectionHandler<AsyncClient> connectionHandler;
 
     static void shutdown(boolean success) {
