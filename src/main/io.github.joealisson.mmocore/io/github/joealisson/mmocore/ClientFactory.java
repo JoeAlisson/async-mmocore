@@ -1,5 +1,8 @@
 package io.github.joealisson.mmocore;
 
+/**
+ * @author JoeAlisson
+ */
 @FunctionalInterface
 public interface ClientFactory<T extends Client<Connection<T>>> {
 

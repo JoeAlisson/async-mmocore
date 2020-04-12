@@ -9,6 +9,9 @@ import java.util.concurrent.Executors;
 
 import static java.util.Objects.isNull;
 
+/**
+ * @author JoeAlisson
+ */
 public class Connector<T extends Client<Connection<T>>>  {
 
     private ConnectionConfig<T> config;
@@ -204,5 +207,4 @@ public class Connector<T extends Client<Connection<T>>>  {
         client.onConnected();
         return client;
     }
-
 }

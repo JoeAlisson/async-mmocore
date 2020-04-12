@@ -28,7 +28,7 @@ public class AsyncServerPingPacket extends ReadablePacket<AsyncClient> {
             emptyString = readString();
             varSizedString = readSizedString();
             emptySizedString = readSizedString();
-            readByteAsBoolean();
+            readBoolean();
             readShortAsBoolean();
             readIntAsBoolean();
         }

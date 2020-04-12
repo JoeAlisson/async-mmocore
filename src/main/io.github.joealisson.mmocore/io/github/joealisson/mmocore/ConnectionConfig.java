@@ -12,6 +12,9 @@ import static java.lang.Math.max;
 import static java.lang.Runtime.getRuntime;
 import static java.util.Objects.nonNull;
 
+/**
+ * @author JoeAlisson
+ */
 class ConnectionConfig<T extends Client<Connection<T>>> {
 
     int bufferDefaultSize = 8 * 1024;

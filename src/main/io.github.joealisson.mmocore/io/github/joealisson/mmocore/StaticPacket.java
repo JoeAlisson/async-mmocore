@@ -7,6 +7,8 @@ import java.lang.annotation.Target;
 
 /**
  * This Annotation indicates that a packet can hold static data. Therefore the data will be write once.
+ *
+ * @author JoeAlisson
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

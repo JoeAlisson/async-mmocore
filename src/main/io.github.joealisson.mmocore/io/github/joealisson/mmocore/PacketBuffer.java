@@ -2,6 +2,9 @@ package io.github.joealisson.mmocore;
 
 import static java.lang.Byte.toUnsignedInt;
 
+/**
+ * @author JoeAlisson
+ */
 public class PacketBuffer {
     byte[] data;
     int index = Client.HEADER_SIZE;

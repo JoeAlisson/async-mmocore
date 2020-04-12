@@ -12,9 +12,12 @@ import java.util.concurrent.ExecutionException;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
+/**
+ * @author JoeAlisson
+ */
 public class Connection<T extends Client<Connection<T>>> {
 
-    private static final Logger logger = LoggerFactory.getLogger(Connection.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Connection.class);
 
     private final AsynchronousSocketChannel channel;
     private final ReadHandler<T> readHandler;
@@ -101,7 +104,7 @@ public class Connection<T extends Client<Connection<T>>> {
         try {
             channel.close();
         } catch (IOException e) {
-            logger.warn(e.getLocalizedMessage(), e);
+            LOGGER.warn(e.getMessage(), e);
         }
     }
 

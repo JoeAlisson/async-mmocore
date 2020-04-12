@@ -55,6 +55,21 @@ public class ClientTest {
     }
 
     @Test
+    public void testInterruptedCloseConnection() throws IOException, ExecutionException, InterruptedException {
+        InetSocketAddress socketAddress = new InetSocketAddress("127.0.0.1",9090);
+        ConnectionHandler<AsyncClient> handler = ConnectionBuilder.create(socketAddress, AsyncClient::new, (buffer, client) -> null, incomingPacket -> { }).shutdownWaitTime(100).build();
+        try {
+            handler.start();
+            AsyncClient client = Connector.create(AsyncClient::new, ((buffer, client1) -> null), incomingPacket -> {
+            }).connect(socketAddress);
+            client.close(new ExecutionErrorPacket());
+        } finally {
+            handler.shutdown();
+            handler.join();
+        }
+    }
+
+    @Test
     public void testWriteNullPacket() throws IOException, ExecutionException, InterruptedException {
         InetSocketAddress socketAddress = new InetSocketAddress("127.0.0.1", 9090);
         ConnectionHandler<AsyncClient> handler = ConnectionBuilder.create(socketAddress, AsyncClient::new, null, null).shutdownWaitTime(100).build();
@@ -127,7 +142,7 @@ public class ClientTest {
     }
 
     @StaticPacket
-    class PacketStatic extends SendablePacket {
+    static class PacketStatic extends SendablePacket {
 
         @Override
         protected boolean write(AsyncClient client) {
@@ -137,15 +152,29 @@ public class ClientTest {
         }
     }
 
-    class EncriptationFailClient extends Client<Connection<EncriptationFailClient>> {
+    static class ExecutionErrorPacket extends SendablePacket {
+
+        @Override
+        protected boolean write(AsyncClient client) {
+            Thread.currentThread().interrupt();
+            return super.write(client);
+        }
+    }
+
+    static class EncriptationFailClient extends Client<Connection<EncriptationFailClient>> {
 
         EncriptationFailClient(Connection<EncriptationFailClient> connection) {
             super(connection);
         }
 
         @Override
-        public int encrypt(byte[] data, int offset, int size) {
+        public int encryptedSize(int dataSize) {
             return -1;
+        }
+
+        @Override
+        public byte[] encrypt(byte[] data, int offset, int size) {
+            return new byte[0];
         }
 
         @Override

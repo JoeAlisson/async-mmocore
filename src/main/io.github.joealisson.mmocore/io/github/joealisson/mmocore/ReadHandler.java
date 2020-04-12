@@ -5,14 +5,18 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.CompletionHandler;
 
 import static io.github.joealisson.mmocore.Client.HEADER_SIZE;
 import static java.util.Objects.nonNull;
 
+/**
+ * @author JoeAlisson
+ */
 class ReadHandler<T extends Client<Connection<T>>> implements CompletionHandler<Integer, T> {
 
-    private static final Logger logger = LoggerFactory.getLogger(ReadHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReadHandler.class);
 
     private final PacketHandler<T> packetHandler;
     private final PacketExecutor<T> executor;
@@ -28,7 +32,7 @@ class ReadHandler<T extends Client<Connection<T>>> implements CompletionHandler<
             return;
         }
 
-        logger.debug("Reading {} from {}", bytesRead, client);
+        LOGGER.debug("Reading {} from {}", bytesRead, client);
         if(bytesRead < 0 ) {
             client.disconnect();
             return;
@@ -43,7 +47,7 @@ class ReadHandler<T extends Client<Connection<T>>> implements CompletionHandler<
         buffer.flip();
 
         if (buffer.remaining() < HEADER_SIZE){
-            logger.debug("Not enough data to read packet header");
+            LOGGER.debug("Not enough data to read packet header");
             buffer.compact();
             connection.read();
             return;
@@ -52,7 +56,7 @@ class ReadHandler<T extends Client<Connection<T>>> implements CompletionHandler<
         int dataSize = Short.toUnsignedInt(buffer.getShort()) - HEADER_SIZE;
 
         if(dataSize > buffer.remaining()) {
-            logger.debug("Not enough data to read. Packet size {}", dataSize);
+            LOGGER.debug("Not enough data to read. Packet size {}", dataSize);
             buffer.position(buffer.position() - HEADER_SIZE);
             buffer.compact();
             connection.read();
@@ -71,7 +75,7 @@ class ReadHandler<T extends Client<Connection<T>>> implements CompletionHandler<
                 if (!buffer.hasRemaining()) {
                     buffer.clear();
                 } else {
-                    logger.debug("Still data on packet. Trying to read");
+                    LOGGER.debug("Still data on packet. Trying to read");
                     int remaining = buffer.remaining();
                     buffer.compact();
                     if (remaining >= HEADER_SIZE) {
@@ -81,7 +85,7 @@ class ReadHandler<T extends Client<Connection<T>>> implements CompletionHandler<
                 }
             }
         } catch(Exception e) {
-            logger.error(e.getLocalizedMessage(), e);
+            LOGGER.warn(e.getMessage(), e);
             buffer.clear();
         } finally {
             if(continueReading) {
@@ -91,7 +95,7 @@ class ReadHandler<T extends Client<Connection<T>>> implements CompletionHandler<
     }
 
     private void parseAndExecutePacket(T client, ByteBuffer incomingBuffer, int dataSize) {
-        logger.debug("Trying to parse data");
+        LOGGER.debug("Trying to parse data");
 
         byte[] data = new byte[dataSize];
         incomingBuffer.get(data);
@@ -101,7 +105,7 @@ class ReadHandler<T extends Client<Connection<T>>> implements CompletionHandler<
         if(decrypted) {
             PacketBuffer buffer = PacketBuffer.of(data, 0);
             ReadablePacket<T> packet = packetHandler.handlePacket(buffer, client);
-            logger.debug("Data parsed to packet {}", packet);
+            LOGGER.debug("Data parsed to packet {}", packet);
             if(nonNull(packet)) {
                 packet.init(client, buffer);
                 execute(packet);
@@ -111,7 +115,7 @@ class ReadHandler<T extends Client<Connection<T>>> implements CompletionHandler<
 
     private void execute(ReadablePacket<T> packet) {
         if(packet.read()) {
-            logger.debug("packet {} was read from client {}", packet, packet.client);
+            LOGGER.debug("packet {} was read from client {}", packet, packet.client);
             executor.execute(packet);
         }
      }
@@ -121,9 +125,10 @@ class ReadHandler<T extends Client<Connection<T>>> implements CompletionHandler<
         if(client.isConnected()) {
             client.disconnect();
         }
-        if(! (e instanceof IOException)) {
-            // client just closes the connection, doesn't need to be logged
-            logger.warn(e.getLocalizedMessage(), e);
+        if(! (e instanceof ClosedChannelException)) {
+            LOGGER.warn(e.getMessage(), e);
+        } else {
+            LOGGER.debug(e.getMessage(), e);
         }
 
     }

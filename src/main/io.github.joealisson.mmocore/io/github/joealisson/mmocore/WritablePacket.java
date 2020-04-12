@@ -17,10 +17,11 @@ import static java.util.Objects.nonNull;
  *
  * The first and second bytes is a 16 bits integer holding the size of the packet.
  *
+ * @author JoeAlisson
  */
 public abstract class WritablePacket<T extends Client<Connection<T>>> {
 
-    private static final Map<Class, Integer> packetInfo = new HashMap<>();
+    private static final Map<Class<?>, Integer> packetInfo = new HashMap<>();
     private static final ThreadLocal<PacketBuffer> threadLocal = new ThreadLocal<>();
 
     private byte[] staticData;

@@ -14,6 +14,7 @@ import static java.lang.Float.intBitsToFloat;
  *
  * The first and second bytes is a 16 bits integer holding the size of the packet.
  *
+ * @author JoeAlisson
  */
 public abstract class ReadablePacket<T extends Client<Connection<T>>> implements Runnable {
 
@@ -69,10 +70,10 @@ public abstract class ReadablePacket<T extends Client<Connection<T>>> implements
 
     /**
      * Reads <B>byte</B> from the buffer
-     * @return true if byte is equal 1
+     * @return true if byte is not equal 0
      */
-    protected final boolean readByteAsBoolean() {
-        return  readByte() == 1;
+    protected final boolean readBoolean() {
+        return readByte() != 0;
     }
 
     /**
@@ -105,10 +106,10 @@ public abstract class ReadablePacket<T extends Client<Connection<T>>> implements
     /**
      * Reads <B>short</B> from the buffer. <BR>
      * 16bit integer (00 00)
-     * @return  true if the short equals 1
+     * @return  true if the short is not equals 0
      */
     protected final boolean readShortAsBoolean()  {
-        return readShort() == 1;
+        return readShort() != 0;
     }
 
     /**
@@ -136,10 +137,10 @@ public abstract class ReadablePacket<T extends Client<Connection<T>>> implements
     /**
      * Reads <B>int</B> from the buffer. <BR>
      * 32bit integer (00 00 00 00)
-     * @return true if int equals 1
+     * @return true if int is not equals 0
      */
     protected final boolean readIntAsBoolean() {
-        return readInt() == 1;
+        return readInt() != 0;
     }
 
     /**

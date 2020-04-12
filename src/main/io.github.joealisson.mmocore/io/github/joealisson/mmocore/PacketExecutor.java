@@ -2,6 +2,8 @@ package io.github.joealisson.mmocore;
 
 /**
  * This class is responsible to execute the incoming packets.
+ *
+ * @author JoeAlisson
  */
 @FunctionalInterface
 public interface PacketExecutor<T extends Client<Connection<T>>> {

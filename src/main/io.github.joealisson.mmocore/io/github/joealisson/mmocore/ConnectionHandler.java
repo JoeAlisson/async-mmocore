@@ -5,25 +5,24 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.StandardSocketOptions;
-import java.nio.channels.AsynchronousChannelGroup;
-import java.nio.channels.AsynchronousServerSocketChannel;
-import java.nio.channels.AsynchronousSocketChannel;
-import java.nio.channels.CompletionHandler;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.nio.channels.*;
+import java.util.concurrent.*;
 
 import static java.lang.Runtime.getRuntime;
 import static java.util.Objects.nonNull;
 
+/**
+ * @author JoeAlisson
+ */
 public final class ConnectionHandler<T extends Client<Connection<T>>> extends Thread {
 
-    private static final Logger logger = LoggerFactory.getLogger(ConnectionHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionHandler.class);
+    private static final int CACHED_THREAD_POLL_THRESHOLD = 1000;
 
     private final AsynchronousChannelGroup group;
     private final AsynchronousServerSocketChannel listener;
     private final ConnectionConfig<T> config;
     private volatile boolean shutdown;
-    private boolean cached;
     private final ResourcePool resourcePool;
 
     ConnectionHandler(ConnectionConfig<T> config) throws IOException {
@@ -36,12 +35,12 @@ public final class ConnectionHandler<T extends Client<Connection<T>>> extends Th
     }
 
     private AsynchronousChannelGroup createChannelGroup(int threadPoolSize) throws IOException {
-        if(threadPoolSize <= 0 || threadPoolSize >= Short.MAX_VALUE) {
-            cached = true;
-            logger.debug("Channel group is using CachedThreadPool");
-            return AsynchronousChannelGroup.withCachedThreadPool(Executors.newCachedThreadPool(), getRuntime().availableProcessors());
+        if(threadPoolSize <= 0 || threadPoolSize >= CACHED_THREAD_POLL_THRESHOLD) {
+            LOGGER.debug("Channel group is using CachedThreadPool");
+            return AsynchronousChannelGroup.withCachedThreadPool(new ThreadPoolExecutor(0, Short.MAX_VALUE, 60L, TimeUnit.SECONDS, new SynchronousQueue<>()),
+                    getRuntime().availableProcessors());
         }
-        logger.debug("Channel group is using FixedThreadPool");
+        LOGGER.debug("Channel group is using FixedThreadPool");
         return AsynchronousChannelGroup.withFixedThreadPool(threadPoolSize, Executors.defaultThreadFactory());
     }
 
@@ -51,16 +50,6 @@ public final class ConnectionHandler<T extends Client<Connection<T>>> extends Th
     @Override
     public void run() {
         listener.accept(null, new AcceptConnectionHandler());
-        if(cached) {
-            while(!shutdown) {
-                try {
-                    Thread.sleep(config.shutdownWaitTime);
-                } catch (InterruptedException e) {
-                    logger.warn(e.getLocalizedMessage(), e);
-                    Thread.currentThread().interrupt();
-                }
-            }
-        }
     }
 
     private void closeConnection() {
@@ -69,7 +58,7 @@ public final class ConnectionHandler<T extends Client<Connection<T>>> extends Th
             group.awaitTermination(config.shutdownWaitTime, TimeUnit.MILLISECONDS);
             group.shutdownNow();
         } catch (Exception e) {
-            logger.warn(e.getLocalizedMessage(), e);
+            LOGGER.warn(e.getMessage(), e);
         }
     }
 
@@ -79,7 +68,7 @@ public final class ConnectionHandler<T extends Client<Connection<T>>> extends Th
      * This method closes all established connections.
      */
     public void shutdown() {
-        logger.debug("Shutting ConnectionHandler down");
+        LOGGER.debug("Shutting ConnectionHandler down");
         shutdown = true;
         closeConnection();
     }
@@ -87,24 +76,33 @@ public final class ConnectionHandler<T extends Client<Connection<T>>> extends Th
     private class AcceptConnectionHandler implements CompletionHandler<AsynchronousSocketChannel, Void> {
         @Override
         public void completed(AsynchronousSocketChannel clientChannel, Void attachment) {
+            tryAcceptNewConnection();
+            acceptConnection(clientChannel);
+        }
+
+        private void tryAcceptNewConnection() {
             if(!shutdown && listener.isOpen()) {
                 listener.accept(null, this);
             }
-            acceptConnection(clientChannel);
         }
 
         @Override
         public void failed(Throwable t, Void attachment) {
-            logger.warn(t.getLocalizedMessage(), t);
+            if(t instanceof ClosedChannelException) {
+                LOGGER.debug(t.getMessage(), t);
+            } else {
+                tryAcceptNewConnection();
+                LOGGER.warn(t.getMessage(), t);
+            }
         }
 
         private void acceptConnection(AsynchronousSocketChannel channel) {
             if(nonNull(channel) && channel.isOpen()) {
                 try {
-                    logger.debug("Accepting connection from {}", channel);
+                    LOGGER.debug("Accepting connection from {}", channel);
                     if(nonNull(config.acceptFilter) && !config.acceptFilter.accept(channel)) {
                         channel.close();
-                        logger.debug("Rejected connection");
+                        LOGGER.debug("Rejected connection");
                         return;
                     }
 
@@ -116,7 +114,11 @@ public final class ConnectionHandler<T extends Client<Connection<T>>> extends Th
                     client.onConnected();
                     connection.read();
                 } catch (Exception  e) {
-                    logger.error(e.getLocalizedMessage(), e);
+                    if(! (e instanceof ClosedChannelException)) {
+                        LOGGER.error(e.getMessage(), e);
+                    } else {
+                        LOGGER.debug(e.getMessage(), e);
+                    }
                 }
             }
         }

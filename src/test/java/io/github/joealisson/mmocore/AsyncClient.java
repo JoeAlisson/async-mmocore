@@ -11,13 +11,18 @@ public class AsyncClient extends Client<Connection<AsyncClient>> {
     }
 
     @Override
+    public int encryptedSize(int dataSize) {
+        return dataSize;
+    }
+
+    @Override
     public boolean decrypt(byte[] data, int offset, int size) {
         return true;
     }
 
     @Override
-    public int encrypt(byte[] data, int offset, int size) {
-        return size;
+    public byte[] encrypt(byte[] data, int offset, int size) {
+        return data;
     }
 
     @Override

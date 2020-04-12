@@ -10,13 +10,16 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
+/**
+ * @author JoeAlisson
+ */
 class ResourcePool {
 
     private final Map<Integer, Queue<ByteBuffer>> buffers = new HashMap<>(4);
 
-    private final ConnectionConfig config;
+    private final ConnectionConfig<?> config;
 
-    private ResourcePool(ConnectionConfig config) {
+    private ResourcePool(ConnectionConfig<?> config) {
         this.config = config;
     }
 
@@ -86,7 +89,7 @@ class ResourcePool {
         return config.bufferSmallSize;
     }
 
-    static ResourcePool initialize(ConnectionConfig config) {
+    static ResourcePool initialize(ConnectionConfig<?> config) {
         return new ResourcePool(config);
     }
 }

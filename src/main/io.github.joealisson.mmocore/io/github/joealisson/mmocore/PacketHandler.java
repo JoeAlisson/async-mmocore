@@ -2,6 +2,8 @@ package io.github.joealisson.mmocore;
 
 /**
  * This class is responsible to handler the incoming data. Converting it to a packet.
+ *
+ * @author JoeAlisson
  */
 @FunctionalInterface
 public interface PacketHandler<T extends Client<Connection<T>>> {

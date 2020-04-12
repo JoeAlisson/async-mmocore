@@ -6,6 +6,7 @@ import java.net.InetSocketAddress;
 /**
  * Builds the {@link ConnectionHandler} responsible to manage all incoming connections.
  *
+ * @author JoeAlisson
  */
 public class ConnectionBuilder<T extends Client<Connection<T>>> {
 

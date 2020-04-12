@@ -12,6 +12,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
+/**
+ * @author JoeAlisson
+ */
 public abstract class Client<T extends Connection<?>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Client.class);
@@ -19,9 +22,9 @@ public abstract class Client<T extends Connection<?>> {
     static final int HEADER_SIZE = 2;
 
     private final T connection;
-    private Queue<WritablePacket<? extends Client<T>>> packetsToWrite = new ConcurrentLinkedQueue<>();
+    private final Queue<WritablePacket<? extends Client<T>>> packetsToWrite = new ConcurrentLinkedQueue<>();
+    private final AtomicBoolean writing = new AtomicBoolean(false);
     private int dataSentSize;
-    private AtomicBoolean writing = new AtomicBoolean(false);
     private volatile boolean isClosing;
     private ResourcePool resourcePool;
 
@@ -129,18 +132,21 @@ public abstract class Client<T extends Connection<?>> {
         isClosing = true;
         LOGGER.debug("Closing client connection {} with packet {}", this, packet);
         packetsToWrite.clear();
-        if(nonNull(packet)) {
-            try {
-                ensureCanWrite();
-                write(packet, true);
-                Thread.sleep(200); // Give the client a chance to be aware of the last packet
-            } catch (ExecutionException | InterruptedException e) {
-                LOGGER.warn(e.getLocalizedMessage(), e);
-                disconnect();
-                Thread.currentThread().interrupt();
+        try {
+            if(nonNull(packet)) {
+                try {
+                    ensureCanWrite();
+                    write(packet, true);
+                    Thread.sleep(1000); // Give the client a chance to be aware of the last packet
+                } catch (ExecutionException | InterruptedException e) {
+                    LOGGER.warn(e.getMessage(), e);
+                    Thread.currentThread().interrupt();
+                }
             }
+        } finally {
+            disconnect();
         }
-        disconnect();
+
     }
 
     void resumeSend(int result) {
@@ -150,13 +156,12 @@ public abstract class Client<T extends Connection<?>> {
 
     void finishWriting() {
         writing.set(false);
-
         tryWriteNextPacket();
     }
 
     private synchronized void ensureCanWrite() throws InterruptedException {
         while (!writing.compareAndSet(false, true)) {
-            Thread.sleep(200);
+            Thread.sleep(1000);
         }
     }
 
@@ -232,6 +237,7 @@ public abstract class Client<T extends Connection<?>> {
 
     /**
      * Handles the client's connection.
+     * This method should not use blocking operations.
      *
      * The Packets can be sent only after this method is called.
      */
