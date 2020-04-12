@@ -14,6 +14,12 @@ public class AsyncServerPingPacket extends ReadablePacket<AsyncClient> {
     private String varSizedString;
     private String emptyString;
     private String emptySizedString;
+    private boolean trueByteBoolean;
+    private boolean falseByteBoolean;
+    private boolean trueShortBoolean;
+    private boolean falseShortBoolean;
+    private boolean trueIntBoolean;
+    private boolean falseIntBoolean;
 
     @Override
     protected boolean read() {
@@ -28,9 +34,12 @@ public class AsyncServerPingPacket extends ReadablePacket<AsyncClient> {
             emptyString = readString();
             varSizedString = readSizedString();
             emptySizedString = readSizedString();
-            readBoolean();
-            readShortAsBoolean();
-            readIntAsBoolean();
+            trueByteBoolean = readBoolean();
+            falseByteBoolean = readBoolean();
+            trueShortBoolean = readShortAsBoolean();
+            falseShortBoolean = readShortAsBoolean();
+            trueIntBoolean = readIntAsBoolean();
+            falseIntBoolean = readIntAsBoolean();
         }
         return true;
     }
@@ -48,6 +57,12 @@ public class AsyncServerPingPacket extends ReadablePacket<AsyncClient> {
             Assert.assertEquals("", emptyString);
             Assert.assertEquals("Packet", varSizedString);
             Assert.assertEquals("", emptySizedString);
+            Assert.assertTrue(trueByteBoolean);
+            Assert.assertFalse(falseByteBoolean);
+            Assert.assertTrue(trueShortBoolean);
+            Assert.assertFalse(falseShortBoolean);
+            Assert.assertTrue(trueIntBoolean);
+            Assert.assertFalse(falseIntBoolean);
         } catch (Exception e) {
             CommunicationTest.shutdown(false);
         }

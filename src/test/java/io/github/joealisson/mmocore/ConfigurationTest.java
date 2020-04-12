@@ -5,8 +5,6 @@ import org.junit.Test;
 
 import static java.lang.Math.max;
 import static java.lang.Runtime.getRuntime;
-import static java.nio.ByteOrder.BIG_ENDIAN;
-import static java.nio.ByteOrder.LITTLE_ENDIAN;
 import static org.junit.Assert.assertEquals;
 
 public class ConfigurationTest {

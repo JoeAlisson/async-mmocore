@@ -6,7 +6,10 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.StandardSocketOptions;
 import java.nio.channels.*;
-import java.util.concurrent.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static java.lang.Runtime.getRuntime;
 import static java.util.Objects.nonNull;
@@ -117,6 +120,11 @@ public final class ConnectionHandler<T extends Client<Connection<T>>> extends Th
                     LOGGER.debug(e.getMessage(), e);
                 } catch (Exception  e) {
                     LOGGER.error(e.getMessage(), e);
+                    try {
+                        channel.close();
+                    } catch (IOException ignore) {
+
+                    }
                 }
             }
         }

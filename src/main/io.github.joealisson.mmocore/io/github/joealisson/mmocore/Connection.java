@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
-import java.util.concurrent.ExecutionException;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -57,14 +56,6 @@ public class Connection<T extends Client<Connection<T>>> {
         if(channel.isOpen() && nonNull(writingBuffer)) {
             channel.write(writingBuffer, client, writeHandler);
         }
-    }
-
-    private void writeSync() throws ExecutionException, InterruptedException {
-        int dataSize = client.getDataSentSize();
-        int dataSent = 0;
-        do {
-            dataSent += channel.write(writingBuffer).get();
-        } while (dataSent < dataSize);
     }
 
     ByteBuffer getReadingBuffer() {

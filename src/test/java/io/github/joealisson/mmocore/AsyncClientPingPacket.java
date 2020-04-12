@@ -16,8 +16,11 @@ public class AsyncClientPingPacket extends WritablePacket<AsyncClient> {
         writeSizedString("Packet");
         writeSizedString(null);
         writeByte(true);
+        writeByte(false);
         writeShort(true);
+        writeShort(false);
         writeInt(true);
+        writeInt(false);
         return true;
     }
 }
