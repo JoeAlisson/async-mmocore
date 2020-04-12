@@ -113,12 +113,10 @@ public final class ConnectionHandler<T extends Client<Connection<T>>> extends Th
                     connection.setClient(client);
                     client.onConnected();
                     connection.read();
+                } catch (ClosedChannelException e) {
+                    LOGGER.debug(e.getMessage(), e);
                 } catch (Exception  e) {
-                    if(! (e instanceof ClosedChannelException)) {
-                        LOGGER.error(e.getMessage(), e);
-                    } else {
-                        LOGGER.debug(e.getMessage(), e);
-                    }
+                    LOGGER.error(e.getMessage(), e);
                 }
             }
         }
