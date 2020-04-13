@@ -122,8 +122,8 @@ public final class ConnectionHandler<T extends Client<Connection<T>>> extends Th
                     LOGGER.error(e.getMessage(), e);
                     try {
                         channel.close();
-                    } catch (IOException ignore) {
-
+                    } catch (IOException ie) {
+                        LOGGER.warn(ie.getMessage(), ie);
                     }
                 }
             }
