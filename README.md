@@ -5,7 +5,7 @@
 [![License badge](https://img.shields.io/badge/license-GPL-blue.svg?logo=gnu&logoColor=white)](https://opensource.org/licenses/AGPL-3.0)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.joealisson/async-mmocore/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.joealisson/async-mmocore)
 
-####### Quality Metrics
+###### Quality Metrics
 
 [![Build Status](https://travis-ci.org/JoeAlisson/async-mmocore.svg?branch=master)](https://travis-ci.org/JoeAlisson/async-mmocore)
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=JoeAlisson_async-mmocore&metric=alert_status)](https://sonarcloud.io/dashboard?id=JoeAlisson_async-mmocore)
