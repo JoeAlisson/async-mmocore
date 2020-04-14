@@ -55,6 +55,21 @@ public class ClientTest {
     }
 
     @Test
+    public void testCloseWithNullPacket() throws InterruptedException, ExecutionException, IOException {
+        InetSocketAddress socketAddress = new InetSocketAddress("127.0.0.1",9090);
+        ConnectionHandler<AsyncClient> handler = ConnectionBuilder.create(socketAddress, AsyncClient::new, (buffer, client) -> null, incomingPacket -> { }).shutdownWaitTime(100).build();
+        try {
+            handler.start();
+            AsyncClient client = Connector.create(AsyncClient::new, ((buffer, client1) -> null), incomingPacket -> {
+            }).connect(socketAddress);
+            client.close();
+        } finally {
+            handler.shutdown();
+            handler.join();
+        }
+    }
+
+    @Test
     public void testWriteNullPacket() throws IOException, ExecutionException, InterruptedException {
         InetSocketAddress socketAddress = new InetSocketAddress("127.0.0.1", 9090);
         ConnectionHandler<AsyncClient> handler = ConnectionBuilder.create(socketAddress, AsyncClient::new, null, null).shutdownWaitTime(100).build();

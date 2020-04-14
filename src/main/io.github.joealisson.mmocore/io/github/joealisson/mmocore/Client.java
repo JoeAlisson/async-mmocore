@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 /**
  * @author JoeAlisson
@@ -135,7 +136,9 @@ public abstract class Client<T extends Connection<?>> {
             return;
         }
         packetsToWrite.clear();
-        packetsToWrite.add(packet);
+        if(nonNull(packet)) {
+            packetsToWrite.add(packet);
+        }
         isClosing = true;
         LOGGER.debug("Closing client connection {} with packet {}", this, packet);
         tryWriteNextPacket();
