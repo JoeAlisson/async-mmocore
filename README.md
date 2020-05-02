@@ -63,7 +63,7 @@ public class ClientImpl extends Client<Connection<ClientImpl>> {
     }
     
     @Override
-    public int[] encrypt(byte[] data, int offset, int size) {
+    public byte[] encrypt(byte[] data, int offset, int size) {
         return myCrypter.encrypt(data, offset, size);
     }
     
