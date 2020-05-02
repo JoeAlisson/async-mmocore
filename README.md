@@ -156,7 +156,7 @@ To send a Packet it's necessary to implement the [abstract class WritablePacket]
 ```java
 public class ServerInfo implements WritablePacket<ClientImpl> {
     @Override
-    protected boolean write(ClientImpl client, ByteBuffer buffer) {
+    protected boolean write(ClientImpl client) {
         writeByte(this.getServerId());
         writeString(this.getServerName());
         writeLong(this.getServerCurrentTime());
@@ -182,11 +182,11 @@ The receiving packet is almost all done by the **Async-mmocore**. The only part 
 public class ReceivedServerInfo implements ReadablePacket<ClientImpl> {
     
     @Override
-    protected boolean read(ByteBuffer buffer) {
-        this.serverId = buffer.get();
-        this.serverName = readString(buffer);
-        this.serverCurrentTime = buffer.getLong();
-        this.serverCurrentUsers = buffer.getInt();
+    protected boolean read() {
+        this.serverId = readByte();
+        this.serverName = readString();
+        this.serverCurrentTime = readLong();
+        this.serverCurrentUsers = readInt();
         return true;
     }
     
