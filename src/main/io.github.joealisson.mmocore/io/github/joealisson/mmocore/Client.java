@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -57,7 +58,7 @@ public abstract class Client<T extends Connection<?>> {
             return;
         }
         packetsToWrite.add(packet);
-        tryWriteNextPacket();
+        CompletableFuture.runAsync(this::tryWriteNextPacket);
     }
 
     private void tryWriteNextPacket() {
@@ -154,9 +155,15 @@ public abstract class Client<T extends Connection<?>> {
         tryWriteNextPacket();
     }
 
-    protected final void disconnect() {
+    final void disconnect() {
         LOGGER.debug("Client {} disconnecting", this);
         onDisconnection();
+        try {
+            // Give a time to send last packet
+            Thread.sleep(2000);
+        } catch (InterruptedException ignored) {
+            // ignore
+        }
         connection.close();
     }
 
