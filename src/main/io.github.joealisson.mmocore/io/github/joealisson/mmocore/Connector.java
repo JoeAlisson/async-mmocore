@@ -203,8 +203,8 @@ public class Connector<T extends Client<Connection<T>>>  {
         T client = config.clientFactory.create(connection);
         client.setResourcePool(ResourcePool.initialize(config));
         connection.setClient(client);
-        client.read();
         client.onConnected();
+        client.read();
         return client;
     }
 }
