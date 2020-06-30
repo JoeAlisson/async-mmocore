@@ -36,66 +36,36 @@ class ReadHandler<T extends Client<Connection<T>>> implements CompletionHandler<
             client.disconnect();
             return;
         }
+        
+        if(bytesRead < client.getExpectedReadSize()) {
+            client.resumeRead(bytesRead);
+            return;
+        }
 
-        readData(client);
+        if(client.isReadingPayload()) {
+            handlePayload(client);
+        } else {
+            handleHeader(client);
+        }
     }
 
-    private void readData(T client) {
-        Connection<T> connection = client.getConnection();
-        ByteBuffer buffer = connection.getReadingBuffer();
+    private void handleHeader(T client) {
+        ByteBuffer buffer = client.getConnection().getReadingBuffer();
         buffer.flip();
-
-        if (buffer.remaining() < HEADER_SIZE){
-            LOGGER.debug("Not enough data to read packet header");
-            buffer.compact();
-            connection.read();
-            return;
-        }
-
         int dataSize = Short.toUnsignedInt(buffer.getShort()) - HEADER_SIZE;
-
-        if(dataSize > buffer.remaining()) {
-            LOGGER.debug("Not enough data to read. Packet size {}", dataSize);
-            buffer.position(buffer.position() - HEADER_SIZE);
-            buffer.compact();
-            connection.read();
-            return;
-        }
-
-        onCompleteRead(client, connection, buffer, dataSize);
+        client.readPayload(dataSize);
     }
 
-    private void onCompleteRead(T client, Connection<T> connection, ByteBuffer buffer, int dataSize) {
-        boolean continueReading = true;
-        try {
-            if (dataSize > 0) {
-                parseAndExecutePacket(client, buffer, dataSize);
-
-                if (!buffer.hasRemaining()) {
-                    buffer.clear();
-                } else {
-                    LOGGER.debug("Still data on packet. Trying to read");
-                    int remaining = buffer.remaining();
-                    buffer.compact();
-                    if (remaining >= HEADER_SIZE) {
-                        completed(remaining, client);
-                        continueReading = false;
-                    }
-                }
-            }
-        } catch(Exception e) {
-            LOGGER.warn(e.getMessage(), e);
-            buffer.clear();
-        } finally {
-            if(continueReading) {
-                connection.read();
-            }
-        }
+    private void handlePayload(T client) {
+        ByteBuffer buffer = client.getConnection().getReadingBuffer();
+        buffer.flip();
+        parseAndExecutePacket(client, buffer);
+        client.read();
     }
 
-    private void parseAndExecutePacket(T client, ByteBuffer incomingBuffer, int dataSize) {
+    private void parseAndExecutePacket(T client, ByteBuffer incomingBuffer) {
         LOGGER.debug("Trying to parse data");
-
+        int dataSize = incomingBuffer.remaining();
         byte[] data = new byte[dataSize];
         incomingBuffer.get(data);
 
@@ -124,11 +94,8 @@ class ReadHandler<T extends Client<Connection<T>>> implements CompletionHandler<
         if(client.isConnected()) {
             client.disconnect();
         }
-        if(! (e instanceof ClosedChannelException)) {
-            LOGGER.warn(e.getMessage(), e);
-        } else {
-            LOGGER.debug(e.getMessage(), e);
+        if( !(e instanceof ClosedChannelException)) {
+            LOGGER.warn("Failed to read from {}", client, e);
         }
-
     }
 }

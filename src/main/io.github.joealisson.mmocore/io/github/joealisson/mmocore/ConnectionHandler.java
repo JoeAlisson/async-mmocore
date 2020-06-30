@@ -114,8 +114,8 @@ public final class ConnectionHandler<T extends Client<Connection<T>>> extends Th
                     T client = config.clientFactory.create(connection);
                     client.setResourcePool(resourcePool);
                     connection.setClient(client);
+                    client.read();
                     client.onConnected();
-                    connection.read();
                 } catch (ClosedChannelException e) {
                     LOGGER.debug(e.getMessage(), e);
                 } catch (Exception  e) {

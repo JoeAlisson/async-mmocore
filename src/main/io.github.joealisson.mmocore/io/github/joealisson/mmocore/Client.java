@@ -27,6 +27,8 @@ public abstract class Client<T extends Connection<?>> {
     private int dataSentSize;
     private volatile boolean isClosing;
     private ResourcePool resourcePool;
+    private boolean readingPayload;
+    private int expectedReadSize;
 
     /**
      * Construct a new Client
@@ -67,7 +69,7 @@ public abstract class Client<T extends Connection<?>> {
             if(packetsToWrite.isEmpty()) {
                 connection.releaseWritingBuffer();
                 writing.set(false);
-                LOGGER.debug("no packet found");
+                LOGGER.debug("There is no packet to send");
                 if(isClosing) {
                     disconnect();
                 }
@@ -115,6 +117,18 @@ public abstract class Client<T extends Connection<?>> {
         LOGGER.debug("Sending packet {} to {}", packet, this);
     }
 
+    void read() {
+        expectedReadSize = HEADER_SIZE;
+        readingPayload = false;
+        connection.readHeader();
+    }
+
+    void readPayload(int dataSize) {
+        expectedReadSize = dataSize;
+        readingPayload = true;
+        connection.read(dataSize);
+    }
+
     /**
      * close the underlying Connection to the client.
      *
@@ -160,7 +174,7 @@ public abstract class Client<T extends Connection<?>> {
         onDisconnection();
         try {
             // Give a time to send last packet
-            Thread.sleep(2000);
+            Thread.sleep(1000);
         } catch (InterruptedException ignored) {
             // ignore
         }
@@ -191,6 +205,19 @@ public abstract class Client<T extends Connection<?>> {
 
     ResourcePool getResourcePool() {
         return resourcePool;
+    }
+
+    boolean isReadingPayload() {
+        return readingPayload;
+    }
+
+    void resumeRead(int bytesRead) {
+        expectedReadSize -=  bytesRead;
+        connection.read();
+    }
+
+    int getExpectedReadSize() {
+        return expectedReadSize;
     }
 
     /**

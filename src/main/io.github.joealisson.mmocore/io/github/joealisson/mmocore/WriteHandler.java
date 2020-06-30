@@ -38,8 +38,6 @@ class WriteHandler<T extends Client<Connection<T>>> implements CompletionHandler
         }
         if(! (e instanceof IOException)) {
             LOGGER.warn(e.getMessage(), e);
-        } else {
-            LOGGER.debug(e.getMessage(), e);
         }
     }
 }

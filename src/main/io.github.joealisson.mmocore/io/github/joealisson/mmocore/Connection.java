@@ -8,7 +8,6 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 
-import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 /**
@@ -38,7 +37,22 @@ public class Connection<T extends Client<Connection<T>>> {
 
     final void read() {
         if(channel.isOpen()) {
-            channel.read(getReadingBuffer(), client, readHandler);
+            channel.read(readingBuffer, client, readHandler);
+        }
+    }
+
+    final void readHeader() {
+        if(channel.isOpen()) {
+            releaseReadingBuffer();
+            readingBuffer = client.getResourcePool().getHeaderBuffer();
+            read();
+        }
+    }
+
+    void read(int size) {
+        if(channel.isOpen()) {
+            readingBuffer = client.getResourcePool().recycleAndGetNew(readingBuffer, size);
+            read();
         }
     }
 
@@ -46,9 +60,9 @@ public class Connection<T extends Client<Connection<T>>> {
         if(!channel.isOpen()) {
             return;
         }
-        ByteBuffer directBuffer = getDirectWritingBuffer(size);
-        directBuffer.put(data, 0, size);
-        directBuffer.flip();
+        writingBuffer = client.getResourcePool().recycleAndGetNew(writingBuffer, size);
+        writingBuffer.put(data, 0, size);
+        writingBuffer.flip();
         write();
     }
 
@@ -59,20 +73,7 @@ public class Connection<T extends Client<Connection<T>>> {
     }
 
     ByteBuffer getReadingBuffer() {
-        if(isNull(readingBuffer)) {
-            readingBuffer = client.getResourcePool().getPooledDirectBuffer();
-        }
         return readingBuffer;
-    }
-
-    private ByteBuffer getDirectWritingBuffer(int length) {
-        if(isNull(writingBuffer)) {
-            writingBuffer = client.getResourcePool().getPooledDirectBuffer(length);
-        } else if(writingBuffer.clear().limit() < length) {
-            releaseWritingBuffer();
-            writingBuffer = client.getResourcePool().getPooledDirectBuffer(length);
-        }
-        return writingBuffer;
     }
 
     private void releaseReadingBuffer() {

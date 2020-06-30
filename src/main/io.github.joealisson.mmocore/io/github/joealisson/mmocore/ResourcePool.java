@@ -23,13 +23,14 @@ class ResourcePool {
         this.config = config;
     }
 
-    ByteBuffer getPooledDirectBuffer() {
-        return getSizedBuffer(config.bufferDefaultSize);
-    }
-
     ByteBuffer getPooledDirectBuffer(int size) {
         return getSizedBuffer(determineBufferSize(size));
     }
+
+    ByteBuffer getHeaderBuffer() {
+        return getSizedBuffer(Client.HEADER_SIZE);
+    }
+
 
     private ByteBuffer getSizedBuffer(int size) {
         Queue<ByteBuffer> queue = queueFromSize(size);
@@ -41,7 +42,7 @@ class ResourcePool {
     }
 
     private Queue<ByteBuffer> queueFromSize(int size) {
-        Queue<ByteBuffer> queue =  buffers.get(size);
+        Queue<ByteBuffer> queue = buffers.get(size);
         if(isNull(queue)) {
             queue = new ConcurrentLinkedQueue<>();
             buffers.put(size, queue);
@@ -71,6 +72,16 @@ class ResourcePool {
                 queue.add(buffer);
             }
         }
+    }
+
+    public ByteBuffer recycleAndGetNew(ByteBuffer buffer, int newSize) {
+        if(nonNull(buffer)) {
+            if(buffer.clear().limit() == determineBufferSize(newSize)) {
+                return buffer;
+            }
+            recycleBuffer(buffer);
+        }
+        return getPooledDirectBuffer(newSize).limit(newSize);
     }
 
     private int determinePoolSize(int size) {
