@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
-import java.nio.channels.ClosedChannelException;
 import java.nio.channels.CompletionHandler;
 
 import static io.github.joealisson.mmocore.Client.HEADER_SIZE;
@@ -91,12 +90,7 @@ class ReadHandler<T extends Client<Connection<T>>> implements CompletionHandler<
 
     @Override
     public void failed(Throwable e, T client) {
-        if( !(e instanceof ClosedChannelException)) {
-            LOGGER.warn("Failed to read from {}", client, e);
-        }
-        if(client.isConnected()) {
-            LOGGER.debug("Client still connect start reading");
-            client.read();
-        }
+        LOGGER.debug("Failed to read from {}", client, e);
+        client.disconnect();
     }
 }
