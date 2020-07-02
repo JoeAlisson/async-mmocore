@@ -1,5 +1,8 @@
 package io.github.joealisson.mmocore;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.HashMap;
@@ -16,15 +19,12 @@ import static java.util.Objects.nonNull;
 class ResourcePool {
 
     private final Map<Integer, Queue<ByteBuffer>> buffers = new HashMap<>(4);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResourcePool.class);
 
     private final ConnectionConfig<?> config;
 
     private ResourcePool(ConnectionConfig<?> config) {
         this.config = config;
-    }
-
-    ByteBuffer getPooledDirectBuffer(int size) {
-        return getSizedBuffer(determineBufferSize(size));
     }
 
     ByteBuffer getHeaderBuffer() {
@@ -51,12 +51,16 @@ class ResourcePool {
     }
 
     private int determineBufferSize(int size) {
-        int bufferSize = config.bufferDefaultSize;
+        if(size > config.bufferLargeSize) {
+            LOGGER.warn("Buffer size {} requested is bigger than larger configured size {}", size, config.bufferLargeSize);
+            return size;
+        }
+        int bufferSize;
         if(size <= config.bufferSmallSize) {
             bufferSize = config.bufferSmallSize;
         } else if( size <= config.bufferMediumSize) {
             bufferSize = config.bufferMediumSize;
-        } else if( size <= config.bufferLargeSize) {
+        } else {
             bufferSize = config.bufferLargeSize;
         }
         return bufferSize;
@@ -65,7 +69,7 @@ class ResourcePool {
     void recycleBuffer(ByteBuffer buffer) {
         if (nonNull(buffer)) {
             Queue<ByteBuffer> queue;
-            int poolSize =  determinePoolSize(buffer.capacity());
+            int poolSize = determinePoolSize(buffer.capacity());
             queue = buffers.get(buffer.capacity());
             if (nonNull(queue) && queue.size() < poolSize) {
                 buffer.clear();
@@ -77,11 +81,15 @@ class ResourcePool {
     public ByteBuffer recycleAndGetNew(ByteBuffer buffer, int newSize) {
         if(nonNull(buffer)) {
             if(buffer.clear().limit() == determineBufferSize(newSize)) {
-                return buffer;
+                return buffer.limit(newSize);
             }
             recycleBuffer(buffer);
         }
         return getPooledDirectBuffer(newSize).limit(newSize);
+    }
+
+    private ByteBuffer getPooledDirectBuffer(int size) {
+        return getSizedBuffer(determineBufferSize(size));
     }
 
     private int determinePoolSize(int size) {

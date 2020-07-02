@@ -33,9 +33,6 @@ class WriteHandler<T extends Client<Connection<T>>> implements CompletionHandler
 
     @Override
     public void failed(Throwable e, T client) {
-        if(client.isConnected()) {
-            client.disconnect();
-        }
         if(! (e instanceof IOException)) {
             LOGGER.warn(e.getMessage(), e);
         }

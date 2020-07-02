@@ -91,11 +91,12 @@ class ReadHandler<T extends Client<Connection<T>>> implements CompletionHandler<
 
     @Override
     public void failed(Throwable e, T client) {
-        if(client.isConnected()) {
-            client.disconnect();
-        }
         if( !(e instanceof ClosedChannelException)) {
             LOGGER.warn("Failed to read from {}", client, e);
+        }
+        if(client.isConnected()) {
+            LOGGER.debug("Client still connect start reading");
+            client.read();
         }
     }
 }
