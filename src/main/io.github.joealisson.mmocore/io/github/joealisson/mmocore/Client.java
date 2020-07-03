@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Queue;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -60,7 +59,7 @@ public abstract class Client<T extends Connection<?>> {
             return;
         }
         packetsToWrite.add(packet);
-        CompletableFuture.runAsync(this::tryWriteNextPacket);
+        tryWriteNextPacket();
     }
 
     private void tryWriteNextPacket() {
