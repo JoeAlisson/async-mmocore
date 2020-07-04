@@ -1,3 +1,21 @@
+/*
+ * Copyright © 2019-2020 Async-mmocore
+ *
+ * This file is part of the Async-mmocore project.
+ *
+ * Async-mmocore is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Async-mmocore is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package io.github.joealisson.mmocore;
 
 import java.io.IOException;
@@ -43,7 +61,6 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
         return this;
     }
 
-
     /**
      * Set the size of the threadPool used to manage the connections and data sending.
      *
@@ -60,7 +77,6 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
         this.config.threadPoolSize = size;
         return this;
     }
-
 
     /**
      * Defines if small outgoing packets must be combined to be sent all at once. This improves the network performance,
@@ -92,131 +108,27 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
     }
 
     /**
-     * Sets the size limit of the data buffer sent/received. The size must be as bigger as the biggest packet received.
+     * Add a new {@link java.nio.ByteBuffer} grouping pool
      *
-     * The default value is 8KB.
-     *
-     * @param bufferSize - the buffer size to be set
-     *
-     * @return this.
-     */
-    public ConnectionBuilder<T> bufferDefaultSize(int bufferSize) {
-        config.bufferDefaultSize = bufferSize;
-        return this;
-    }
-
-    /**
-     * Sets the small size of the data buffer sent/received.
-     *
-     * The default value is 1KB.
-     *
-     * @param bufferSize - the buffer size to be set
-     *
-     * @return this.
-     */
-    public ConnectionBuilder<T> bufferSmallSize(int bufferSize) {
-        config.bufferSmallSize = bufferSize;
-        return this;
-    }
-
-    /**
-     * Sets the large size of the data buffer sent/received.
-     *
-     * The default value is 4KB.
-     *
-     * @param bufferSize - the buffer size to be set
-     *
-     * @return this.
-     */
-    public ConnectionBuilder<T> bufferLargeSize(int bufferSize) {
-        config.bufferLargeSize = bufferSize;
-        return this;
-    }
-
-    /**
-     * Sets the medium size of the data buffer sent/received.
-     *
-     * The default value is 2KB.
-     *
-     * @param bufferSize - the buffer size to be set
-     *
-     * @return this.
-     */
-    public ConnectionBuilder<T> bufferMediumSize(int bufferSize) {
-        config.bufferMediumSize = bufferSize;
-        return this;
-    }
-
-    /**
-     * Sets the maximum amount of buffer with default size that can be holder on the BufferPool.
-     * A small value can be lead to buffer overhead creation.
-     * Otherwise a too big size can be lead to unwanted memory usage.
-     *
-     * The size must be restricted related to the number of expected clients and taking considerations of system resources.
-     *
-     * The default value is 100.
-     *
-     * @param bufferPoolSize - the size of the buffer pool size.
+     * @param size the max amount of {@link java.nio.ByteBuffer} supported
+     * @param bufferSize the {@link java.nio.ByteBuffer}'s size inside the pool.
      *
      * @return this
      */
-        public ConnectionBuilder<T> bufferPoolSize(int bufferPoolSize) {
-        config.bufferPoolSize = bufferPoolSize;
+    public ConnectionBuilder<T> addBufferPool(int size, int bufferSize) {
+        config.newBufferGroup(size, bufferSize);
         return this;
     }
 
     /**
-     * Sets the maximum amount of buffer with small size that can be holder on the BufferPool.
-     * A small value can be lead to buffer overhead creation.
-     * Otherwise a too big size can be lead to unwanted memory usage.
+     * define the factor of pre-initialized {@link java.nio.ByteBuffer} inside a pool.
      *
-     * The size must be restricted related to the number of expected clients and taking considerations of system resources.
-     *
-     * The default value is 100.
-     *
-     * @param bufferPoolSize - the size of the buffer pool size.
-     *
+     * @param factor the factor of initialized buffers
      * @return this
      */
-    public ConnectionBuilder<T> bufferSmallPoolSize(int bufferPoolSize) {
-        config.bufferSmallPoolSize = bufferPoolSize;
+    public ConnectionBuilder<T> initBufferPoolFactor(float factor) {
+        config.initBufferPoolFactor = factor;
         return this;
-    }
-
-    /**
-     * Sets the maximum amount of buffer with medium size that can be holder on the BufferPool.
-     * A small value can be lead to buffer overhead creation.
-     * Otherwise a too big size can be lead to unwanted memory usage.
-     *
-     * The size must be restricted related to the number of expected clients and taking considerations of system resources.
-     *
-     * The default value is 50.
-     *
-     * @param bufferPoolSize - the size of the buffer pool size.
-     *
-     * @return this
-     */
-    public ConnectionBuilder<T> bufferMediumPoolSize(int bufferPoolSize) {
-        config.bufferMediumPoolSize = bufferPoolSize;
-        return  this;
-    }
-
-    /**
-     * Sets the maximum amount of buffer with large size that can be holder on the BufferPool.
-     * A small value can be lead to buffer overhead creation.
-     * Otherwise a too big size can be lead to unwanted memory usage.
-     *
-     * The size must be restricted related to the number of expected clients and taking considerations of system resources.
-     *
-     * The default value is 25.
-     *
-     * @param bufferPoolSize - the size of the buffer pool size.
-     *
-     * @return this
-     */
-    public ConnectionBuilder<T> bufferLargePoolSize(int bufferPoolSize) {
-        config.bufferLargePoolSize = bufferPoolSize;
-        return  this;
     }
 
     /**
@@ -227,6 +139,6 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
      * @throws IOException - If the Socket Address configured can't be used.
      */
     public ConnectionHandler<T> build() throws IOException {
-        return new ConnectionHandler<>(config);
+        return new ConnectionHandler<>(config.complete());
     }
 }

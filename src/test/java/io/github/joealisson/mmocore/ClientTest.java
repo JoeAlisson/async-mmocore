@@ -1,3 +1,21 @@
+/*
+ * Copyright © 2019-2020 Async-mmocore
+ *
+ * This file is part of the Async-mmocore project.
+ *
+ * Async-mmocore is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Async-mmocore is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package io.github.joealisson.mmocore;
 
 import org.junit.Assert;
@@ -129,7 +147,8 @@ public class ClientTest {
         ConnectionHandler<BigEncripterClient> handler = ConnectionBuilder.create(socketAddress, BigEncripterClient::new, null, null).shutdownWaitTime(100).build();
         try {
             handler.start();
-            BigEncripterClient client = Connector.create(BigEncripterClient::new, null, null).connect(socketAddress);
+            BigEncripterClient client = Connector.create(BigEncripterClient::new, null, null)
+                    .addBufferPool(10, 4).addBufferPool(10, 16).connect(socketAddress);
             client.writePacket(new WritablePacket<>() {
                 @Override
                 protected boolean write(BigEncripterClient client) {
@@ -151,7 +170,8 @@ public class ClientTest {
         try {
             handler.start();
             AsyncClient client = Connector.create(AsyncClient::new, null, null).connect(socketAddress);
-            client.sendPacket(null);
+            client.sendPacket(PacketStatic.STATIC);
+            client.sendPacket(PacketStatic.STATIC);
         } finally {
             handler.shutdown();
             handler.join();
@@ -160,7 +180,7 @@ public class ClientTest {
 
     @StaticPacket
     static class PacketStatic extends SendablePacket {
-
+        static PacketStatic STATIC = new PacketStatic();
         @Override
         protected boolean write(AsyncClient client) {
             writeInt(20);
@@ -178,7 +198,7 @@ public class ClientTest {
 
         @Override
         public int encryptedSize(int dataSize) {
-            return getResourcePool().getSmallSize() * 2;
+            return dataSize * 2;
         }
 
         @Override

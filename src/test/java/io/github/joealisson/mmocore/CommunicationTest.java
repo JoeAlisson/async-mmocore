@@ -1,3 +1,21 @@
+/*
+ * Copyright © 2019-2020 Async-mmocore
+ *
+ * This file is part of the Async-mmocore project.
+ *
+ * Async-mmocore is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Async-mmocore is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package io.github.joealisson.mmocore;
 
 import org.awaitility.Awaitility;
@@ -31,11 +49,9 @@ public class CommunicationTest {
     public void SetUp() {
         GenericClientHandler handler = new GenericClientHandler();
 
-        builder = ConnectionBuilder.create(listenAddress, AsyncClient::new, handler, handler).filter(channel -> true).threadPoolSize(2).useNagle(false).shutdownWaitTime(500)
-                .bufferDefaultSize(300).bufferSmallSize(40).bufferLargeSize(100).bufferMediumSize(50).bufferPoolSize(10).bufferSmallPoolSize(10).bufferMediumPoolSize(8)
-                .bufferLargePoolSize(3);
-        connector = Connector.create(AsyncClient::new, handler, handler).bufferDefaultSize(300).bufferLargePoolSize(3).bufferLargeSize(100).bufferMediumPoolSize(8)
-                .bufferMediumSize(50).bufferSmallPoolSize(10).bufferPoolSize(10).bufferSmallSize(40);
+        builder = ConnectionBuilder.create(listenAddress, AsyncClient::new, handler, handler).filter(channel -> true).threadPoolSize(2).useNagle(false)
+                .shutdownWaitTime(500).addBufferPool(10,300).initBufferPoolFactor(0.2f);
+        connector = Connector.create(AsyncClient::new, handler, handler).addBufferPool(10, 300).initBufferPoolFactor(0.2f);
 
     }
 

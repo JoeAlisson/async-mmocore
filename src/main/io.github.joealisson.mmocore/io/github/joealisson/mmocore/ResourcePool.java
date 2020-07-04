@@ -1,14 +1,29 @@
+/*
+ * Copyright © 2019-2020 Async-mmocore
+ *
+ * This file is part of the Async-mmocore project.
+ *
+ * Async-mmocore is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Async-mmocore is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package io.github.joealisson.mmocore;
 
+import io.github.joealisson.mmocore.internal.BufferPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -18,94 +33,61 @@ import static java.util.Objects.nonNull;
  */
 class ResourcePool {
 
-    private final Map<Integer, Queue<ByteBuffer>> buffers = new HashMap<>(4);
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourcePool.class);
 
     private final ConnectionConfig<?> config;
+    private final int[] bufferSizes;
 
     private ResourcePool(ConnectionConfig<?> config) {
         this.config = config;
+        bufferSizes = config.bufferPools.keySet().stream().sorted().mapToInt(Integer::intValue).toArray();
     }
 
     ByteBuffer getHeaderBuffer() {
-        return getSizedBuffer(Client.HEADER_SIZE);
+        return getSizedBuffer(ConnectionConfig.HEADER_SIZE);
     }
 
-
-    private ByteBuffer getSizedBuffer(int size) {
-        Queue<ByteBuffer> queue = queueFromSize(size);
-        ByteBuffer buffer = queue.poll();
-        if(isNull(buffer)) {
-            return ByteBuffer.allocateDirect(size).order(ByteOrder.LITTLE_ENDIAN);
-        }
-        return buffer;
-    }
-
-    private Queue<ByteBuffer> queueFromSize(int size) {
-        Queue<ByteBuffer> queue = buffers.get(size);
-        if(isNull(queue)) {
-            queue = new ConcurrentLinkedQueue<>();
-            buffers.put(size, queue);
-        }
-        return queue;
-    }
-
-    private int determineBufferSize(int size) {
-        if(size > config.bufferLargeSize) {
-            LOGGER.warn("Buffer size {} requested is bigger than larger configured size {}", size, config.bufferLargeSize);
-            return size;
-        }
-        int bufferSize;
-        if(size <= config.bufferSmallSize) {
-            bufferSize = config.bufferSmallSize;
-        } else if( size <= config.bufferMediumSize) {
-            bufferSize = config.bufferMediumSize;
-        } else {
-            bufferSize = config.bufferLargeSize;
-        }
-        return bufferSize;
-    }
-
-    void recycleBuffer(ByteBuffer buffer) {
-        if (nonNull(buffer)) {
-            Queue<ByteBuffer> queue;
-            int poolSize = determinePoolSize(buffer.capacity());
-            queue = buffers.get(buffer.capacity());
-            if (nonNull(queue) && queue.size() < poolSize) {
-                buffer.clear();
-                queue.add(buffer);
-            }
-        }
-    }
-
-    public ByteBuffer recycleAndGetNew(ByteBuffer buffer, int newSize) {
+    ByteBuffer recycleAndGetNew(ByteBuffer buffer, int newSize) {
+        int bufferSize = determineBufferSize(newSize);
         if(nonNull(buffer)) {
-            if(buffer.clear().limit() == determineBufferSize(newSize)) {
+            if(buffer.clear().limit() == bufferSize) {
                 return buffer.limit(newSize);
             }
             recycleBuffer(buffer);
         }
-        return getPooledDirectBuffer(newSize).limit(newSize);
+        return getSizedBuffer(bufferSize).limit(newSize);
     }
 
-    private ByteBuffer getPooledDirectBuffer(int size) {
-        return getSizedBuffer(determineBufferSize(size));
-    }
-
-    private int determinePoolSize(int size) {
-        int poolSize = config.bufferPoolSize;
-        if(size == config.bufferSmallSize) {
-            poolSize = config.bufferSmallPoolSize;
-        } else if( size == config.bufferMediumSize) {
-            poolSize = config.bufferMediumPoolSize;
-        } else if( size == config.bufferLargePoolSize) {
-            poolSize = config.bufferLargePoolSize;
+    private ByteBuffer getSizedBuffer(int size) {
+        BufferPool pool = config.bufferPools.get(size);
+        ByteBuffer buffer;
+        if(isNull(pool) || isNull(buffer = pool.get()) ) {
+            buffer = ByteBuffer.allocateDirect(size).order(ByteOrder.LITTLE_ENDIAN);
         }
-        return poolSize;
+        return buffer;
     }
 
-    int getSmallSize() {
-        return config.bufferSmallSize;
+    private int determineBufferSize(int size) {
+        for (int bufferSize : bufferSizes) {
+            if(size < bufferSize) {
+                return bufferSize;
+            }
+        }
+        LOGGER.warn("There is no buffer pool handling buffer size {}", size);
+        return size;
+    }
+
+    void recycleBuffer(ByteBuffer buffer) {
+        if (nonNull(buffer)) {
+            BufferPool pool = config.bufferPools.get(buffer.capacity());
+            if(nonNull(pool)) {
+                pool.recycle(buffer);
+            }
+        }
+    }
+
+    int medianSize() {
+        return bufferSizes[(int) Math.ceil(bufferSizes.length >> 1)];
     }
 
     static ResourcePool initialize(ConnectionConfig<?> config) {
