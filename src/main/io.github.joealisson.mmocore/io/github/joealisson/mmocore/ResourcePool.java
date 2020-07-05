@@ -60,8 +60,11 @@ class ResourcePool {
 
     private ByteBuffer getSizedBuffer(int size) {
         BufferPool pool = config.bufferPools.get(size);
-        ByteBuffer buffer;
-        if(isNull(pool) || isNull(buffer = pool.get()) ) {
+        ByteBuffer buffer = null;
+        if(nonNull(pool)) {
+            buffer = pool.get();
+        }
+        if(isNull(buffer)) {
             buffer = ByteBuffer.allocateDirect(size).order(ByteOrder.LITTLE_ENDIAN);
         }
         return buffer;
@@ -87,7 +90,7 @@ class ResourcePool {
     }
 
     int medianSize() {
-        return bufferSizes[(int) Math.ceil(bufferSizes.length >> 1)];
+        return bufferSizes[bufferSizes.length >> 1];
     }
 
     static ResourcePool initialize(ConnectionConfig<?> config) {

@@ -45,8 +45,7 @@ class ConnectionConfig<T extends Client<Connection<T>>> {
     private static final Pattern BUFFER_POOL_PROPERTY = Pattern.compile("(bufferPool\\.\\w+?\\.)size", Pattern.CASE_INSENSITIVE);
     public static final int HEADER_SIZE = 2;
 
-    public float initBufferPoolFactor;
-
+    float initBufferPoolFactor;
     long shutdownWaitTime = 5000;
     int threadPoolSize;
     boolean useNagle;

@@ -191,10 +191,11 @@ public abstract class Client<T extends Connection<?>> {
         try {
             // Give a time to send last packet
             Thread.sleep(1000);
-        } catch (InterruptedException ignored) {
-            // ignore
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } finally {
+            connection.close();
         }
-        connection.close();
     }
 
     int getDataSentSize() {
