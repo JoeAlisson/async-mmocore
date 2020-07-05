@@ -32,8 +32,10 @@ import static java.util.Objects.isNull;
  */
 public class Connector<T extends Client<Connection<T>>>  {
 
+    private static final Object groupLock = new Object();
+
+    private static AsynchronousChannelGroup group;
     private ConnectionConfig<T> config;
-    private static final int THREAD_POOL_SIZE = 2;
 
     /**
      * Creates a Connector holding the minimum requirements to create a Client.
@@ -110,7 +112,12 @@ public class Connector<T extends Client<Connection<T>>>  {
      * @throws InterruptedException if the current thread was interrupted while waiting
      */
     public T connect(InetSocketAddress socketAddress) throws IOException, ExecutionException, InterruptedException {
-        AsynchronousChannelGroup group = AsynchronousChannelGroup.withFixedThreadPool(THREAD_POOL_SIZE, Executors.defaultThreadFactory());
+        synchronized (groupLock) {
+            if(isNull(group)) {
+                group = AsynchronousChannelGroup.withCachedThreadPool(Executors.newCachedThreadPool(), 2);
+            }
+        }
+
         AsynchronousSocketChannel channel = group.provider().openAsynchronousSocketChannel(group);
         channel.connect(socketAddress).get();
         Connection<T> connection = new Connection<>(channel, config.readHandler, new WriteHandler<>());
