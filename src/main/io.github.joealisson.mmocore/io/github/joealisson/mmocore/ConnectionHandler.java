@@ -18,6 +18,7 @@
  */
 package io.github.joealisson.mmocore;
 
+import io.github.joealisson.mmocore.internal.MMOThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,8 +26,6 @@ import java.io.IOException;
 import java.net.StandardSocketOptions;
 import java.nio.channels.*;
 import java.util.concurrent.Executors;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.Runtime.getRuntime;
@@ -47,6 +46,7 @@ public final class ConnectionHandler<T extends Client<Connection<T>>> extends Th
     private final ResourcePool resourcePool;
 
     ConnectionHandler(ConnectionConfig<T> config) throws IOException {
+        setName("MMO-Networking");
         this.config = config;
         resourcePool = ResourcePool.initialize(config);
         group = createChannelGroup(config.threadPoolSize);
@@ -58,11 +58,10 @@ public final class ConnectionHandler<T extends Client<Connection<T>>> extends Th
     private AsynchronousChannelGroup createChannelGroup(int threadPoolSize) throws IOException {
         if(threadPoolSize <= 0 || threadPoolSize >= CACHED_THREAD_POLL_THRESHOLD) {
             LOGGER.debug("Channel group is using CachedThreadPool");
-            return AsynchronousChannelGroup.withCachedThreadPool(new ThreadPoolExecutor(0, Short.MAX_VALUE, 60L, TimeUnit.SECONDS, new SynchronousQueue<>()),
-                    getRuntime().availableProcessors());
+            return AsynchronousChannelGroup.withCachedThreadPool(Executors.newCachedThreadPool(new MMOThreadFactory()), getRuntime().availableProcessors());
         }
         LOGGER.debug("Channel group is using FixedThreadPool");
-        return AsynchronousChannelGroup.withFixedThreadPool(threadPoolSize, Executors.defaultThreadFactory());
+        return AsynchronousChannelGroup.withFixedThreadPool(threadPoolSize, new MMOThreadFactory());
     }
 
     /**

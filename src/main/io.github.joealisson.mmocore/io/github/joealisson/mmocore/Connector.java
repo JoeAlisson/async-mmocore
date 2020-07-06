@@ -121,7 +121,7 @@ public class Connector<T extends Client<Connection<T>>>  {
         AsynchronousSocketChannel channel = group.provider().openAsynchronousSocketChannel(group);
         channel.connect(socketAddress).get();
         Connection<T> connection = new Connection<>(channel, config.readHandler, new WriteHandler<>());
-        T client = config.clientFactory.create(connection);
+        T client = config.complete().clientFactory.create(connection);
         client.setResourcePool(ResourcePool.initialize(config));
         connection.setClient(client);
         client.onConnected();
