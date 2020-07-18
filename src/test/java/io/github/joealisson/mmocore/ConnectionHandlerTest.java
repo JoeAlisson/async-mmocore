@@ -111,17 +111,12 @@ public class ConnectionHandlerTest {
         }
 
         @Override
-        public int encryptedSize(int dataSize) {
-            return 0;
+        public boolean encrypt(Buffer data, int offset, int size) {
+            return  false;
         }
 
         @Override
-        public byte[] encrypt(byte[] data, int offset, int size) {
-            return new byte[0];
-        }
-
-        @Override
-        public boolean decrypt(byte[] data, int offset, int size) {
+        public boolean decrypt(Buffer data, int offset, int size) {
             return false;
         }
 

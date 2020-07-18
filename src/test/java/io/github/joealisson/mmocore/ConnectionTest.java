@@ -25,6 +25,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -40,7 +41,11 @@ public class ConnectionTest {
         AsynchronousSocketChannel channel = AsynchronousSocketChannel.open();
         Connection<AsyncClient> connection = new Connection<>(channel,null, null);
         channel.close();
-        connection.write(new byte[10], 10);
+        ByteBuffer buffer = ByteBuffer.allocateDirect(10);
+        buffer.putLong(80);
+        buffer.flip();
+        connection.write();
+        connection.write(new ByteBuffer[] {buffer});
     }
 
     @Test

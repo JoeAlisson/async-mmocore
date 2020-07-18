@@ -41,14 +41,10 @@ import static java.util.Objects.nonNull;
  */
 class ConnectionConfig<T extends Client<Connection<T>>> {
 
-    private static final int MINIMUM_POOL_GROUPS = 3;
-    private static final Pattern BUFFER_POOL_PROPERTY = Pattern.compile("(bufferPool\\.\\w+?\\.)size", Pattern.CASE_INSENSITIVE);
     public static final int HEADER_SIZE = 2;
 
-    float initBufferPoolFactor;
-    long shutdownWaitTime = 5000;
-    int threadPoolSize;
-    boolean useNagle;
+    private static final int MINIMUM_POOL_GROUPS = 3;
+    private static final Pattern BUFFER_POOL_PROPERTY = Pattern.compile("(bufferPool\\.\\w+?\\.)size", Pattern.CASE_INSENSITIVE);
 
     ClientFactory<T> clientFactory;
     ConnectionFilter acceptFilter;
@@ -56,6 +52,12 @@ class ConnectionConfig<T extends Client<Connection<T>>> {
     WriteHandler<T> writeHandler;
     SocketAddress address;
     Map<Integer, BufferPool> bufferPools = new HashMap<>(4);
+
+    float initBufferPoolFactor;
+    long shutdownWaitTime = 5000;
+    int threadPoolSize;
+    boolean useNagle;
+    int bufferSegmentSize = 256;
 
     ConnectionConfig(SocketAddress address, ClientFactory<T> factory, ReadHandler<T> readHandler) {
         this.address = address;
@@ -90,13 +92,14 @@ class ConnectionConfig<T extends Client<Connection<T>>> {
     private void configure(Properties properties) {
         shutdownWaitTime = parseInt(properties, "shutdownWaitTime", 5) * 1000L;
         threadPoolSize = parseInt(properties, "threadPoolSize", threadPoolSize);
+        bufferSegmentSize = parseInt(properties, "bufferSegmentSize", bufferSegmentSize);
         initBufferPoolFactor = parseFloat(properties, "bufferPool.initFactor", 0);
 
         properties.stringPropertyNames().forEach(property -> {
             Matcher matcher = BUFFER_POOL_PROPERTY.matcher(property);
             if(matcher.matches()) {
                 int size = parseInt(properties, property, 10);
-                int bufferSize = parseInt(properties, matcher.group(1), 1024);
+                int bufferSize = parseInt(properties, matcher.group(1) + "bufferSize", 1024);
                 newBufferGroup(size, bufferSize);
             }
         });

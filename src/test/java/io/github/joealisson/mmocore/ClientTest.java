@@ -56,7 +56,7 @@ public class ClientTest {
             handler.start();
             AsyncClient client = Connector.create(AsyncClient::new, ((buffer, client1) -> null), incomingPacket -> {
             }).connect(socketAddress);
-            client.close(new PacketStatic());
+            client.close(new AsyncClientClosePacket());
             client.close();
         } finally {
             handler.shutdown();
@@ -95,6 +95,34 @@ public class ClientTest {
             handler.start();
             AsyncClient client = Connector.create(AsyncClient::new, null, null).connect(socketAddress);
             client.sendPacket(null);
+        } finally {
+            handler.shutdown();
+            handler.join();
+        }
+    }
+
+    @Test
+    public void testWriteEmptyPacket() throws IOException, ExecutionException, InterruptedException {
+        InetSocketAddress socketAddress = new InetSocketAddress("127.0.0.1", 9090);
+        ConnectionHandler<AsyncClient> handler = ConnectionBuilder.create(socketAddress, AsyncClient::new, null, null).shutdownWaitTime(100).build();
+        try {
+            handler.start();
+            AsyncClient client = Connector.create(AsyncClient::new, null, null).connect(socketAddress);
+            client.sendPacket(new EmptyPacket());
+        } finally {
+            handler.shutdown();
+            handler.join();
+        }
+    }
+
+    @Test
+    public void testWriteEmptyEncryptedPacket() throws IOException, ExecutionException, InterruptedException {
+        InetSocketAddress socketAddress = new InetSocketAddress("127.0.0.1", 9090);
+        ConnectionHandler<AsyncClient> handler = ConnectionBuilder.create(socketAddress, AsyncClient::new, null, null).shutdownWaitTime(100).build();
+        try {
+            handler.start();
+            EmptyEncrypterClient client = Connector.create(EmptyEncrypterClient::new, null, null).connect(socketAddress);
+            client.writePacket(new EmptyEncrypterPacket());
         } finally {
             handler.shutdown();
             handler.join();
@@ -164,51 +192,53 @@ public class ClientTest {
     }
 
     @Test
-    public void testStaticPacket() throws IOException, ExecutionException, InterruptedException {
-        InetSocketAddress socketAddress = new InetSocketAddress("127.0.0.1", 9090);
-        ConnectionHandler<AsyncClient> handler = ConnectionBuilder.create(socketAddress, AsyncClient::new, (buffer, client) -> null, null).shutdownWaitTime(100).build();
+    public void testNewBuffer() throws InterruptedException, IOException, ExecutionException {
+        InetSocketAddress socketAddress = new InetSocketAddress("127.0.0.1",9090);
+        ConnectionHandler<BigEncripterClient> handler = ConnectionBuilder.create(socketAddress, BigEncripterClient::new, null, null).shutdownWaitTime(100).build();
         try {
             handler.start();
-            AsyncClient client = Connector.create(AsyncClient::new, null, null).connect(socketAddress);
-            client.sendPacket(PacketStatic.STATIC);
-            client.sendPacket(PacketStatic.STATIC);
+            BigEncripterClient client = Connector.create(BigEncripterClient::new, null, null)
+                    .addBufferPool(10, 4).addBufferPool(10, 16).connect(socketAddress);
+            client.writePacket(new WritablePacket<>() {
+                @Override
+                protected boolean write(BigEncripterClient client) {
+                    writeByte(10);
+                    writeShort(20);
+                    writeInt(30);
+                    writeFloat(40);
+                    writeDouble(50);
+                    writeBytes((byte)60, (byte)70, (byte) 80);
+                    writeLong(90);
+                    writeLong(80);
+                    return true;
+                }
+            });
         } finally {
             handler.shutdown();
             handler.join();
         }
     }
 
-    @StaticPacket
-    static class PacketStatic extends SendablePacket {
-        static PacketStatic STATIC = new PacketStatic();
-        @Override
-        protected boolean write(AsyncClient client) {
-            writeInt(20);
-            writeLong(50);
-            return true;
-        }
-    }
-
     static class BigEncripterClient extends Client<Connection<BigEncripterClient>> {
-
 
         public BigEncripterClient(Connection<BigEncripterClient> connection) {
             super(connection);
         }
 
-        @Override
         public int encryptedSize(int dataSize) {
             return dataSize * 2;
         }
 
         @Override
-        public byte[] encrypt(byte[] data, int offset, int size) {
-            return data;
+        public boolean encrypt(Buffer data, int offset, int size) {
+            var encryptedSize = encryptedSize(size);
+            data.limit(encryptedSize);
+            return true;
         }
 
         @Override
-        public boolean decrypt(byte[] data, int offset, int size) {
-            return false;
+        public boolean decrypt(Buffer data, int offset, int size) {
+            return true;
         }
 
         @Override
@@ -229,17 +259,12 @@ public class ClientTest {
         }
 
         @Override
-        public int encryptedSize(int dataSize) {
-            return -1;
+        public boolean encrypt(Buffer data, int offset, int size) {
+            return false;
         }
 
         @Override
-        public byte[] encrypt(byte[] data, int offset, int size) {
-            return new byte[0];
-        }
-
-        @Override
-        public boolean decrypt(byte[] data, int offset, int size) {
+        public boolean decrypt(Buffer data, int offset, int size) {
             return false;
         }
 
@@ -251,6 +276,51 @@ public class ClientTest {
         @Override
         public void onConnected() {
 
+        }
+    }
+
+    static class EmptyEncrypterClient extends Client<Connection<EmptyEncrypterClient>> {
+
+        public EmptyEncrypterClient(Connection<EmptyEncrypterClient> connection) {
+            super(connection);
+        }
+
+        @Override
+        public boolean encrypt(Buffer data, int offset, int size) {
+            data.limit(0);
+            return true;
+        }
+
+        @Override
+        public boolean decrypt(Buffer data, int offset, int size) {
+            return true;
+        }
+
+        @Override
+        protected void onDisconnection() {
+
+        }
+
+        @Override
+        public void onConnected() {
+
+        }
+    }
+
+    static class EmptyEncrypterPacket extends WritablePacket<EmptyEncrypterClient> {
+
+        @Override
+        protected boolean write(EmptyEncrypterClient client) {
+            writeDouble(42);
+            return true;
+        }
+    }
+
+    static class EmptyPacket extends WritablePacket<AsyncClient> {
+
+        @Override
+        protected boolean write(AsyncClient client) {
+            return true;
         }
     }
 }

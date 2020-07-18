@@ -18,10 +18,10 @@
  */
 package io.github.joealisson.mmocore;
 
+import io.github.joealisson.mmocore.internal.WritableBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -59,10 +59,6 @@ public abstract class Client<T extends Connection<?>> {
         this.connection = connection;
     }
 
-    T getConnection() {
-        return connection;
-    }
-
     /**
      * Sends a packet to this client.
      *
@@ -97,40 +93,44 @@ public abstract class Client<T extends Connection<?>> {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void write(WritablePacket packet) {
+        boolean sendedData = false;
         try {
-            int dataSize = packet.writeData(this);
+            WritableBuffer data = packet.writeData(this);
 
-            if(dataSize <= 0) {
+            if(isNull(data)) {
                 finishWriting();
                 return;
             }
 
-            var payloadSize = dataSize - HEADER_SIZE;
-            dataSentSize = encryptedSize(payloadSize) + HEADER_SIZE;
+            var payloadSize = data.limit() - HEADER_SIZE;
 
-            if(dataSentSize <= HEADER_SIZE) {
+            if(payloadSize <= 0) {
                 finishWriting();
                 return;
             }
 
-            encryptAndWrite(packet, payloadSize);
+            if(encrypt(data, HEADER_SIZE, payloadSize)) {
+                dataSentSize = data.limit();
+
+                if (dataSentSize <= HEADER_SIZE) {
+                    finishWriting();
+                    return;
+                }
+
+                packet.writeHeaderAndRecord(dataSentSize);
+                sendedData = connection.write(data.toByteBuffers());
+                LOGGER.debug("Sending packet {} to {}", packet, this);
+            }
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             finishWriting();
         } finally {
-            packet.releaseData();
+            WritableBuffer writable = packet.releaseData();
+            if(!sendedData) {
+                connection.releaseWritingBuffer();
+                writable.releaseResources();
+            }
         }
-    }
-
-    private void encryptAndWrite(WritablePacket<? extends Client<T>> packet, int payloadSize) {
-        var buffer = packet.buffer();
-        if(dataSentSize > buffer.data.length) {
-            buffer.data = Arrays.copyOf(buffer.data, dataSentSize);
-        }
-        buffer.data = encrypt(buffer.data, HEADER_SIZE, payloadSize);
-        packet.writeHeaderAndRecord(dataSentSize);
-        connection.write(buffer.data, dataSentSize);
-        LOGGER.debug("Sending packet {} to {}", packet, this);
     }
 
     void read() {
@@ -175,13 +175,14 @@ public abstract class Client<T extends Connection<?>> {
         tryWriteNextPacket();
     }
 
-    void resumeSend(int result) {
+    void resumeSend(long result) {
         dataSentSize-= result;
         connection.write();
     }
 
     void finishWriting() {
         writing.set(false);
+        connection.releaseWritingBuffer();
         tryWriteNextPacket();
     }
 
@@ -196,6 +197,10 @@ public abstract class Client<T extends Connection<?>> {
         } finally {
             connection.close();
         }
+    }
+
+    T getConnection() {
+        return connection;
     }
 
     int getDataSentSize() {
@@ -238,22 +243,14 @@ public abstract class Client<T extends Connection<?>> {
     }
 
     /**
-     * @param dataSize the data size to be encrypted
-     *
-     * @return the size of the data after encrypted
-     */
-    public abstract int encryptedSize(int dataSize);
-
-    /**
      * Encrypt the data in-place.
-     *
      * @param data - the data to be encrypted
      * @param offset - the initial index to be encrypted
      * @param size - the length of data to be encrypted
      *
-     * @return The data after encrypted
+     * @return if data was encrypted
      */
-    public abstract byte[] encrypt(byte[] data, int offset, int size);
+    public abstract boolean encrypt(Buffer data, int offset, int size);
 
     /**
      * Decrypt the data in-place
@@ -264,7 +261,7 @@ public abstract class Client<T extends Connection<?>> {
      *
      * @return if the data was decrypted.
      */
-    public abstract boolean decrypt(byte[] data, int offset, int size);
+    public abstract boolean decrypt(Buffer data, int offset, int size);
 
     /**
      * Handles the client's disconnection.

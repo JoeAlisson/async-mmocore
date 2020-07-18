@@ -35,7 +35,7 @@ public class WriteHandlerTest {
             handler.start();
             AsyncClient client = Connector.create(AsyncClient::new, null, null).connect(socketAddress);
             WriteHandler<AsyncClient> writeHandler = new WriteHandler<>();
-            writeHandler.completed(-1, client);
+            writeHandler.completed(-1L, client);
             boolean connected = client.isConnected();
             Assert.assertFalse(connected);
         } finally {
@@ -54,7 +54,7 @@ public class WriteHandlerTest {
             client.sendPacket(new AsyncClientPingPacket());
             WriteHandler<AsyncClient> writeHandler = new WriteHandler<>();
             client.getConnection().releaseWritingBuffer();
-            writeHandler.completed(2, client);
+            writeHandler.completed(2L, client);
             client.disconnect();
             Assert.assertTrue(client.getDataSentSize() > 0);
         } finally {

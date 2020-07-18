@@ -22,25 +22,20 @@ import static java.util.Objects.nonNull;
 
 public class AsyncClient extends Client<Connection<AsyncClient>> {
 
-    public PacketBuffer receivedPacket;
+    public ReadableBuffer receivedPacket;
 
     public AsyncClient(Connection<AsyncClient> connection) {
         super(connection);
     }
 
     @Override
-    public int encryptedSize(int dataSize) {
-        return dataSize;
-    }
-
-    @Override
-    public boolean decrypt(byte[] data, int offset, int size) {
+    public boolean decrypt(Buffer data, int offset, int size) {
         return true;
     }
 
     @Override
-    public byte[] encrypt(byte[] data, int offset, int size) {
-        return data;
+    public boolean encrypt(Buffer data, int offset, int size) {
+        return true;
     }
 
     @Override

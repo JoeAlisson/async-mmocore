@@ -121,13 +121,24 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
     }
 
     /**
-     * define the factor of pre-initialized {@link java.nio.ByteBuffer} inside a pool.
+     * Define the factor of pre-initialized {@link java.nio.ByteBuffer} inside a pool.
      *
      * @param factor the factor of initialized buffers
      * @return this
      */
     public ConnectionBuilder<T> initBufferPoolFactor(float factor) {
         config.initBufferPoolFactor = factor;
+        return this;
+    }
+
+    /**
+     * Define the size of dynamic buffer's segment. A segment is used to increase the Buffer when needed.
+     *
+     * @param size of dynamic buffer segment
+     * @return this
+     */
+    public ConnectionBuilder<T> bufferSegmentSize(int size) {
+        config.bufferSegmentSize = size;
         return this;
     }
 

@@ -47,7 +47,7 @@ public class AsyncServerPingPacket extends ReadablePacket<AsyncClient> {
             varInt = readInt();
             varFloat = readFloat();
             varShort = readShort();
-            varByte = readByte();
+            varByte = (byte) readUnsignedByte();
             varString = readString();
             emptyString = readString();
             varSizedString = readSizedString();
@@ -58,6 +58,7 @@ public class AsyncServerPingPacket extends ReadablePacket<AsyncClient> {
             falseShortBoolean = readShortAsBoolean();
             trueIntBoolean = readIntAsBoolean();
             falseIntBoolean = readIntAsBoolean();
+            readBytes(new byte[4], 0, 4);
         }
         return true;
     }

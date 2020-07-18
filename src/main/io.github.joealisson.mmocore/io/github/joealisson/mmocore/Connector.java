@@ -79,6 +79,17 @@ public class Connector<T extends Client<Connection<T>>>  {
     }
 
     /**
+     * Define the size of dynamic buffer's segment. A segment is used to increase the Buffer when needed.
+     *
+     * @param size of dynamic buffer segment
+     * @return this
+     */
+    public Connector<T> bufferSegmentSize(int size) {
+        config.bufferSegmentSize = size;
+        return this;
+    }
+
+    /**
      * Connects to a host using the address and port.
      *
      * @param host the address to be connected to

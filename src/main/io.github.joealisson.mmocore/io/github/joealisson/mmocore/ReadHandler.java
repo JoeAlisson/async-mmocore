@@ -82,20 +82,21 @@ class ReadHandler<T extends Client<Connection<T>>> implements CompletionHandler<
 
     private void parseAndExecutePacket(T client, ByteBuffer incomingBuffer) {
         LOGGER.debug("Trying to parse data");
-        int dataSize = incomingBuffer.remaining();
-        byte[] data = new byte[dataSize];
-        incomingBuffer.get(data);
 
-        boolean decrypted = client.decrypt(data, 0, dataSize);
+        try {
+            ReadableBuffer buffer = ReadableBuffer.of(incomingBuffer);
+            boolean decrypted = client.decrypt(buffer, 0, buffer.remaining());
 
-        if(decrypted) {
-            PacketBuffer buffer = PacketBuffer.of(data, 0);
-            ReadablePacket<T> packet = packetHandler.handlePacket(buffer, client);
-            LOGGER.debug("Data parsed to packet {}", packet);
-            if(nonNull(packet)) {
-                packet.init(client, buffer);
-                execute(packet);
+            if (decrypted) {
+                ReadablePacket<T> packet = packetHandler.handlePacket(buffer, client);
+                LOGGER.debug("Data parsed to packet {}", packet);
+                if (nonNull(packet)) {
+                    packet.init(client, buffer);
+                    execute(packet);
+                }
             }
+        } catch (Exception e) {
+            LOGGER.warn(e.getMessage(), e);
         }
     }
 

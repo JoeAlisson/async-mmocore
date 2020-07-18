@@ -28,8 +28,8 @@ public class GenericClientHandler implements PacketHandler<AsyncClient>, PacketE
     private ThreadPoolExecutor threadPool = new ThreadPoolExecutor(2, 2, 15L,TimeUnit.SECONDS, new LinkedBlockingQueue<>(), Executors.defaultThreadFactory());
 
     @Override
-    public ReadablePacket<AsyncClient> handlePacket(PacketBuffer buffer, AsyncClient client) {
-        int opcode = Byte.toUnsignedInt(buffer.read());
+    public ReadablePacket<AsyncClient> handlePacket(ReadableBuffer buffer, AsyncClient client) {
+        int opcode = Byte.toUnsignedInt(buffer.readByte());
         ReadablePacket<AsyncClient> packet = null;
         if(opcode == 0x01) {
             packet = new AsyncServerPingPacket();
@@ -44,7 +44,8 @@ public class GenericClientHandler implements PacketHandler<AsyncClient>, PacketE
                 if(op2 == 0x01) {
                     int op3 = buffer.readInt();
                     if(op3 == 0x02) {
-                       bytes =  buffer.expose();
+                       bytes = new byte[buffer.remaining()];
+                       buffer.readBytes(bytes);
                     }
                 }
             }

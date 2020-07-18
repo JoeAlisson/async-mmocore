@@ -21,9 +21,6 @@ package io.github.joealisson.mmocore;
 import java.nio.charset.StandardCharsets;
 
 import static java.lang.Byte.toUnsignedInt;
-import static java.lang.Byte.toUnsignedLong;
-import static java.lang.Double.longBitsToDouble;
-import static java.lang.Float.intBitsToFloat;
 
 /**
  * This class represents a Packet received from the client.
@@ -36,14 +33,14 @@ import static java.lang.Float.intBitsToFloat;
  */
 public abstract class ReadablePacket<T extends Client<Connection<T>>> implements Runnable {
 
-    private PacketBuffer buffer;
+    private ReadableBuffer buffer;
     protected T client;
 
     protected ReadablePacket() {
         // no direct instances
     }
 
-    void init(T client, PacketBuffer buffer) {
+    void init(T client, ReadableBuffer buffer) {
         this.client = client;
         this.buffer = buffer;
     }
@@ -53,7 +50,7 @@ public abstract class ReadablePacket<T extends Client<Connection<T>>> implements
      * @return the available data to be read
      */
     protected final int available() {
-        return buffer.data.length - buffer.index;
+        return buffer.remaining();
     }
 
     /**
@@ -62,7 +59,7 @@ public abstract class ReadablePacket<T extends Client<Connection<T>>> implements
      * @param dst : the byte array which will be filled with the data.
      */
     protected final void readBytes(final byte[] dst) {
-        readBytes(dst,0, dst.length);
+        buffer.readBytes(dst,0, dst.length);
     }
 
     /**
@@ -74,8 +71,7 @@ public abstract class ReadablePacket<T extends Client<Connection<T>>> implements
      * @param length : the given length of bytes to be read.
      */
     protected final void readBytes(final byte[] dst, final int offset, final int length) {
-        System.arraycopy(buffer.data, buffer.index, dst, offset, length);
-        buffer.index += length;
+        buffer.readBytes(dst, offset, length);
     }
 
     /**
@@ -83,7 +79,7 @@ public abstract class ReadablePacket<T extends Client<Connection<T>>> implements
      * @return byte read
      */
     protected final byte readByte() {
-        return buffer.data[buffer.index++];
+        return buffer.readByte();
     }
 
     /**
@@ -99,7 +95,7 @@ public abstract class ReadablePacket<T extends Client<Connection<T>>> implements
      * @return char read
      */
     protected final char readChar() {
-        return (char) readShort();
+        return buffer.readChar();
     }
 
     /**
@@ -108,7 +104,7 @@ public abstract class ReadablePacket<T extends Client<Connection<T>>> implements
      * @return unsigned int read
      */
     protected final int readUnsignedByte() {
-        return toUnsignedInt(buffer.data[buffer.index++]);
+        return toUnsignedInt(readByte());
     }
 
     /**
@@ -117,8 +113,7 @@ public abstract class ReadablePacket<T extends Client<Connection<T>>> implements
      * @return short read
      */
     protected final short readShort()  {
-        return (short) (readUnsignedByte() |
-                        readUnsignedByte() << 8);
+        return buffer.readShort();
     }
 
     /**
@@ -136,7 +131,7 @@ public abstract class ReadablePacket<T extends Client<Connection<T>>> implements
      * @return float read
      */
     protected final float readFloat() {
-        return intBitsToFloat(readInt());
+        return buffer.readFloat();
     }
 
     /**
@@ -145,10 +140,7 @@ public abstract class ReadablePacket<T extends Client<Connection<T>>> implements
      * @return int read
      */
     protected final int readInt() {
-        return readUnsignedByte()  |
-                readUnsignedByte() << 8  |
-                readUnsignedByte() << 16 |
-                readUnsignedByte() << 24 ;
+        return buffer.readInt();
 
     }
 
@@ -167,14 +159,7 @@ public abstract class ReadablePacket<T extends Client<Connection<T>>> implements
      * @return long read
      */
     protected final long readLong() {
-        return toUnsignedLong(readByte())  |
-                toUnsignedLong(readByte()) <<  8  |
-                toUnsignedLong(readByte()) << 16 |
-                toUnsignedLong(readByte()) << 24 |
-                toUnsignedLong(readByte()) << 32 |
-                toUnsignedLong(readByte()) << 40 |
-                toUnsignedLong(readByte()) << 48 |
-                toUnsignedLong(readByte()) << 56;
+        return buffer.readLong();
     }
 
     /**
@@ -183,7 +168,7 @@ public abstract class ReadablePacket<T extends Client<Connection<T>>> implements
      * @return double read
      */
     protected final double readDouble() {
-        return longBitsToDouble(readLong());
+        return buffer.readDouble();
     }
 
     /**

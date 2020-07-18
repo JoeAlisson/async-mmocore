@@ -34,5 +34,5 @@ public interface PacketHandler<T extends Client<Connection<T>>> {
      *
      * @return A Packet related to the data received.
      */
-	ReadablePacket<T> handlePacket(PacketBuffer buffer, T client);
+	ReadablePacket<T> handlePacket(ReadableBuffer buffer, T client);
 }

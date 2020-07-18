@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
+import java.util.concurrent.TimeUnit;
 
 import static java.util.Objects.nonNull;
 
@@ -41,7 +42,7 @@ public class Connection<T extends Client<Connection<T>>> {
     private T client;
 
     private ByteBuffer readingBuffer;
-    private ByteBuffer writingBuffer;
+    private ByteBuffer[] writingBuffers;
 
     Connection(AsynchronousSocketChannel channel, ReadHandler<T> readHandler, WriteHandler<T> writeHandler) {
         this.channel = channel;
@@ -74,20 +75,20 @@ public class Connection<T extends Client<Connection<T>>> {
         }
     }
 
-    final void write(byte[] data, int size) {
+    final boolean write(ByteBuffer[] buffers) {
         if(!channel.isOpen()) {
-            return;
+            return false;
         }
-        writingBuffer = client.getResourcePool().recycleAndGetNew(writingBuffer, size);
-        writingBuffer.put(data, 0, size);
-        writingBuffer.flip();
-        write();
+        writingBuffers = buffers;
+        return write();
     }
 
-    final void write() {
-        if(channel.isOpen() && nonNull(writingBuffer)) {
-            channel.write(writingBuffer, client, writeHandler);
+    final boolean write() {
+        if(channel.isOpen() && nonNull(writingBuffers)) {
+            channel.write(writingBuffers, 0, writingBuffers.length, -1, TimeUnit.MILLISECONDS,  client, writeHandler);
+            return true;
         }
+        return false;
     }
 
     ByteBuffer getReadingBuffer() {
@@ -100,8 +101,13 @@ public class Connection<T extends Client<Connection<T>>> {
     }
 
     void releaseWritingBuffer() {
-        client.getResourcePool().recycleBuffer(writingBuffer);
-        writingBuffer = null;
+        if(nonNull(writingBuffers)) {
+            ResourcePool resourcePool = client.getResourcePool();
+            for (ByteBuffer buffer : writingBuffers) {
+                resourcePool.recycleBuffer(buffer);
+            }
+            writingBuffers = null;
+        }
     }
 
     void close() {

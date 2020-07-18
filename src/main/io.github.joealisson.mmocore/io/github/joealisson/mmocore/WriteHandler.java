@@ -27,12 +27,12 @@ import java.nio.channels.CompletionHandler;
 /**
  * @author JoeAlisson
  */
-class WriteHandler<T extends Client<Connection<T>>> implements CompletionHandler<Integer, T> {
+class WriteHandler<T extends Client<Connection<T>>> implements CompletionHandler<Long, T> {
 
     private  static final Logger LOGGER = LoggerFactory.getLogger(WriteHandler.class);
 
     @Override
-    public void completed(Integer result, T client) {
+    public void completed(Long result, T client) {
         if(result < 0) {
             LOGGER.warn("Couldn't send data to client {}", client);
             if(client.isConnected()) {

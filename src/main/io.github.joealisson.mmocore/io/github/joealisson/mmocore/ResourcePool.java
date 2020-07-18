@@ -31,7 +31,7 @@ import static java.util.Objects.nonNull;
 /**
  * @author JoeAlisson
  */
-class ResourcePool {
+public class ResourcePool {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourcePool.class);
 
@@ -45,6 +45,14 @@ class ResourcePool {
 
     ByteBuffer getHeaderBuffer() {
         return getSizedBuffer(ConnectionConfig.HEADER_SIZE);
+    }
+
+    public ByteBuffer getSegmentBuffer() {
+        return getSizedBuffer(config.bufferSegmentSize);
+    }
+
+    public ByteBuffer getBuffer(int size) {
+        return getSizedBuffer(determineBufferSize(size));
     }
 
     ByteBuffer recycleAndGetNew(ByteBuffer buffer, int newSize) {
@@ -80,17 +88,13 @@ class ResourcePool {
         return size;
     }
 
-    void recycleBuffer(ByteBuffer buffer) {
+    public void recycleBuffer(ByteBuffer buffer) {
         if (nonNull(buffer)) {
             BufferPool pool = config.bufferPools.get(buffer.capacity());
             if(nonNull(pool)) {
                 pool.recycle(buffer);
             }
         }
-    }
-
-    int medianSize() {
-        return bufferSizes[bufferSizes.length >> 1];
     }
 
     static ResourcePool initialize(ConnectionConfig<?> config) {
