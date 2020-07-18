@@ -27,18 +27,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class MMOThreadFactory implements ThreadFactory {
 
     private static final AtomicInteger poolNumber = new AtomicInteger(1);
-    private final ThreadGroup group;
     private final AtomicInteger threadNumber = new AtomicInteger(1);
     private final String namePrefix;
 
     public MMOThreadFactory(){
-        group = new ThreadGroup("MMO-thread-group");
         namePrefix = "MMO-pool-" +poolNumber.getAndIncrement() + "-thread-";
     }
 
     @Override
     public Thread newThread(Runnable r) {
-        Thread thread = new Thread(group, r,namePrefix +threadNumber.getAndIncrement(), 0);
+        Thread thread = new Thread(Thread.currentThread().getThreadGroup(), r,namePrefix +threadNumber.getAndIncrement(), 0);
         thread.setPriority(Thread.MAX_PRIORITY);
         thread.setDaemon(false);
         return thread;
