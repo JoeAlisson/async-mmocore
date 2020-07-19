@@ -118,7 +118,6 @@ public abstract class Client<T extends Connection<?>> {
             }
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            finishWriting();
         } finally {
             WritableBuffer writable = packet.releaseData();
             if(!sendedData) {
