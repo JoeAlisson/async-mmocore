@@ -76,7 +76,6 @@ public abstract class Client<T extends Connection<?>> {
     }
 
     private void tryWriteNextPacket() {
-        LOGGER.debug("Trying to send next packet");
         if(writing.compareAndSet(false, true)) {
             if(packetsToWrite.isEmpty()) {
                 connection.releaseWritingBuffer();
@@ -98,14 +97,11 @@ public abstract class Client<T extends Connection<?>> {
             WritableBuffer data = packet.writeData(this);
 
             if(isNull(data)) {
-                finishWriting();
                 return;
             }
 
             var payloadSize = data.limit() - HEADER_SIZE;
-
             if(payloadSize <= 0) {
-                finishWriting();
                 return;
             }
 
@@ -113,7 +109,6 @@ public abstract class Client<T extends Connection<?>> {
                 dataSentSize = data.limit();
 
                 if (dataSentSize <= HEADER_SIZE) {
-                    finishWriting();
                     return;
                 }
 
@@ -129,6 +124,7 @@ public abstract class Client<T extends Connection<?>> {
             if(!sendedData) {
                 connection.releaseWritingBuffer();
                 writable.releaseResources();
+                finishWriting();
             }
         }
     }

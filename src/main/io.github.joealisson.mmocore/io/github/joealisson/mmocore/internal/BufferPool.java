@@ -29,22 +29,22 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class BufferPool {
 
     private final Queue<ByteBuffer> buffers = new ConcurrentLinkedQueue<>();
-    private final int size;
+    private final int maxSize;
     private final int bufferSize;
 
-    public BufferPool(int size, int bufferSize) {
-        this.size = size;
+    public BufferPool(int maxSize, int bufferSize) {
+        this.maxSize = maxSize;
         this.bufferSize = bufferSize;
     }
     public void initialize(float factor) {
-        final int amount = (int) Math.min(size, size * factor);
+        final int amount = (int) Math.min(maxSize, maxSize * factor);
         for (int i = 0; i < amount; i++) {
             buffers.offer(ByteBuffer.allocateDirect(bufferSize).order(ByteOrder.LITTLE_ENDIAN));
         }
     }
 
     public void recycle(ByteBuffer buffer) {
-        if(buffers.size() < size) {
+        if(buffers.size() < maxSize) {
             buffers.offer(buffer.clear());
         }
     }
