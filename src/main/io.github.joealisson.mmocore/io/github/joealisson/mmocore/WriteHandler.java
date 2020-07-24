@@ -41,8 +41,8 @@ class WriteHandler<T extends Client<Connection<T>>> implements CompletionHandler
             return;
         }
 
-        if(result < client.getDataSentSize() ) {
-            LOGGER.debug("Still data to send. Trying to send");
+        if(result < client.getDataSentSize() && result > 0) {
+            LOGGER.debug("Still {} data to send. Trying to send", result);
             client.resumeSend(result);
         } else {
             client.finishWriting();

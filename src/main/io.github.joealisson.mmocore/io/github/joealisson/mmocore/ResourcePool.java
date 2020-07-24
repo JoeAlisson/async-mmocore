@@ -80,7 +80,7 @@ public class ResourcePool {
 
     private int determineBufferSize(int size) {
         for (int bufferSize : bufferSizes) {
-            if(size < bufferSize) {
+            if(size <= bufferSize) {
                 return bufferSize;
             }
         }

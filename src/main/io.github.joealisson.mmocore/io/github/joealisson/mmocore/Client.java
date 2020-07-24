@@ -114,7 +114,7 @@ public abstract class Client<T extends Connection<?>> {
 
                 packet.writeHeaderAndRecord(dataSentSize);
                 sendedData = connection.write(data.toByteBuffers());
-                LOGGER.debug("Sending packet {} to {}", packet, this);
+                LOGGER.debug("Sending packet {}[{}] to {}", packet, dataSentSize, this);
             }
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
@@ -176,8 +176,8 @@ public abstract class Client<T extends Connection<?>> {
     }
 
     void finishWriting() {
-        writing.set(false);
         connection.releaseWritingBuffer();
+        writing.set(false);
         tryWriteNextPacket();
     }
 

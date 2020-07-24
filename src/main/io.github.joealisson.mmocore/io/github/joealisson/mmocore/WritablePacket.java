@@ -210,7 +210,7 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> {
     WritableBuffer writeData(T client) {
         WritableBuffer buffer = choosePacketBuffer(client);
 
-        buffer.writeShort((short) 0);
+        buffer.position(ConnectionConfig.HEADER_SIZE);
         if(write(client)) {
             buffer.mark();
             return buffer;

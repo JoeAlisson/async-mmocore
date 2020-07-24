@@ -115,12 +115,12 @@ public class Connection<T extends Client<Connection<T>>> {
         releaseWritingBuffer();
         try {
             if(channel.isOpen()) {
-                channel.shutdownInput();
-                channel.shutdownOutput();
                 channel.close();
             }
         } catch (IOException e) {
             LOGGER.warn(e.getMessage(), e);
+        } finally {
+            client = null;
         }
     }
 
