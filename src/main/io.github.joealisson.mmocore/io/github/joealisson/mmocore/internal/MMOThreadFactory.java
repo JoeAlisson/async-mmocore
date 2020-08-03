@@ -36,7 +36,7 @@ public class MMOThreadFactory implements ThreadFactory {
 
     @Override
     public Thread newThread(Runnable r) {
-        Thread thread = new Thread(Thread.currentThread().getThreadGroup(), r,namePrefix +threadNumber.getAndIncrement(), 0);
+        Thread thread = new Thread(null, r,namePrefix +threadNumber.getAndIncrement(), 0);
         thread.setPriority(Thread.MAX_PRIORITY);
         thread.setDaemon(false);
         return thread;

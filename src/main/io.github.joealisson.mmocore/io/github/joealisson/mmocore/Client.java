@@ -183,8 +183,8 @@ public abstract class Client<T extends Connection<?>> {
 
     final void disconnect() {
         LOGGER.debug("Client {} disconnecting", this);
-        onDisconnection();
         try {
+            onDisconnection();
             // Give a time to send last packet
             Thread.sleep(1000);
         } catch (InterruptedException e) {

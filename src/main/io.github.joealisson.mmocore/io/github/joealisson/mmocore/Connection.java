@@ -96,8 +96,10 @@ public class Connection<T extends Client<Connection<T>>> {
     }
 
     private void releaseReadingBuffer() {
-        client.getResourcePool().recycleBuffer(readingBuffer);
-        readingBuffer=null;
+        if(nonNull(readingBuffer)) {
+            client.getResourcePool().recycleBuffer(readingBuffer);
+            readingBuffer = null;
+        }
     }
 
     void releaseWritingBuffer() {
