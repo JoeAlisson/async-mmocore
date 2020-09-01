@@ -287,7 +287,7 @@ public class DynamicPacketBuffer implements WritableBuffer {
         while (min <= max) {
             int mid = (min + max) >>> 1;
             PacketNode node = nodes[mid];
-            if(index >= node.endIndex) {
+            if(index > node.endIndex) {
                 min = mid + 1;
             } else if (index < node.initialIndex) {
                 max = mid - 1;
