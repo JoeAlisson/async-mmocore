@@ -198,6 +198,22 @@ public class DynamicPacketBuffer implements WritableBuffer {
         return node.buffer.get(node.idx(index));
     }
 
+    public void readBytes(int index, byte[] data) {
+        checkSize(index + data.length);
+        PacketNode node = indexToNode(index);
+        int length = data.length;
+        int offset = 0;
+        do {
+            int available = min(length, node.endIndex - index);
+            node.buffer.position(node.idx(index));
+            node.buffer.get(data, offset, available);
+            length -= available;
+            offset += available;
+            index += available;
+            node = nodes[min(node.offset + 1, nodes.length - 1)];
+        } while (length > 0);
+    }
+
     @Override
     public short readShort(int index) {
         checkSize(index + 2);
@@ -216,12 +232,34 @@ public class DynamicPacketBuffer implements WritableBuffer {
     @Override
     public int readInt(int index) {
         checkSize(index + 4);
+        return getInt(index);
+    }
+
+    private int getInt(int index) {
         PacketNode node = indexToNode(index);
         if(index + 4 <= node.endIndex) {
             return node.buffer.getInt(node.idx(index));
         } else {
             return getShort(index) & 0xFFFF | (getShort(index + 2) & 0xFFFF) << 16;
         }
+    }
+
+    public float readFloat(int index) {
+        return Float.intBitsToFloat(readInt(index));
+    }
+
+    public long readLong(int index) {
+        checkSize(index + 8);
+        PacketNode node = indexToNode(index);
+        if(index + 8 <= node.endIndex) {
+            return node.buffer.getLong(node.idx(index));
+        } else {
+            return getInt(index) & 0xFFFFFFFFL | (getInt(index + 4) & 0xFFFFFFFFL) << 32;
+        }
+    }
+
+    public double readDouble(int index) {
+        return Double.longBitsToDouble(readLong(index));
     }
 
     @Override
@@ -250,7 +288,7 @@ public class DynamicPacketBuffer implements WritableBuffer {
     }
 
     private void limitBuffer() {
-        PacketNode node = indexToNode(limit);
+        PacketNode node = indexToNode(limit - 1);
         node.buffer.limit(node.idx(limit));
     }
 
@@ -287,7 +325,7 @@ public class DynamicPacketBuffer implements WritableBuffer {
         while (min <= max) {
             int mid = (min + max) >>> 1;
             PacketNode node = nodes[mid];
-            if(index > node.endIndex) {
+            if(index >= node.endIndex) {
                 min = mid + 1;
             } else if (index < node.initialIndex) {
                 max = mid - 1;
@@ -301,7 +339,7 @@ public class DynamicPacketBuffer implements WritableBuffer {
 
     @Override
     public ByteBuffer[] toByteBuffers() {
-        int maxNode = indexToNode(limit).offset;
+        int maxNode = indexToNode(limit - 1).offset;
         ByteBuffer[] buffers = new ByteBuffer[maxNode+1];
         for (int i = 0; i <= maxNode; i++) {
             buffers[i] = nodes[i].buffer;
