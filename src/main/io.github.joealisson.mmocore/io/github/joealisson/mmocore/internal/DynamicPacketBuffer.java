@@ -24,12 +24,13 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import static java.lang.Math.min;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 /**
  * @author JoeAlisson
  */
-public class DynamicPacketBuffer implements WritableBuffer {
+public class DynamicPacketBuffer extends InternalWritableBuffer {
 
     private PacketNode[] nodes = new PacketNode[8];
     private PacketNode currentNode;
@@ -78,6 +79,9 @@ public class DynamicPacketBuffer implements WritableBuffer {
 
     @Override
     public void writeBytes(byte[] bytes) {
+        if(isNull(bytes)) {
+            return;
+        }
         ensureSize(bufferIndex + bytes.length);
         setBytes(bufferIndex, bytes);
         bufferIndex += bytes.length;

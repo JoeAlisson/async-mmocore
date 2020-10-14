@@ -156,11 +156,11 @@ To send a Packet it's necessary to implement the [abstract class WritablePacket]
 ```java
 public class ServerInfo implements WritablePacket<ClientImpl> {
     @Override
-    protected boolean write(ClientImpl client) {
-        writeByte(this.getServerId());
-        writeString(this.getServerName());
-        writeLong(this.getServerCurrentTime());
-        writeInt(this.getServerCurrentUsers());
+    protected boolean write(ClientImpl client, WritableBuffer buffer) {
+        buffer.writeByte(this.getServerId());
+        buffer.writeString(this.getServerName());
+        buffer.writeLong(this.getServerCurrentTime());
+        buffer.writeInt(this.getServerCurrentUsers());
         return true;      
     }
 }

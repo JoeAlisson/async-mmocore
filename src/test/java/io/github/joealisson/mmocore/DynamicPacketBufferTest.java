@@ -1,7 +1,7 @@
 package io.github.joealisson.mmocore;
 
 import io.github.joealisson.mmocore.internal.DynamicPacketBuffer;
-import io.github.joealisson.mmocore.internal.WritableBuffer;
+import io.github.joealisson.mmocore.internal.InternalWritableBuffer;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -25,7 +25,7 @@ public class DynamicPacketBufferTest {
         ConnectionConfig<?> config = new ConnectionConfig<>(null, null, null);
         config.newBufferGroup(4, 32);
         ResourcePool resourcePool = ResourcePool.initialize(config);
-        WritableBuffer packetBuffer = WritableBuffer.dynamicOf(ByteBuffer.allocate(32), resourcePool);
+        InternalWritableBuffer packetBuffer = InternalWritableBuffer.dynamicOf(ByteBuffer.allocate(32), resourcePool);
 
         packetBuffer.writeByte((byte) 1);
         packetBuffer.writeShort((short) 2);
@@ -200,9 +200,5 @@ public class DynamicPacketBufferTest {
             packetBuffer.readBytes(0, read);
             Assert.assertArrayEquals(data, read);
         }
-
-
     }
-
-
 }

@@ -138,7 +138,7 @@ public class ClientTest {
             AsyncClient client = Connector.create(AsyncClient::new, null, null).connect(socketAddress);
             client.writePacket(new WritablePacket<>() {
                 @Override
-                protected boolean write(AsyncClient client) {
+                protected boolean write(AsyncClient client, WritableBuffer buffer) {
                     throw new IllegalStateException();
                 }
             });
@@ -157,9 +157,9 @@ public class ClientTest {
             EncriptationFailClient client = Connector.create(EncriptationFailClient::new, null, null).connect(socketAddress);
             client.writePacket(new WritablePacket<>() {
                 @Override
-                protected boolean write(EncriptationFailClient client) {
-                    writeLong(90);
-                    writeLong(80);
+                protected boolean write(EncriptationFailClient client, WritableBuffer buffer) {
+                    buffer.writeLong(90);
+                    buffer.writeLong(80);
                     return true;
                 }
             });
@@ -179,9 +179,9 @@ public class ClientTest {
                     .addBufferPool(10, 4).addBufferPool(10, 16).connect(socketAddress);
             client.writePacket(new WritablePacket<>() {
                 @Override
-                protected boolean write(BigEncripterClient client) {
-                    writeLong(90);
-                    writeLong(80);
+                protected boolean write(BigEncripterClient client, WritableBuffer buffer) {
+                    buffer.writeLong(90);
+                    buffer.writeLong(80);
                     return true;
                 }
             });
@@ -201,15 +201,15 @@ public class ClientTest {
                     .addBufferPool(10, 4).addBufferPool(10, 16).connect(socketAddress);
             client.writePacket(new WritablePacket<>() {
                 @Override
-                protected boolean write(BigEncripterClient client) {
-                    writeByte(10);
-                    writeShort(20);
-                    writeInt(30);
-                    writeFloat(40);
-                    writeDouble(50);
-                    writeBytes((byte)60, (byte)70, (byte) 80);
-                    writeLong(90);
-                    writeLong(80);
+                protected boolean write(BigEncripterClient client, WritableBuffer buffer) {
+                    buffer.writeByte(10);
+                    buffer.writeShort(20);
+                    buffer.writeInt(30);
+                    buffer.writeFloat(40);
+                    buffer.writeDouble(50);
+                    buffer.writeBytes((byte)60, (byte)70, (byte) 80);
+                    buffer.writeLong(90);
+                    buffer.writeLong(80);
                     return true;
                 }
             });
@@ -310,8 +310,8 @@ public class ClientTest {
     static class EmptyEncrypterPacket extends WritablePacket<EmptyEncrypterClient> {
 
         @Override
-        protected boolean write(EmptyEncrypterClient client) {
-            writeDouble(42);
+        protected boolean write(EmptyEncrypterClient client, WritableBuffer buffer) {
+            buffer.writeDouble(42);
             return true;
         }
     }
@@ -319,7 +319,7 @@ public class ClientTest {
     static class EmptyPacket extends WritablePacket<AsyncClient> {
 
         @Override
-        protected boolean write(AsyncClient client) {
+        protected boolean write(AsyncClient client, WritableBuffer buffer) {
             return true;
         }
     }

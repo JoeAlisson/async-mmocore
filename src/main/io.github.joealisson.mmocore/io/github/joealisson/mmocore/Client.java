@@ -18,7 +18,7 @@
  */
 package io.github.joealisson.mmocore;
 
-import io.github.joealisson.mmocore.internal.WritableBuffer;
+import io.github.joealisson.mmocore.internal.InternalWritableBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,36 +93,37 @@ public abstract class Client<T extends Connection<?>> {
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void write(WritablePacket packet) {
         boolean sendedData = false;
+        InternalWritableBuffer buffer = null;
         try {
-            WritableBuffer data = packet.writeData(this);
+             buffer = packet.writeData(this);
 
-            if(isNull(data)) {
+            if(isNull(buffer)) {
                 return;
             }
 
-            var payloadSize = data.limit() - HEADER_SIZE;
+            var payloadSize = buffer.limit() - HEADER_SIZE;
             if(payloadSize <= 0) {
                 return;
             }
 
-            if(encrypt(data, HEADER_SIZE, payloadSize)) {
-                dataSentSize = data.limit();
+            if(encrypt(buffer, HEADER_SIZE, payloadSize)) {
+                dataSentSize = buffer.limit();
 
                 if (dataSentSize <= HEADER_SIZE) {
                     return;
                 }
 
-                packet.writeHeaderAndRecord(dataSentSize);
-                sendedData = connection.write(data.toByteBuffers());
+                packet.writeHeaderAndRecord(buffer, dataSentSize);
+                sendedData = connection.write(buffer.toByteBuffers());
                 LOGGER.debug("Sending packet {}[{}] to {}", packet, dataSentSize, this);
             }
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
         } finally {
-            WritableBuffer writable = packet.releaseData();
             if(!sendedData) {
-                connection.releaseWritingBuffer();
-                writable.releaseResources();
+                if(nonNull(buffer)) {
+                    buffer.releaseResources();
+                }
                 finishWriting();
             }
         }

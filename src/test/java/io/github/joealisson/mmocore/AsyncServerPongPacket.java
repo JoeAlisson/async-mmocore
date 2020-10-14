@@ -21,16 +21,16 @@ package io.github.joealisson.mmocore;
 public class AsyncServerPongPacket extends WritablePacket<AsyncClient> {
 
     @Override
-    protected boolean write(AsyncClient client) {
-        writeByte(0x02);
-        writeLong(Long.MAX_VALUE);
-        writeDouble(Double.MAX_VALUE);
-        writeInt(Integer.MAX_VALUE);
-        writeFloat(Float.MAX_VALUE);
-        writeShort(Short.MAX_VALUE);
-        writeByte(Byte.MAX_VALUE);
-        writeString("Pong");
-        writeSizedString("Packet");
+    protected boolean write(AsyncClient client, WritableBuffer buffer) {
+        buffer.writeByte(0x02);
+        buffer.writeLong(Long.MAX_VALUE);
+        buffer.writeDouble(Double.MAX_VALUE);
+        buffer.writeInt(Integer.MAX_VALUE);
+        buffer.writeFloat(Float.MAX_VALUE);
+        buffer.writeShort(Short.MAX_VALUE);
+        buffer.writeByte(Byte.MAX_VALUE);
+        buffer.writeString("Pong");
+        buffer.writeSizedString("Packet");
         return true;
     }
 }

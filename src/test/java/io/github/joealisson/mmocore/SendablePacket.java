@@ -21,7 +21,7 @@ package io.github.joealisson.mmocore;
 public class SendablePacket extends WritablePacket<AsyncClient> {
 
     @Override
-    protected boolean write(AsyncClient client) {
+    protected boolean write(AsyncClient client, WritableBuffer buffer) {
         return true;
     }
 }

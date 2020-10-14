@@ -29,8 +29,9 @@ import static java.lang.Byte.toUnsignedLong;
 import static java.lang.Double.doubleToRawLongBits;
 import static java.lang.Double.longBitsToDouble;
 import static java.lang.Float.intBitsToFloat;
+import static java.util.Objects.isNull;
 
-public class ArrayPacketBuffer implements WritableBuffer, ReadableBuffer {
+public class ArrayPacketBuffer extends InternalWritableBuffer implements ReadableBuffer {
 
     private final ResourcePool resourcePool;
     private byte[] data;
@@ -62,6 +63,9 @@ public class ArrayPacketBuffer implements WritableBuffer, ReadableBuffer {
 
     @Override
     public void writeBytes(byte[] bytes) {
+        if(isNull(bytes)) {
+            return;
+        }
         ensureSize(index + bytes.length);
 
         System.arraycopy(bytes, 0, data, index, bytes.length);

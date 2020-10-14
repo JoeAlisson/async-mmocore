@@ -1,7 +1,7 @@
 package io.github.joealisson.mmocore;
 
 import io.github.joealisson.mmocore.internal.ArrayPacketBuffer;
-import io.github.joealisson.mmocore.internal.WritableBuffer;
+import io.github.joealisson.mmocore.internal.InternalWritableBuffer;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -23,6 +23,7 @@ public class ArrayPacketBufferTest {
         buffer.writeFloat(8.5f);
         buffer.writeLong(9);
         buffer.writeDouble(10.5);
+        buffer.writeBytes(null);
 
         buffer.mark();
         int position = buffer.position();
@@ -66,7 +67,7 @@ public class ArrayPacketBufferTest {
     public void testReleaseResources() {
         ConnectionConfig<?> config = new ConnectionConfig<>(null, null, null);
         ResourcePool resourcePool = ResourcePool.initialize(config);
-        WritableBuffer buffer = WritableBuffer.of(10, resourcePool);
+        InternalWritableBuffer buffer = InternalWritableBuffer.of(10, resourcePool);
 
         buffer.writeShort((short) 10);
         buffer.mark();

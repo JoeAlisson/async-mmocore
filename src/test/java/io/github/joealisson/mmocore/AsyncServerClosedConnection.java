@@ -21,12 +21,12 @@ package io.github.joealisson.mmocore;
 public class AsyncServerClosedConnection extends WritablePacket<AsyncClient> {
 
     @Override
-    protected boolean write(AsyncClient client) {
-        writeByte(0x04);
-        writeShort(0x01);
-        writeInt(0x02);
-        writeString(client.getHostAddress());
-        writeBytes(new byte[20]);
+    protected boolean write(AsyncClient client, WritableBuffer buffer) {
+        buffer.writeByte(0x04);
+        buffer.writeShort(0x01);
+        buffer.writeInt(0x02);
+        buffer.writeString(client.getHostAddress());
+        buffer.writeBytes(new byte[20]);
         return true;
     }
 }

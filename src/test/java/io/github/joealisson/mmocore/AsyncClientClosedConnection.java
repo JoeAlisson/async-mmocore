@@ -34,8 +34,8 @@ public class AsyncClientClosedConnection extends ReadablePacket<AsyncClient> {
     public void run() {
         client.close(new WritablePacket<>() {
             @Override
-            protected boolean write(AsyncClient client) {
-                writeBytes(bytes);
+            protected boolean write(AsyncClient client, WritableBuffer buffer) {
+                buffer.writeBytes(bytes);
                 return false;
             }
         });
