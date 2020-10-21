@@ -116,6 +116,21 @@ public class ClientTest {
     }
 
     @Test
+    public void testWriteMultipleEmptyPacket() throws IOException, ExecutionException, InterruptedException {
+        InetSocketAddress socketAddress = new InetSocketAddress("127.0.0.1", 9090);
+        ConnectionHandler<AsyncClient> handler = ConnectionBuilder.create(socketAddress, AsyncClient::new, null, null).shutdownWaitTime(100).build();
+        try {
+            handler.start();
+            AsyncClient client = Connector.create(AsyncClient::new, null, null).connect(socketAddress);
+            client.sendPackets(new EmptyPacket(), new EmptyPacket());
+        } finally {
+            handler.shutdown();
+            handler.join();
+        }
+    }
+
+
+    @Test
     public void testWriteEmptyEncryptedPacket() throws IOException, ExecutionException, InterruptedException {
         InetSocketAddress socketAddress = new InetSocketAddress("127.0.0.1", 9090);
         ConnectionHandler<AsyncClient> handler = ConnectionBuilder.create(socketAddress, AsyncClient::new, null, null).shutdownWaitTime(100).build();
@@ -123,6 +138,34 @@ public class ClientTest {
             handler.start();
             EmptyEncrypterClient client = Connector.create(EmptyEncrypterClient::new, null, null).connect(socketAddress);
             client.writePacket(new EmptyEncrypterPacket());
+        } finally {
+            handler.shutdown();
+            handler.join();
+        }
+    }
+
+    @Test
+    public void testMultipleNullPacket() throws IOException, ExecutionException, InterruptedException {
+        InetSocketAddress socketAddress = new InetSocketAddress("127.0.0.1", 9090);
+        ConnectionHandler<AsyncClient> handler = ConnectionBuilder.create(socketAddress, AsyncClient::new, null, null).shutdownWaitTime(100).build();
+        try {
+            handler.start();
+            EmptyEncrypterClient client = Connector.create(EmptyEncrypterClient::new, null, null).connect(socketAddress);
+            client.writePackets(null);
+        } finally {
+            handler.shutdown();
+            handler.join();
+        }
+    }
+
+    @Test
+    public void testMultipleEmptyPacket() throws IOException, ExecutionException, InterruptedException {
+        InetSocketAddress socketAddress = new InetSocketAddress("127.0.0.1", 9090);
+        ConnectionHandler<AsyncClient> handler = ConnectionBuilder.create(socketAddress, AsyncClient::new, null, null).shutdownWaitTime(100).build();
+        try {
+            handler.start();
+            EmptyEncrypterClient client = Connector.create(EmptyEncrypterClient::new, null, null).connect(socketAddress);
+            client.writePackets(null);
         } finally {
             handler.shutdown();
             handler.join();
@@ -178,6 +221,28 @@ public class ClientTest {
             BigEncripterClient client = Connector.create(BigEncripterClient::new, null, null)
                     .addBufferPool(10, 4).addBufferPool(10, 16).connect(socketAddress);
             client.writePacket(new WritablePacket<>() {
+                @Override
+                protected boolean write(BigEncripterClient client, WritableBuffer buffer) {
+                    buffer.writeLong(90);
+                    buffer.writeLong(80);
+                    return true;
+                }
+            });
+        } finally {
+            handler.shutdown();
+            handler.join();
+        }
+    }
+
+    @Test
+    public void testMultipleEncryptedDataOverflow() throws InterruptedException, IOException, ExecutionException {
+        InetSocketAddress socketAddress = new InetSocketAddress("127.0.0.1",9090);
+        ConnectionHandler<BigEncripterClient> handler = ConnectionBuilder.create(socketAddress, BigEncripterClient::new, null, null).shutdownWaitTime(100).build();
+        try {
+            handler.start();
+            BigEncripterClient client = Connector.create(BigEncripterClient::new, null, null)
+                    .addBufferPool(10, 4).addBufferPool(10, 16).connect(socketAddress);
+            client.writePacket(new WritablePacket<BigEncripterClient>() {
                 @Override
                 protected boolean write(BigEncripterClient client, WritableBuffer buffer) {
                     buffer.writeLong(90);

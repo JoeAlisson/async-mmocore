@@ -22,6 +22,7 @@ import io.github.joealisson.mmocore.internal.InternalWritableBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -72,6 +73,14 @@ public abstract class Client<T extends Connection<?>> {
             return;
         }
         packetsToWrite.add(packet);
+        tryWriteNextPacket();
+    }
+
+    protected final void writePackets(Collection<WritablePacket<? extends Client<T>>> packets) {
+        if(!isConnected() || isNull(packets) || packets.isEmpty()) {
+            return;
+        }
+        packetsToWrite.addAll(packets);
         tryWriteNextPacket();
     }
 

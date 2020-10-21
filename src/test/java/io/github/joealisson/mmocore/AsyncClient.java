@@ -18,6 +18,8 @@
  */
 package io.github.joealisson.mmocore;
 
+import java.util.List;
+
 import static java.util.Objects.nonNull;
 
 public class AsyncClient extends Client<Connection<AsyncClient>> {
@@ -53,5 +55,9 @@ public class AsyncClient extends Client<Connection<AsyncClient>> {
             System.out.println("Sending " + packet.toString());
         }
         writePacket(packet);
+    }
+
+    public void sendPackets(WritablePacket<AsyncClient>... packets) {
+        writePackets(List.of(packets));
     }
 }
