@@ -325,7 +325,7 @@ public class DynamicPacketBuffer extends InternalWritableBuffer {
         }
 
         int min = 0;
-        int max = nodeCount;
+        int max = nodeCount -1;
         while (min <= max) {
             int mid = (min + max) >>> 1;
             PacketNode node = nodes[mid];

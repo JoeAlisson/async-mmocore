@@ -51,6 +51,9 @@ public class GenericClientHandler implements PacketHandler<AsyncClient>, PacketE
             }
             packet = new AsyncClientClosedConnection(bytes);
         }
+        else if(opcode == 0x10) {
+            packet = new AsyncClientBroadcastReceiverPacket();
+        }
         return packet;
     }
 

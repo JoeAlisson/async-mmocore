@@ -37,15 +37,27 @@ public class ConnectionTest {
     private AsyncClient connectionClient;
 
     @Test
-    public void testWriteWithClosedChannel() throws IOException {
-        AsynchronousSocketChannel channel = AsynchronousSocketChannel.open();
-        Connection<AsyncClient> connection = new Connection<>(channel,null, null);
-        channel.close();
-        ByteBuffer buffer = ByteBuffer.allocateDirect(10);
-        buffer.putLong(80);
-        buffer.flip();
-        connection.write();
-        connection.write(new ByteBuffer[] {buffer});
+    public void testWriteWithClosedChannel() throws IOException, ExecutionException, InterruptedException {
+        InetSocketAddress socketAddress = new InetSocketAddress("127.0.0.1", 9090);
+        ConnectionHandler<AsyncClient> handler = ConnectionBuilder.create(socketAddress, AsyncClient::new, null, null).shutdownWaitTime(100).build();
+        try {
+            handler.start();
+            AsyncClient client = Connector.create(AsyncClient::new, null, null).connect(socketAddress);
+            Connection<AsyncClient> connection = client.getConnection();
+            connection.close();
+
+            ByteBuffer buffer = ByteBuffer.allocateDirect(10);
+            buffer.putLong(80);
+            buffer.flip();
+            connection.write();
+            connection.write(new ByteBuffer[] {buffer});
+
+            Assert.assertFalse(connection.isOpen());
+            Assert.assertEquals("", connection.getRemoteAddress());
+        } finally {
+            handler.shutdown();
+            handler.join();
+        }
     }
 
     @Test

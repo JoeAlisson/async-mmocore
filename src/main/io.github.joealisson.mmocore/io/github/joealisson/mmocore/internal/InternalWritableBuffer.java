@@ -24,6 +24,12 @@ public abstract class InternalWritableBuffer extends WritableBuffer {
         return new DynamicPacketBuffer(buffer, resourcePool);
     }
 
+    public static InternalWritableBuffer dynamicOf(ArrayPacketBuffer buffer, ResourcePool resourcePool) {
+        var copy = new DynamicPacketBuffer(buffer.toByteBuffers()[0], resourcePool);
+        copy.limit(buffer.limit());
+        return copy;
+    }
+
     public static InternalWritableBuffer of(int size, ResourcePool resourcePool) {
         return new ArrayPacketBuffer(size, resourcePool);
     }

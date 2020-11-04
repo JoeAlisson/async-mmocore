@@ -18,6 +18,7 @@
  */
 package io.github.joealisson.mmocore;
 
+import io.github.joealisson.mmocore.internal.ArrayPacketBuffer;
 import io.github.joealisson.mmocore.internal.InternalWritableBuffer;
 
 import java.nio.ByteBuffer;
@@ -26,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static java.lang.Math.max;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 /**
  * This class represents a Packet that can be sent to clients.
@@ -39,14 +41,35 @@ import static java.util.Objects.isNull;
 public abstract class WritablePacket<T extends Client<Connection<T>>> {
 
     private static final Map<Class<?>, Integer> packetInfo = new ConcurrentHashMap<>();
+    private volatile boolean broadcast;
+    private ArrayPacketBuffer broadcastCacheBuffer;
 
     protected WritablePacket() { }
 
     InternalWritableBuffer writeData(T client) {
+        if(broadcast) {
+            return writeDataWithCache(client);
+        }
+        return writeDataToBuffer(client);
+    }
+
+    private synchronized InternalWritableBuffer writeDataWithCache(T client) {
+        if (nonNull(broadcastCacheBuffer)) {
+            return InternalWritableBuffer.dynamicOf(broadcastCacheBuffer, client.getResourcePool());
+        } else {
+            InternalWritableBuffer buffer = writeDataToBuffer(client);
+            if(buffer instanceof ArrayPacketBuffer) {
+                broadcastCacheBuffer = (ArrayPacketBuffer) buffer;
+            }
+            return buffer;
+        }
+    }
+
+    private InternalWritableBuffer writeDataToBuffer(T client) {
         InternalWritableBuffer buffer = choosePacketBuffer(client);
 
         buffer.position(ConnectionConfig.HEADER_SIZE);
-        if(write(client, buffer)) {
+        if (write(client, buffer)) {
             buffer.mark();
             return buffer;
         }
@@ -56,6 +79,11 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> {
 
     private InternalWritableBuffer choosePacketBuffer(T client) {
         ByteBuffer buffer;
+        if(broadcast) {
+            int size = packetInfo.getOrDefault(getClass(), client.getResourcePool().getSegmentSize());
+            return InternalWritableBuffer.of(size, client.getResourcePool());
+        }
+
         if(packetInfo.containsKey(getClass())) {
             buffer = client.getResourcePool().getBuffer(packetInfo.get(getClass()));
         } else {
@@ -69,9 +97,18 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> {
         packetInfo.compute(getClass(), (k, v) -> isNull(v) ? header : max(v, header));
     }
 
-    @Override
-    public String toString() {
-        return getClass().getSimpleName();
+    /**
+     * Mark this packet as broadcast. A broadcast packet is sent to more than one client.
+     *
+     * Caution: This method should be called before {@link Client#writePacket(WritablePacket)}
+     *
+     * A broadcast packet will create a Buffer cache where the data is written once and only the copy is sent to the client.
+     * note: Each copy will be encrypted to each client
+     *
+     * @param broadcast true if the packet is sent to more than one client
+     */
+    public void sendInBroadcast(boolean broadcast) {
+        this.broadcast = broadcast;
     }
 
     /**
@@ -82,4 +119,9 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> {
      * @param buffer where the data is written into
      */
     protected abstract boolean write(T client, WritableBuffer buffer);
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName();
+    }
 }

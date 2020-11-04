@@ -28,6 +28,7 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.fail;
 
@@ -40,9 +41,18 @@ public class CommunicationTest {
     private final InetSocketAddress listenAddress = new InetSocketAddress(9090);
     private ConnectionHandler<AsyncClient> connectionHandler;
 
+    private static AtomicInteger packetsSended = new AtomicInteger();
+    private static final int  BROADCAST_CLIENTS = 10;
+
     static void shutdown(boolean success) {
         shutdown.getAndSet(true);
         CommunicationTest.success = success;
+    }
+
+    static void incrementPacketSended() {
+        if(packetsSended.incrementAndGet() == BROADCAST_CLIENTS) {
+            shutdown(true);
+        }
     }
 
     @Before
@@ -52,7 +62,8 @@ public class CommunicationTest {
         builder = ConnectionBuilder.create(listenAddress, AsyncClient::new, handler, handler).filter(channel -> true).threadPoolSize(2).useNagle(false)
                 .shutdownWaitTime(500).addBufferPool(10,300).initBufferPoolFactor(0.2f).bufferSegmentSize(256);
         connector = Connector.create(AsyncClient::new, handler, handler).addBufferPool(10, 300).initBufferPoolFactor(0.2f).bufferSegmentSize(128);
-
+        packetsSended.set(0);
+        shutdown.set(false);
     }
 
     @Test
@@ -68,6 +79,32 @@ public class CommunicationTest {
         connectionHandler.shutdown();
         connectionHandler.join();
         if(!success) {
+            fail();
+        }
+    }
+
+    @Test
+    public void testBroadcast() throws IOException, ExecutionException, InterruptedException {
+        connectionHandler = builder.build();
+        connectionHandler.start();
+
+        AsyncClient[] clients = new AsyncClient[10];
+        for (int i = 0; i < clients.length; i++) {
+            clients[i] = connector.connect("localhost", 9090);
+        }
+
+        AsyncClientBroadcastPacket packet = new AsyncClientBroadcastPacket();
+        packet.sendInBroadcast(true);
+
+        for (AsyncClient client : clients) {
+            client.sendPacket(packet);
+        }
+
+        Awaitility.waitAtMost(10, TimeUnit.SECONDS).untilTrue(shutdown);
+
+        connectionHandler.shutdown();
+        connectionHandler.join();
+        if(packetsSended.get() != clients.length) {
             fail();
         }
     }

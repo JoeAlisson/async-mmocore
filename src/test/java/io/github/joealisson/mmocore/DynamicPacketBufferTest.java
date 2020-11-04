@@ -6,6 +6,11 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
+import java.util.Random;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class DynamicPacketBufferTest {
 
@@ -200,5 +205,127 @@ public class DynamicPacketBufferTest {
             packetBuffer.readBytes(0, read);
             Assert.assertArrayEquals(data, read);
         }
+    }
+
+
+    @Test
+    public void testIOE() {
+        ConnectionConfig<?> config = new ConnectionConfig<>(null, null, null);
+        ResourcePool resourcePool = ResourcePool.initialize(config);
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(4, 1000, 5, TimeUnit.SECONDS, new ArrayBlockingQueue<>(1000));
+
+        for (int i = 0; i < 1000; i++) {
+            CompletableFuture.runAsync(() -> writeBufferData(resourcePool), executor);
+            CompletableFuture.runAsync(() -> writeBufferData(resourcePool), executor);
+        }
+
+    }
+
+    private void writeBufferData(ResourcePool resourcePool) {
+        DynamicPacketBuffer packetBuffer = new DynamicPacketBuffer(resourcePool.getSegmentBuffer(), resourcePool);
+        Random rnd = new Random();
+        writeNpcInfo(packetBuffer);
+        for (int j = 0; j < 10; j++) {
+            if(rnd.nextBoolean()) {
+                packetBuffer.writeLong(8);
+            }
+            if(rnd.nextBoolean()) {
+                packetBuffer.writeLong(8);
+            }
+            packetBuffer.writeInt(7);
+        }
+        packetBuffer.mark();
+        packetBuffer.releaseResources();
+    }
+
+    private void writeNpcInfo(DynamicPacketBuffer buffer) {
+        buffer.writeInt(1);
+        buffer.writeByte( 0x00);
+        buffer.writeShort(37);
+        buffer.writeBytes(new byte[] {1, 2, 3, 4, 5});
+
+        buffer.writeByte(1);
+        buffer.writeByte(0);
+        buffer.writeInt(0x00);
+        buffer.writeString("String here");
+
+        // Block 2
+        buffer.writeShort(12);
+        buffer.writeInt(1000000);
+
+        buffer.writeInt(2);
+        buffer.writeInt(4);
+        buffer.writeInt(8);
+
+        buffer.writeInt(43);
+
+        buffer.writeInt(0x00); // Unknown
+
+        buffer.writeInt(300);
+        buffer.writeInt(333);
+
+        buffer.writeFloat(0.2323442f);
+        buffer.writeFloat(1.0f);
+
+        buffer.writeInt(2132);
+        buffer.writeInt(0x00); // Armor id?
+        buffer.writeInt(323);
+
+        buffer.writeByte(true);
+        buffer.writeByte(false);
+
+        buffer.writeByte(0x00);
+
+        buffer.writeByte(0);
+
+
+        buffer.writeInt(12);
+
+        buffer.writeInt(false);
+
+        buffer.writeInt(12312);
+
+        buffer.writeInt(212);
+
+
+        buffer.writeInt(3212);
+
+        buffer.writeInt(121);
+
+        buffer.writeInt((int) 1212.2);
+
+        buffer.writeInt((int) 2123.1);
+
+        buffer.writeInt(1212);
+
+        buffer.writeInt(2123);
+        buffer.writeByte(0x00); // 2 - do some animation on spawn
+
+        buffer.writeInt(0x00);
+        buffer.writeInt(0x00);
+
+
+        buffer.writeString("Npname");
+
+        buffer.writeInt(-1); // NPCStringId for name
+
+
+        buffer.writeInt( -1); // NPCStringId for title
+
+        buffer.writeByte(0); // PVP flag
+
+        buffer.writeInt(0); // Reputation
+
+
+        buffer.writeInt(0);
+        buffer.writeInt(0);
+        buffer.writeInt(0);
+        buffer.writeInt(0);
+        buffer.writeInt(0);
+
+        buffer.writeByte(1);
+
+
+        buffer.writeShort( 0);
     }
 }

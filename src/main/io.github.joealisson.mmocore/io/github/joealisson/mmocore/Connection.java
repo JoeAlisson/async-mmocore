@@ -80,16 +80,19 @@ public class Connection<T extends Client<Connection<T>>> {
             return false;
         }
         writingBuffers = buffers;
-        return write();
+        write();
+        return true;
     }
 
-    final boolean write() {
+    final void write() {
         if(channel.isOpen() && nonNull(writingBuffers)) {
             channel.write(writingBuffers, 0, writingBuffers.length, -1, TimeUnit.MILLISECONDS,  client, writeHandler);
-            return true;
+        } else if(nonNull(client)) {
+            client.finishWriting();
         }
-        return false;
     }
+
+
 
     ByteBuffer getReadingBuffer() {
         return readingBuffer;

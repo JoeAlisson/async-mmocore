@@ -101,7 +101,7 @@ public abstract class Client<T extends Connection<?>> {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void write(WritablePacket packet) {
-        boolean sendedData = false;
+        boolean written = false;
         InternalWritableBuffer buffer = null;
         try {
              buffer = packet.writeData(this);
@@ -123,13 +123,13 @@ public abstract class Client<T extends Connection<?>> {
                 }
 
                 packet.writeHeaderAndRecord(buffer, dataSentSize);
-                sendedData = connection.write(buffer.toByteBuffers());
+                written = connection.write(buffer.toByteBuffers());
                 LOGGER.debug("Sending packet {}[{}] to {}", packet, dataSentSize, this);
             }
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
         } finally {
-            if(!sendedData) {
+            if(!written) {
                 if(nonNull(buffer)) {
                     buffer.releaseResources();
                 }
@@ -200,6 +200,7 @@ public abstract class Client<T extends Connection<?>> {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } finally {
+            packetsToWrite.clear();
             connection.close();
         }
     }

@@ -103,6 +103,8 @@ class ConnectionConfig<T extends Client<Connection<T>>> {
                 newBufferGroup(size, bufferSize);
             }
         });
+
+        newBufferGroup(100, bufferSegmentSize);
     }
 
     private int parseInt(Properties properties, String propertyName, int defaultValue) {

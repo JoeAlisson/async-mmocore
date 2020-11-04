@@ -37,7 +37,7 @@ import static java.util.Objects.nonNull;
 public final class ConnectionHandler<T extends Client<Connection<T>>> extends Thread {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionHandler.class);
-    private static final int CACHED_THREAD_POLL_THRESHOLD = 1000;
+    private static final int CACHED_THREAD_POOL_THRESHOLD = 1000;
 
     private final AsynchronousChannelGroup group;
     private final AsynchronousServerSocketChannel listener;
@@ -56,7 +56,7 @@ public final class ConnectionHandler<T extends Client<Connection<T>>> extends Th
     }
 
     private AsynchronousChannelGroup createChannelGroup(int threadPoolSize) throws IOException {
-        if(threadPoolSize <= 0 || threadPoolSize >= CACHED_THREAD_POLL_THRESHOLD) {
+        if(threadPoolSize <= 0 || threadPoolSize >= CACHED_THREAD_POOL_THRESHOLD) {
             LOGGER.debug("Channel group is using CachedThreadPool");
             return AsynchronousChannelGroup.withCachedThreadPool(Executors.newCachedThreadPool(new MMOThreadFactory()), getRuntime().availableProcessors());
         }

@@ -97,6 +97,10 @@ public class ResourcePool {
         }
     }
 
+    public int getSegmentSize() {
+        return config.bufferSegmentSize;
+    }
+
     static ResourcePool initialize(ConnectionConfig<?> config) {
         return new ResourcePool(config);
     }
