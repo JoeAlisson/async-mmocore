@@ -26,8 +26,6 @@ import java.net.SocketAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -39,27 +37,27 @@ import static java.util.Objects.nonNull;
 /**
  * @author JoeAlisson
  */
-class ConnectionConfig<T extends Client<Connection<T>>> {
+class ConnectionConfig {
 
     public static final int HEADER_SIZE = 2;
 
     private static final int MINIMUM_POOL_GROUPS = 3;
     private static final Pattern BUFFER_POOL_PROPERTY = Pattern.compile("(bufferPool\\.\\w+?\\.)size", Pattern.CASE_INSENSITIVE);
 
+    ResourcePool resourcePool;
     ConnectionFilter acceptFilter;
     SocketAddress address;
-    Map<Integer, BufferPool> bufferPools = new HashMap<>(4);
 
     float initBufferPoolFactor;
     long shutdownWaitTime = 5000;
     int threadPoolSize;
     boolean useNagle;
-    int bufferSegmentSize = 256;
 
     ConnectionConfig(SocketAddress address) {
         this.address = address;
-        threadPoolSize = max(1, getRuntime().availableProcessors() - 2);
-        bufferPools.put(HEADER_SIZE, new BufferPool(100, HEADER_SIZE));
+        threadPoolSize = max(2, getRuntime().availableProcessors() - 2);
+        resourcePool = new ResourcePool();
+        resourcePool.addBufferPool(HEADER_SIZE, new BufferPool(100, HEADER_SIZE));
 
         String systemProperty = System.getProperty("async-mmocore.configurationFile");
         if(nonNull(systemProperty) && !systemProperty.trim().isEmpty()) {
@@ -86,7 +84,7 @@ class ConnectionConfig<T extends Client<Connection<T>>> {
     private void configure(Properties properties) {
         shutdownWaitTime = parseInt(properties, "shutdownWaitTime", 5) * 1000L;
         threadPoolSize = parseInt(properties, "threadPoolSize", threadPoolSize);
-        bufferSegmentSize = parseInt(properties, "bufferSegmentSize", bufferSegmentSize);
+        resourcePool.setBufferSegmentSize(parseInt(properties, "bufferSegmentSize", resourcePool.getSegmentSize()));
         initBufferPoolFactor = parseFloat(properties, "bufferPool.initFactor", 0);
 
         properties.stringPropertyNames().forEach(property -> {
@@ -98,7 +96,7 @@ class ConnectionConfig<T extends Client<Connection<T>>> {
             }
         });
 
-        newBufferGroup(100, bufferSegmentSize);
+        newBufferGroup(100, resourcePool.getSegmentSize());
     }
 
     private int parseInt(Properties properties, String propertyName, int defaultValue) {
@@ -118,25 +116,21 @@ class ConnectionConfig<T extends Client<Connection<T>>> {
     }
 
     public void newBufferGroup(int groupSize, int bufferSize) {
-        if(!bufferPools.containsKey(bufferSize)) {
-            bufferPools.put(bufferSize, new BufferPool(groupSize, bufferSize));
-        }
+        resourcePool.addBufferPool(bufferSize, new BufferPool(groupSize, bufferSize));
     }
 
-    public ConnectionConfig<T> complete() {
+    public ConnectionConfig complete() {
         completeBuffersPool();
-        if(initBufferPoolFactor > 0) {
-            bufferPools.values().forEach(pool -> pool.initialize(initBufferPoolFactor));
-        }
+        resourcePool.initializeBuffers(initBufferPoolFactor);
         return this;
     }
 
     private void completeBuffersPool() {
-        int missingPools = MINIMUM_POOL_GROUPS - bufferPools.size();
+        int missingPools = MINIMUM_POOL_GROUPS - resourcePool.bufferPoolSize();
 
         for (int i = 0; i < missingPools; i++) {
             int bufferSize = 16384 << i;
-            bufferPools.put(bufferSize,new BufferPool(10, bufferSize));
+            resourcePool.addBufferPool(bufferSize,new BufferPool(10, bufferSize));
         }
     }
 }

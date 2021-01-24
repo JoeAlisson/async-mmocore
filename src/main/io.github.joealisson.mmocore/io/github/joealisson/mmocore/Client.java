@@ -43,7 +43,6 @@ public abstract class Client<T extends Connection<?>> {
     private final AtomicBoolean writing = new AtomicBoolean(false);
     private int dataSentSize;
     private volatile boolean isClosing;
-    private ResourcePool resourcePool;
     private boolean readingPayload;
     private int expectedReadSize;
 
@@ -227,12 +226,8 @@ public abstract class Client<T extends Connection<?>> {
         return connection.isOpen() && !isClosing;
     }
 
-    void setResourcePool(ResourcePool resourcePool) {
-        this.resourcePool = resourcePool;
-    }
-
     ResourcePool getResourcePool() {
-        return resourcePool;
+        return connection.getResourcePool();
     }
 
     boolean isReadingPayload() {

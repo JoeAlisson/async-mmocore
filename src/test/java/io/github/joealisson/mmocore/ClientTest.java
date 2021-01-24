@@ -67,7 +67,7 @@ public class ClientTest {
     @Test(expected = IllegalArgumentException.class)
     public void testClosedConnection() throws IOException {
         try(AsynchronousSocketChannel channel = AsynchronousSocketChannel.open()) {
-            Connection<AsyncClient> connection = new Connection<>(channel, null, null);
+            Connection<AsyncClient> connection = new Connection<>(channel, null, null, new ConnectionConfig(null));
             new AsyncClient(connection);
         }
     }

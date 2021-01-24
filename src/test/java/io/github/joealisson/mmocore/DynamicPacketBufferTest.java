@@ -16,10 +16,10 @@ public class DynamicPacketBufferTest {
 
     @Test
     public void testIncrease() {
-        ConnectionConfig<?> config = new ConnectionConfig<>(null);
+        ConnectionConfig config = new ConnectionConfig(null);
+        config.complete();
         config.newBufferGroup(4, 32);
-        ResourcePool resourcePool = ResourcePool.initialize(config);
-        DynamicPacketBuffer packetBuffer = new DynamicPacketBuffer(ByteBuffer.allocate(32), resourcePool);
+        DynamicPacketBuffer packetBuffer = new DynamicPacketBuffer(ByteBuffer.allocate(32), config.resourcePool);
         for (int i = 0; i < 16; i++) {
             packetBuffer.writeBytes(new byte[34 + i * 64]);
         }
@@ -27,10 +27,9 @@ public class DynamicPacketBufferTest {
 
     @Test
     public void testIntegrity() {
-        ConnectionConfig<?> config = new ConnectionConfig<>(null);
+        ConnectionConfig config = new ConnectionConfig(null);
         config.newBufferGroup(4, 32);
-        ResourcePool resourcePool = ResourcePool.initialize(config);
-        InternalWritableBuffer packetBuffer = InternalWritableBuffer.dynamicOf(ByteBuffer.allocate(32), resourcePool);
+        InternalWritableBuffer packetBuffer = InternalWritableBuffer.dynamicOf(ByteBuffer.allocate(32), config.resourcePool);
 
         packetBuffer.writeByte((byte) 1);
         packetBuffer.writeShort((short) 2);
@@ -55,33 +54,30 @@ public class DynamicPacketBufferTest {
 
     @Test(expected = IndexOutOfBoundsException.class)
     public void testNegativeIndex() {
-        ConnectionConfig<?> config = new ConnectionConfig<>(null);
-        ResourcePool resourcePool = ResourcePool.initialize(config);
-        DynamicPacketBuffer packetBuffer = new DynamicPacketBuffer(ByteBuffer.allocate(32), resourcePool);
+        ConnectionConfig config = new ConnectionConfig(null);
+        DynamicPacketBuffer packetBuffer = new DynamicPacketBuffer(ByteBuffer.allocate(32), config.resourcePool);
         packetBuffer.writeInt(-1, 10);
     }
 
     @Test(expected = IndexOutOfBoundsException.class)
     public void testOutOfBoundIndex() {
-        ConnectionConfig<?> config = new ConnectionConfig<>(null);
-        ResourcePool resourcePool = ResourcePool.initialize(config);
-        DynamicPacketBuffer packetBuffer = new DynamicPacketBuffer(ByteBuffer.allocate(2), resourcePool);
+        ConnectionConfig config = new ConnectionConfig(null);
+        DynamicPacketBuffer packetBuffer = new DynamicPacketBuffer(ByteBuffer.allocate(2), config.resourcePool);
         packetBuffer.writeInt(100, 10);
     }
 
     @Test(expected = IndexOutOfBoundsException.class)
     public void testOutOfBoundReadIndex() {
-        ConnectionConfig<?> config = new ConnectionConfig<>(null);
-        ResourcePool resourcePool = ResourcePool.initialize(config);
-        DynamicPacketBuffer packetBuffer = new DynamicPacketBuffer(ByteBuffer.allocate(2), resourcePool);
+        ConnectionConfig config = new ConnectionConfig(null);
+        DynamicPacketBuffer packetBuffer = new DynamicPacketBuffer(ByteBuffer.allocate(2), config.resourcePool);
         packetBuffer.readInt(0);
     }
 
     @Test
     public void testBufferLimitWriting() {
-        ConnectionConfig<?> config = new ConnectionConfig<>(null);
-        ResourcePool resourcePool = ResourcePool.initialize(config);
-        DynamicPacketBuffer packetBuffer = new DynamicPacketBuffer(ByteBuffer.allocate(2), resourcePool);
+        ConnectionConfig config = new ConnectionConfig(null);
+        config.complete();
+        DynamicPacketBuffer packetBuffer = new DynamicPacketBuffer(ByteBuffer.allocate(2), config.resourcePool);
 
         packetBuffer.writeInt(1000000);
 
@@ -100,9 +96,9 @@ public class DynamicPacketBufferTest {
 
     @Test
     public void testBufferLimit() {
-        ConnectionConfig<?> config = new ConnectionConfig<>(null);
-        ResourcePool resourcePool = ResourcePool.initialize(config);
-        DynamicPacketBuffer packetBuffer = new DynamicPacketBuffer(ByteBuffer.allocate(32), resourcePool);
+        ConnectionConfig config = new ConnectionConfig(null);
+        config.complete();
+        DynamicPacketBuffer packetBuffer = new DynamicPacketBuffer(ByteBuffer.allocate(32), config.resourcePool);
 
         packetBuffer.writeBytes(new byte[10]);
         int pos = packetBuffer.position();
@@ -116,9 +112,9 @@ public class DynamicPacketBufferTest {
 
     @Test
     public void testMultipleBufferLimits() {
-        ConnectionConfig<?> config = new ConnectionConfig<>(null);
-        ResourcePool resourcePool = ResourcePool.initialize(config);
-        DynamicPacketBuffer packetBuffer = new DynamicPacketBuffer(ByteBuffer.allocate(32), resourcePool);
+        ConnectionConfig config = new ConnectionConfig(null);
+        config.complete();
+        DynamicPacketBuffer packetBuffer = new DynamicPacketBuffer(ByteBuffer.allocate(32), config.resourcePool);
 
         int initial = 10;
         byte end = 20;
@@ -164,8 +160,9 @@ public class DynamicPacketBufferTest {
 
     @Test
     public void testSplitValue() {
-        ConnectionConfig<?> config = new ConnectionConfig<>(null);
-        ResourcePool resourcePool = ResourcePool.initialize(config);
+        ConnectionConfig config = new ConnectionConfig(null);
+        config.complete();
+        ResourcePool resourcePool = config.resourcePool;
 
 
         DynamicPacketBuffer packetBuffer = new DynamicPacketBuffer(ByteBuffer.allocate(1), resourcePool);
@@ -210,8 +207,8 @@ public class DynamicPacketBufferTest {
 
     @Test
     public void testIOE() {
-        ConnectionConfig<?> config = new ConnectionConfig<>(null);
-        ResourcePool resourcePool = ResourcePool.initialize(config);
+        ConnectionConfig config = new ConnectionConfig(null);
+        ResourcePool resourcePool = config.resourcePool;
         ThreadPoolExecutor executor = new ThreadPoolExecutor(4, 1000, 5, TimeUnit.SECONDS, new ArrayBlockingQueue<>(1000));
 
         for (int i = 0; i < 1000; i++) {

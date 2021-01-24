@@ -35,7 +35,7 @@ public class Connector<T extends Client<Connection<T>>>  {
     private static final Object groupLock = new Object();
 
     private static AsynchronousChannelGroup group;
-    private ConnectionConfig<T> config;
+    private ConnectionConfig config;
     private ReadHandler<T> readHandler;
     private ClientFactory<T> clientFactory;
 
@@ -52,7 +52,7 @@ public class Connector<T extends Client<Connection<T>>>  {
      */
     public static <T extends Client<Connection<T>>> Connector<T> create(ClientFactory<T> clientFactory, PacketHandler<T> packetHandler, PacketExecutor<T> executor)  {
         Connector<T> builder = new Connector<>();
-        builder.config = new ConnectionConfig<>(null);
+        builder.config = new ConnectionConfig(null);
         builder.readHandler = new ReadHandler<>(packetHandler, executor);
         builder.clientFactory = clientFactory;
         return builder;
@@ -89,7 +89,7 @@ public class Connector<T extends Client<Connection<T>>>  {
      * @return this
      */
     public Connector<T> bufferSegmentSize(int size) {
-        config.bufferSegmentSize = size;
+        config.resourcePool.setBufferSegmentSize(size);
         return this;
     }
 
@@ -135,10 +135,8 @@ public class Connector<T extends Client<Connection<T>>>  {
 
         AsynchronousSocketChannel channel = group.provider().openAsynchronousSocketChannel(group);
         channel.connect(socketAddress).get();
-        Connection<T> connection = new Connection<>(channel, readHandler, new WriteHandler<>());
-        config.complete();
+        Connection<T> connection = new Connection<>(channel, readHandler, new WriteHandler<>(), config.complete());
         T client = clientFactory.create(connection);
-        client.setResourcePool(ResourcePool.initialize(config));
         connection.setClient(client);
         client.onConnected();
         client.read();

@@ -39,15 +39,17 @@ public class Connection<T extends Client<Connection<T>>> {
     private final AsynchronousSocketChannel channel;
     private final ReadHandler<T> readHandler;
     private final WriteHandler<T> writeHandler;
+    private final ConnectionConfig config;
     private T client;
 
     private ByteBuffer readingBuffer;
     private ByteBuffer[] writingBuffers;
 
-    Connection(AsynchronousSocketChannel channel, ReadHandler<T> readHandler, WriteHandler<T> writeHandler) {
+    Connection(AsynchronousSocketChannel channel, ReadHandler<T> readHandler, WriteHandler<T> writeHandler, ConnectionConfig config) {
         this.channel = channel;
         this.readHandler = readHandler;
         this.writeHandler = writeHandler;
+        this.config = config;
     }
 
     void setClient(T client) {
@@ -63,14 +65,14 @@ public class Connection<T extends Client<Connection<T>>> {
     final void readHeader() {
         if(channel.isOpen()) {
             releaseReadingBuffer();
-            readingBuffer = client.getResourcePool().getHeaderBuffer();
+            readingBuffer = config.resourcePool.getHeaderBuffer();
             read();
         }
     }
 
     void read(int size) {
         if(channel.isOpen()) {
-            readingBuffer = client.getResourcePool().recycleAndGetNew(readingBuffer, size);
+            readingBuffer = config.resourcePool.recycleAndGetNew(readingBuffer, size);
             read();
         }
     }
@@ -92,24 +94,21 @@ public class Connection<T extends Client<Connection<T>>> {
         }
     }
 
-
-
     ByteBuffer getReadingBuffer() {
         return readingBuffer;
     }
 
     private void releaseReadingBuffer() {
         if(nonNull(readingBuffer)) {
-            client.getResourcePool().recycleBuffer(readingBuffer);
+            config.resourcePool.recycleBuffer(readingBuffer);
             readingBuffer = null;
         }
     }
 
     void releaseWritingBuffer() {
         if(nonNull(writingBuffers)) {
-            ResourcePool resourcePool = client.getResourcePool();
             for (ByteBuffer buffer : writingBuffers) {
-                resourcePool.recycleBuffer(buffer);
+                config.resourcePool.recycleBuffer(buffer);
             }
             writingBuffers = null;
         }
@@ -144,5 +143,9 @@ public class Connection<T extends Client<Connection<T>>> {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public ResourcePool getResourcePool() {
+        return config.resourcePool;
     }
 }

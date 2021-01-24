@@ -28,7 +28,7 @@ import java.net.InetSocketAddress;
  */
 public class ConnectionBuilder<T extends Client<Connection<T>>> {
 
-    private ConnectionConfig<T> config;
+    private ConnectionConfig config;
     private ReadHandler<T> readerHandler;
     private ClientFactory<T> clientFactory;
 
@@ -46,7 +46,7 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
      */
     public static <T extends Client<Connection<T>>> ConnectionBuilder<T> create(InetSocketAddress address, ClientFactory<T> clientFactory, PacketHandler<T> packetHandler, PacketExecutor<T> executor) {
         ConnectionBuilder<T> builder = new ConnectionBuilder<>();
-        builder.config = new ConnectionConfig<>(address);
+        builder.config = new ConnectionConfig(address);
         builder.readerHandler = new ReadHandler<>(packetHandler, executor);
         builder.clientFactory = clientFactory;
         return builder;
@@ -142,7 +142,7 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
      * @return this
      */
     public ConnectionBuilder<T> bufferSegmentSize(int size) {
-        config.bufferSegmentSize = size;
+        config.resourcePool.setBufferSegmentSize(size);
         return this;
     }
 

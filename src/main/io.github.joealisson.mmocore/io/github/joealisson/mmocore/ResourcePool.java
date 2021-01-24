@@ -24,6 +24,8 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.HashMap;
+import java.util.Map;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -35,27 +37,27 @@ public class ResourcePool {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourcePool.class);
 
-    private final ConnectionConfig<?> config;
-    private final int[] bufferSizes;
+    private int bufferSegmentSize = 256;
+    private int[] bufferSizes = new int[] { 2 };
+    private final Map<Integer, BufferPool> bufferPools = new HashMap<>(4);
 
-    private ResourcePool(ConnectionConfig<?> config) {
-        this.config = config;
-        bufferSizes = config.bufferPools.keySet().stream().sorted().mapToInt(Integer::intValue).toArray();
+    public ResourcePool() {
+
     }
 
-    ByteBuffer getHeaderBuffer() {
+    public ByteBuffer getHeaderBuffer() {
         return getSizedBuffer(ConnectionConfig.HEADER_SIZE);
     }
 
     public ByteBuffer getSegmentBuffer() {
-        return getSizedBuffer(config.bufferSegmentSize);
+        return getSizedBuffer(bufferSegmentSize);
     }
 
     public ByteBuffer getBuffer(int size) {
         return getSizedBuffer(determineBufferSize(size));
     }
 
-    ByteBuffer recycleAndGetNew(ByteBuffer buffer, int newSize) {
+    public ByteBuffer recycleAndGetNew(ByteBuffer buffer, int newSize) {
         int bufferSize = determineBufferSize(newSize);
         if(nonNull(buffer)) {
             if(buffer.clear().limit() == bufferSize) {
@@ -67,7 +69,7 @@ public class ResourcePool {
     }
 
     private ByteBuffer getSizedBuffer(int size) {
-        BufferPool pool = config.bufferPools.get(size);
+        BufferPool pool = bufferPools.get(size);
         ByteBuffer buffer = null;
         if(nonNull(pool)) {
             buffer = pool.get();
@@ -90,7 +92,7 @@ public class ResourcePool {
 
     public void recycleBuffer(ByteBuffer buffer) {
         if (nonNull(buffer)) {
-            BufferPool pool = config.bufferPools.get(buffer.capacity());
+            BufferPool pool = bufferPools.get(buffer.capacity());
             if(nonNull(pool)) {
                 pool.recycle(buffer);
             }
@@ -98,10 +100,25 @@ public class ResourcePool {
     }
 
     public int getSegmentSize() {
-        return config.bufferSegmentSize;
+        return bufferSegmentSize;
     }
 
-    static ResourcePool initialize(ConnectionConfig<?> config) {
-        return new ResourcePool(config);
+    public void addBufferPool(int bufferSize, BufferPool bufferPool) {
+        bufferPools.put(bufferSize, bufferPool);
+    }
+
+    public int bufferPoolSize() {
+        return bufferPools.size();
+    }
+
+    public void initializeBuffers(float initBufferPoolFactor) {
+        if(initBufferPoolFactor > 0) {
+            bufferPools.values().forEach(pool -> pool.initialize(initBufferPoolFactor));
+        }
+        bufferSizes = bufferPools.keySet().stream().sorted().mapToInt(Integer::intValue).toArray();
+    }
+
+    public void setBufferSegmentSize(int size) {
+        bufferSegmentSize = size;
     }
 }

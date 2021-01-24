@@ -63,7 +63,7 @@ public class ConnectionTest {
     @Test
     public void testIsOpenWithNoConnectedChannel() throws IOException {
         AsynchronousSocketChannel channel = AsynchronousSocketChannel.open();
-        Connection<AsyncClient> connection = new Connection<>(channel,null, null);
+        Connection<AsyncClient> connection = new Connection<>(channel,null, null, new ConnectionConfig(null));
         Assert.assertFalse(connection.isOpen());
     }
 

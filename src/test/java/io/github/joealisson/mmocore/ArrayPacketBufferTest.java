@@ -11,9 +11,9 @@ public class ArrayPacketBufferTest {
 
     @Test
     public void testIntegrity() {
-        ConnectionConfig<?> config = new ConnectionConfig<>(null);
-        ResourcePool resourcePool = ResourcePool.initialize(config);
-        ArrayPacketBuffer buffer = new ArrayPacketBuffer(10, resourcePool);
+        ConnectionConfig config = new ConnectionConfig(null);
+        config.complete();
+        ArrayPacketBuffer buffer = new ArrayPacketBuffer(10, config.resourcePool);
 
         buffer.writeByte((byte) 1);
         buffer.writeBytes(new byte[] {2, 3, 4, 5});
@@ -65,9 +65,8 @@ public class ArrayPacketBufferTest {
 
     @Test
     public void testReleaseResources() {
-        ConnectionConfig<?> config = new ConnectionConfig<>(null);
-        ResourcePool resourcePool = ResourcePool.initialize(config);
-        InternalWritableBuffer buffer = InternalWritableBuffer.of(10, resourcePool);
+        ConnectionConfig config = new ConnectionConfig(null);;
+        InternalWritableBuffer buffer = InternalWritableBuffer.of(10, config.resourcePool);
 
         buffer.writeShort((short) 10);
         buffer.mark();
