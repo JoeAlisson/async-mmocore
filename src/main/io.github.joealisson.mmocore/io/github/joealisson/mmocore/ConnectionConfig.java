@@ -46,7 +46,6 @@ class ConnectionConfig<T extends Client<Connection<T>>> {
     private static final int MINIMUM_POOL_GROUPS = 3;
     private static final Pattern BUFFER_POOL_PROPERTY = Pattern.compile("(bufferPool\\.\\w+?\\.)size", Pattern.CASE_INSENSITIVE);
 
-    ClientFactory<T> clientFactory;
     ConnectionFilter acceptFilter;
     SocketAddress address;
     Map<Integer, BufferPool> bufferPools = new HashMap<>(4);
@@ -57,9 +56,8 @@ class ConnectionConfig<T extends Client<Connection<T>>> {
     boolean useNagle;
     int bufferSegmentSize = 256;
 
-    ConnectionConfig(SocketAddress address, ClientFactory<T> factory) {
+    ConnectionConfig(SocketAddress address) {
         this.address = address;
-        this.clientFactory = factory;
         threadPoolSize = max(1, getRuntime().availableProcessors() - 2);
         bufferPools.put(HEADER_SIZE, new BufferPool(100, HEADER_SIZE));
 

@@ -30,6 +30,7 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
 
     private ConnectionConfig<T> config;
     private ReadHandler<T> readerHandler;
+    private ClientFactory<T> clientFactory;
 
     /**
      * Creates a ConnectionBuilder holding the minimum requirements to create a ConnectionHandler.
@@ -45,8 +46,9 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
      */
     public static <T extends Client<Connection<T>>> ConnectionBuilder<T> create(InetSocketAddress address, ClientFactory<T> clientFactory, PacketHandler<T> packetHandler, PacketExecutor<T> executor) {
         ConnectionBuilder<T> builder = new ConnectionBuilder<>();
-        builder.config = new ConnectionConfig<>(address, clientFactory);
+        builder.config = new ConnectionConfig<>(address);
         builder.readerHandler = new ReadHandler<>(packetHandler, executor);
+        builder.clientFactory = clientFactory;
         return builder;
     }
 
@@ -152,6 +154,6 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
      * @throws IOException - If the Socket Address configured can't be used.
      */
     public ConnectionHandler<T> build() throws IOException {
-        return new ConnectionHandler<>(config.complete(), readerHandler);
+        return new ConnectionHandler<>(config.complete(), clientFactory, readerHandler);
     }
 }
