@@ -94,6 +94,19 @@ public class Connector<T extends Client<Connection<T>>>  {
     }
 
     /**
+     * Define the threshold to allow the client to drop {@link Disposable} packets.
+     *
+     * When the client has queued more than {@code threshold} {@link Disposable} packets will can be disposed.
+     *
+     * @param threshold the minimum value to drop packets. The default value is 250
+     * @return this
+     */
+    public Connector<T> disposePacketThreshold(int threshold) {
+        config.disposePacketThreshold = threshold;
+        return this;
+    }
+
+    /**
      * Connects to a host using the address and port.
      *
      * @param host the address to be connected to

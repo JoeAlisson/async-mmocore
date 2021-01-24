@@ -113,6 +113,16 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> {
     }
 
     /**
+     * If this method returns true, the packet will be considered disposable.
+     *
+     * @param client client to send data to
+     * @return if the packet is disposable or not.
+     */
+    public boolean canBeDisposed(T client) {
+        return false;
+    }
+
+    /**
      * Writes the data to the client
      *
      * @return the packet was written successful
@@ -125,4 +135,4 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> {
     public String toString() {
         return getClass().getSimpleName();
     }
-}
+    }

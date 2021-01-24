@@ -147,6 +147,19 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
     }
 
     /**
+     * Define the threshold to allow the client to drop disposable packets.
+     *
+     * When the client has queued more than {@code threshold} disposable packets will be disposed.
+     *
+     * @param threshold the minimum value to drop packets. The default value is 250
+     * @return this
+     */
+    public ConnectionBuilder<T> disposePacketThreshold(int threshold) {
+        config.disposePacketThreshold = threshold;
+        return this;
+    }
+
+    /**
      * Builds a new ConnectionHandler based on the options configured.
      *
      * @return a ConnectionHandler

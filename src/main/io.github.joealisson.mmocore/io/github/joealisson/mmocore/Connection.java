@@ -148,4 +148,8 @@ public class Connection<T extends Client<Connection<T>>> {
     public ResourcePool getResourcePool() {
         return config.resourcePool;
     }
+
+    public int disposePacketThreshold() {
+        return config.disposePacketThreshold;
+    }
 }

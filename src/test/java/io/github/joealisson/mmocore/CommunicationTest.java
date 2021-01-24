@@ -20,6 +20,7 @@ package io.github.joealisson.mmocore;
 
 import org.awaitility.Awaitility;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -41,8 +42,8 @@ public class CommunicationTest {
     private final InetSocketAddress listenAddress = new InetSocketAddress(9090);
     private ConnectionHandler<AsyncClient> connectionHandler;
 
-    private static AtomicInteger packetsSended = new AtomicInteger();
-    private static final int  BROADCAST_CLIENTS = 10;
+    private static AtomicInteger packetsSent;
+    private static int PACKET_SENT_TO_SUCCESS = 10;
 
     static void shutdown(boolean success) {
         shutdown.getAndSet(true);
@@ -50,19 +51,20 @@ public class CommunicationTest {
     }
 
     static void incrementPacketSended() {
-        if(packetsSended.incrementAndGet() == BROADCAST_CLIENTS) {
+        if(packetsSent.incrementAndGet() == PACKET_SENT_TO_SUCCESS) {
             shutdown(true);
         }
     }
 
     @Before
     public void SetUp() {
+        packetsSent = new AtomicInteger();
         GenericClientHandler handler = new GenericClientHandler();
 
         builder = ConnectionBuilder.create(listenAddress, AsyncClient::new, handler, handler).filter(channel -> true).threadPoolSize(2).useNagle(false)
                 .shutdownWaitTime(500).addBufferPool(10,300).initBufferPoolFactor(0.2f).bufferSegmentSize(256);
         connector = Connector.create(AsyncClient::new, handler, handler).addBufferPool(10, 300).initBufferPoolFactor(0.2f).bufferSegmentSize(128);
-        packetsSended.set(0);
+        packetsSent.set(0);
         shutdown.set(false);
     }
 
@@ -88,7 +90,7 @@ public class CommunicationTest {
         connectionHandler = builder.build();
         connectionHandler.start();
 
-        AsyncClient[] clients = new AsyncClient[10];
+        AsyncClient[] clients = new AsyncClient[PACKET_SENT_TO_SUCCESS];
         for (int i = 0; i < clients.length; i++) {
             clients[i] = connector.connect("localhost", 9090);
         }
@@ -104,10 +106,53 @@ public class CommunicationTest {
 
         connectionHandler.shutdown();
         connectionHandler.join();
-        if(packetsSended.get() != clients.length) {
+        if(packetsSent.get() != clients.length) {
             fail();
         }
     }
+
+    @Test
+    public void testDisposable() throws IOException, ExecutionException, InterruptedException {
+        int disposeThreshold = 5;
+        PACKET_SENT_TO_SUCCESS = 100;
+        connectionHandler = builder.disposePacketThreshold(disposeThreshold).build();
+        connectionHandler.start();
+
+        AsyncClient client = connector.disposePacketThreshold(disposeThreshold).connect("localhost", 9090);
+        AsyncClientBroadcastPacket[] packets = new AsyncClientBroadcastPacket[100];
+        for (int i = 0; i < 100; i++) {
+            packets[i] = new AsyncClientBroadcastPacket();
+        }
+        AsyncDisposablePacket packet = new AsyncDisposablePacket();
+        client.sendPackets(packets);
+
+        Assert.assertTrue(client.getEstimateQueueSize() > disposeThreshold);
+        client.sendPacket(packet);
+        client.sendPacket(new AsyncClientBroadcastPacket());
+
+        Awaitility.waitAtMost(10, TimeUnit.SECONDS).untilTrue(shutdown);
+
+        connectionHandler.shutdown();
+        connectionHandler.join();
+        if(packetsSent.get() != packets.length + 1) {
+            fail();
+        }
+    }
+
+    static class AsyncDisposablePacket extends WritablePacket<AsyncClient> {
+
+        @Override
+        protected boolean write(AsyncClient client, WritableBuffer buffer) {
+            shutdown(false);
+            throw new IllegalStateException();
+        }
+
+        @Override
+        public boolean canBeDisposed(AsyncClient client) {
+            return true;
+        }
+    }
+
 
     @After
     public void tearDown() {

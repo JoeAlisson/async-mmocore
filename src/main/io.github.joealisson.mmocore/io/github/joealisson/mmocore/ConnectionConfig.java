@@ -52,6 +52,7 @@ class ConnectionConfig {
     long shutdownWaitTime = 5000;
     int threadPoolSize;
     boolean useNagle;
+    int disposePacketThreshold = 250;
 
     ConnectionConfig(SocketAddress address) {
         this.address = address;
@@ -84,8 +85,9 @@ class ConnectionConfig {
     private void configure(Properties properties) {
         shutdownWaitTime = parseInt(properties, "shutdownWaitTime", 5) * 1000L;
         threadPoolSize = parseInt(properties, "threadPoolSize", threadPoolSize);
-        resourcePool.setBufferSegmentSize(parseInt(properties, "bufferSegmentSize", resourcePool.getSegmentSize()));
         initBufferPoolFactor = parseFloat(properties, "bufferPool.initFactor", 0);
+        disposePacketThreshold = parseInt(properties, "disposePacketThreshold", 200);
+        resourcePool.setBufferSegmentSize(parseInt(properties, "bufferSegmentSize", resourcePool.getSegmentSize()));
 
         properties.stringPropertyNames().forEach(property -> {
             Matcher matcher = BUFFER_POOL_PROPERTY.matcher(property);

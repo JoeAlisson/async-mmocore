@@ -41,6 +41,7 @@ public abstract class Client<T extends Connection<?>> {
     private final T connection;
     private final Queue<WritablePacket<? extends Client<T>>> packetsToWrite = new ConcurrentLinkedQueue<>();
     private final AtomicBoolean writing = new AtomicBoolean(false);
+    private int estimateQueueSize = 0;
     private int dataSentSize;
     private volatile boolean isClosing;
     private boolean readingPayload;
@@ -68,17 +69,25 @@ public abstract class Client<T extends Connection<?>> {
      * @param packet to be sent.
      */
     protected final void writePacket(WritablePacket<? extends Client<T>> packet) {
-        if(!isConnected() || isNull(packet)) {
+        if (!isConnected() || isNull(packet) || checkDispose(packet)) {
             return;
         }
+
+        estimateQueueSize++;
         packetsToWrite.add(packet);
         tryWriteNextPacket();
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private boolean checkDispose(WritablePacket packet) {
+        return estimateQueueSize > connection.disposePacketThreshold() && packet.canBeDisposed(this);
     }
 
     protected final void writePackets(Collection<WritablePacket<? extends Client<T>>> packets) {
         if(!isConnected() || isNull(packets) || packets.isEmpty()) {
             return;
         }
+        estimateQueueSize += packets.size();
         packetsToWrite.addAll(packets);
         tryWriteNextPacket();
     }
@@ -93,6 +102,7 @@ public abstract class Client<T extends Connection<?>> {
                     disconnect();
                 }
             } else {
+                estimateQueueSize--;
                 write(packetsToWrite.poll());
             }
         }
@@ -224,6 +234,13 @@ public abstract class Client<T extends Connection<?>> {
      */
     public boolean isConnected() {
         return connection.isOpen() && !isClosing;
+    }
+
+    /**
+     * @return the estimate amount of packet queued to send
+     */
+    public int getEstimateQueueSize() {
+        return estimateQueueSize;
     }
 
     ResourcePool getResourcePool() {
