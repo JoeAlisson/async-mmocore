@@ -31,7 +31,7 @@ public class ConfigurationTest {
     @Test
     public void testCorrectConfigurations() {
         System.setProperty("async-mmocore.configurationFile", "/async-mmocore.properties");
-        ConnectionConfig<AsyncClient> config = new ConnectionConfig<>(null, null, null);
+        ConnectionConfig<AsyncClient> config = new ConnectionConfig<>(null, null);
         config.complete();
         assertTrue(config.bufferPools.size() >= 2);
         assertEquals(0.2f, config.initBufferPoolFactor, 0);
@@ -43,13 +43,13 @@ public class ConfigurationTest {
     @Test(expected = IllegalArgumentException.class)
     public void testNonExistentConfigurationFile() {
         System.setProperty("async-mmocore.configurationFile", "/async-mmocore-nonexistent.properties");
-        new ConnectionConfig<>(null, null, null);
+        new ConnectionConfig<>(null, null);
     }
 
     @Test
     public void testWrongValuesConfigurations() {
         System.setProperty("async-mmocore.configurationFile", "/async-mmocore-wrong.properties");
-        ConnectionConfig<AsyncClient> config = new ConnectionConfig<>(null, null, null);
+        ConnectionConfig<AsyncClient> config = new ConnectionConfig<>(null, null);
         config.complete();
         assertEquals(5 * 1000L, config.shutdownWaitTime);
         assertEquals(max(1, getRuntime().availableProcessors() - 2), config.threadPoolSize);

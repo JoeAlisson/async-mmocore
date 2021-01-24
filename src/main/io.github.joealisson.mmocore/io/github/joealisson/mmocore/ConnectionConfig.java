@@ -48,8 +48,6 @@ class ConnectionConfig<T extends Client<Connection<T>>> {
 
     ClientFactory<T> clientFactory;
     ConnectionFilter acceptFilter;
-    ReadHandler<T> readHandler;
-    WriteHandler<T> writeHandler;
     SocketAddress address;
     Map<Integer, BufferPool> bufferPools = new HashMap<>(4);
 
@@ -59,11 +57,9 @@ class ConnectionConfig<T extends Client<Connection<T>>> {
     boolean useNagle;
     int bufferSegmentSize = 256;
 
-    ConnectionConfig(SocketAddress address, ClientFactory<T> factory, ReadHandler<T> readHandler) {
+    ConnectionConfig(SocketAddress address, ClientFactory<T> factory) {
         this.address = address;
         this.clientFactory = factory;
-        this.readHandler = readHandler;
-        this.writeHandler = new WriteHandler<>();
         threadPoolSize = max(1, getRuntime().availableProcessors() - 2);
         bufferPools.put(HEADER_SIZE, new BufferPool(100, HEADER_SIZE));
 

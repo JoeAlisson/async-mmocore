@@ -29,6 +29,7 @@ import java.net.InetSocketAddress;
 public class ConnectionBuilder<T extends Client<Connection<T>>> {
 
     private ConnectionConfig<T> config;
+    private ReadHandler<T> readerHandler;
 
     /**
      * Creates a ConnectionBuilder holding the minimum requirements to create a ConnectionHandler.
@@ -44,7 +45,8 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
      */
     public static <T extends Client<Connection<T>>> ConnectionBuilder<T> create(InetSocketAddress address, ClientFactory<T> clientFactory, PacketHandler<T> packetHandler, PacketExecutor<T> executor) {
         ConnectionBuilder<T> builder = new ConnectionBuilder<>();
-        builder.config = new ConnectionConfig<>(address, clientFactory, new ReadHandler<>(packetHandler, executor));
+        builder.config = new ConnectionConfig<>(address, clientFactory);
+        builder.readerHandler = new ReadHandler<>(packetHandler, executor);
         return builder;
     }
 
@@ -150,6 +152,6 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
      * @throws IOException - If the Socket Address configured can't be used.
      */
     public ConnectionHandler<T> build() throws IOException {
-        return new ConnectionHandler<>(config.complete());
+        return new ConnectionHandler<>(config.complete(), readerHandler);
     }
 }

@@ -36,6 +36,7 @@ public class Connector<T extends Client<Connection<T>>>  {
 
     private static AsynchronousChannelGroup group;
     private ConnectionConfig<T> config;
+    private ReadHandler<T> readHandler;
 
     /**
      * Creates a Connector holding the minimum requirements to create a Client.
@@ -50,7 +51,8 @@ public class Connector<T extends Client<Connection<T>>>  {
      */
     public static <T extends Client<Connection<T>>> Connector<T> create(ClientFactory<T> clientFactory, PacketHandler<T> packetHandler, PacketExecutor<T> executor)  {
         Connector<T> builder = new Connector<>();
-        builder.config = new ConnectionConfig<>(null, clientFactory, new ReadHandler<>(packetHandler, executor));
+        builder.config = new ConnectionConfig<>(null, clientFactory);
+        builder.readHandler = new ReadHandler<>(packetHandler, executor);
         return builder;
     }
 
@@ -131,7 +133,7 @@ public class Connector<T extends Client<Connection<T>>>  {
 
         AsynchronousSocketChannel channel = group.provider().openAsynchronousSocketChannel(group);
         channel.connect(socketAddress).get();
-        Connection<T> connection = new Connection<>(channel, config.readHandler, new WriteHandler<>());
+        Connection<T> connection = new Connection<>(channel, readHandler, new WriteHandler<>());
         T client = config.complete().clientFactory.create(connection);
         client.setResourcePool(ResourcePool.initialize(config));
         connection.setClient(client);

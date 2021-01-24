@@ -42,17 +42,21 @@ public final class ConnectionHandler<T extends Client<Connection<T>>> extends Th
     private final AsynchronousChannelGroup group;
     private final AsynchronousServerSocketChannel listener;
     private final ConnectionConfig<T> config;
+    private final WriteHandler<T> writeHandler;
+    private final ReadHandler<T> readHandler;
     private volatile boolean shutdown;
     private final ResourcePool resourcePool;
 
-    ConnectionHandler(ConnectionConfig<T> config) throws IOException {
+    ConnectionHandler(ConnectionConfig<T> config, ReadHandler<T> readHandler) throws IOException {
         setName("MMO-Networking");
         this.config = config;
+        this.readHandler = readHandler;
         resourcePool = ResourcePool.initialize(config);
         group = createChannelGroup(config.threadPoolSize);
         listener = group.provider().openAsynchronousServerSocketChannel(group);
         listener.setOption(StandardSocketOptions.SO_REUSEADDR, true);
         listener.bind(config.address);
+        writeHandler = new WriteHandler<>();
     }
 
     private AsynchronousChannelGroup createChannelGroup(int threadPoolSize) throws IOException {
@@ -127,7 +131,7 @@ public final class ConnectionHandler<T extends Client<Connection<T>>> extends Th
                     }
 
                     channel.setOption(StandardSocketOptions.TCP_NODELAY, !config.useNagle);
-                    Connection<T> connection = new Connection<>(channel, config.readHandler, config.writeHandler);
+                    Connection<T> connection = new Connection<>(channel, readHandler, writeHandler);
                     T client = config.clientFactory.create(connection);
                     client.setResourcePool(resourcePool);
                     connection.setClient(client);
