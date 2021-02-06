@@ -39,20 +39,22 @@ import static java.util.Objects.nonNull;
  */
 class ConnectionConfig {
 
-    public static final int HEADER_SIZE = 2;
-
     private static final int MINIMUM_POOL_GROUPS = 3;
     private static final Pattern BUFFER_POOL_PROPERTY = Pattern.compile("(bufferPool\\.\\w+?\\.)size", Pattern.CASE_INSENSITIVE);
+
+    public static final int HEADER_SIZE = 2;
 
     ResourcePool resourcePool;
     ConnectionFilter acceptFilter;
     SocketAddress address;
 
+    private int maxCachedThreads = -1;
     float initBufferPoolFactor;
     long shutdownWaitTime = 5000;
     int threadPoolSize;
     boolean useNagle;
-    int disposePacketThreshold = 250;
+    int dropPacketThreshold = 250;
+    boolean useCachedThreadPool;
 
     ConnectionConfig(SocketAddress address) {
         this.address = address;
@@ -84,9 +86,11 @@ class ConnectionConfig {
 
     private void configure(Properties properties) {
         shutdownWaitTime = parseInt(properties, "shutdownWaitTime", 5) * 1000L;
-        threadPoolSize = parseInt(properties, "threadPoolSize", threadPoolSize);
+        useCachedThreadPool = parseBoolean(properties, "useCachedThreadPool", useCachedThreadPool);
+        threadPoolSize = Math.max(1, parseInt(properties, "threadPoolSize", threadPoolSize));
+        maxCachedThreads = parseInt(properties, "maxCachedThreads", maxCachedThreads);
         initBufferPoolFactor = parseFloat(properties, "bufferPool.initFactor", 0);
-        disposePacketThreshold = parseInt(properties, "disposePacketThreshold", 200);
+        dropPacketThreshold = parseInt(properties, "dropPacketThreshold", 200);
         resourcePool.setBufferSegmentSize(parseInt(properties, "bufferSegmentSize", resourcePool.getSegmentSize()));
 
         properties.stringPropertyNames().forEach(property -> {
@@ -99,6 +103,14 @@ class ConnectionConfig {
         });
 
         newBufferGroup(100, resourcePool.getSegmentSize());
+    }
+
+    private boolean parseBoolean(Properties properties, String propertyName, boolean defaultValue) {
+        try {
+            return Boolean.parseBoolean(properties.getProperty(propertyName));
+        } catch (Exception e) {
+            return defaultValue;
+        }
     }
 
     private int parseInt(Properties properties, String propertyName, int defaultValue) {
@@ -134,5 +146,13 @@ class ConnectionConfig {
             int bufferSize = 16384 << i;
             resourcePool.addBufferPool(bufferSize,new BufferPool(10, bufferSize));
         }
+    }
+
+    int maxCachedThreads() {
+        return maxCachedThreads < 0  || maxCachedThreads <= threadPoolSize ? threadPoolSize + 2 : maxCachedThreads;
+    }
+
+    void maxCachedThreads(int size) {
+        maxCachedThreads = size;
     }
 }

@@ -80,7 +80,7 @@ public abstract class Client<T extends Connection<?>> {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private boolean packetCanBeDropped(WritablePacket packet) {
-        return estimateQueueSize > connection.disposePacketThreshold() && packet.canBeDropped(this);
+        return estimateQueueSize > connection.dropPacketThreshold() && packet.canBeDropped(this);
     }
 
     protected final void writePackets(Collection<WritablePacket<? extends Client<T>>> packets) {
@@ -98,7 +98,7 @@ public abstract class Client<T extends Connection<?>> {
         }
     }
 
-    void writeNextPacket() {
+    private void writeNextPacket() {
         WritablePacket<? extends Client<T>> packet = packetsToWrite.poll();
         if(isNull(packet)) {
             releaseWritingResource();

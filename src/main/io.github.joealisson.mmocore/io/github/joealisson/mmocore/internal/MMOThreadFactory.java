@@ -30,8 +30,8 @@ public class MMOThreadFactory implements ThreadFactory {
     private final AtomicInteger threadNumber = new AtomicInteger(1);
     private final String namePrefix;
 
-    public MMOThreadFactory(){
-        namePrefix = "MMO-pool-" +poolNumber.getAndIncrement() + "-thread-";
+    public MMOThreadFactory(String name){
+        namePrefix = name + "MMO-pool-" +poolNumber.getAndIncrement() + "-thread-";
     }
 
     @Override

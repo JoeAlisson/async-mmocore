@@ -25,10 +25,11 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.StandardSocketOptions;
 import java.nio.channels.*;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static java.lang.Runtime.getRuntime;
 import static java.util.Objects.nonNull;
 
 /**
@@ -37,7 +38,6 @@ import static java.util.Objects.nonNull;
 public final class ConnectionHandler<T extends Client<Connection<T>>> extends Thread {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionHandler.class);
-    private static final int CACHED_THREAD_POOL_THRESHOLD = 1000;
 
     private final AsynchronousChannelGroup group;
     private final AsynchronousServerSocketChannel listener;
@@ -52,20 +52,21 @@ public final class ConnectionHandler<T extends Client<Connection<T>>> extends Th
         this.config = config;
         this.readHandler = readHandler;
         this.clientFactory = clientFactory;
-        group = createChannelGroup(config.threadPoolSize);
+        group = createChannelGroup();
         listener = group.provider().openAsynchronousServerSocketChannel(group);
         listener.setOption(StandardSocketOptions.SO_REUSEADDR, true);
         listener.bind(config.address);
         writeHandler = new WriteHandler<>();
     }
 
-    private AsynchronousChannelGroup createChannelGroup(int threadPoolSize) throws IOException {
-        if(threadPoolSize <= 0 || threadPoolSize >= CACHED_THREAD_POOL_THRESHOLD) {
+    private AsynchronousChannelGroup createChannelGroup() throws IOException {
+        if(config.useCachedThreadPool) {
             LOGGER.debug("Channel group is using CachedThreadPool");
-            return AsynchronousChannelGroup.withCachedThreadPool(Executors.newCachedThreadPool(new MMOThreadFactory()), getRuntime().availableProcessors());
+            ExecutorService threadPool = new ThreadPoolExecutor(config.threadPoolSize, config.maxCachedThreads(), 60L, TimeUnit.SECONDS, new SynchronousQueue<>(), new MMOThreadFactory("server"));
+            return AsynchronousChannelGroup.withCachedThreadPool(threadPool, config.threadPoolSize);
         }
         LOGGER.debug("Channel group is using FixedThreadPool");
-        return AsynchronousChannelGroup.withFixedThreadPool(threadPoolSize, new MMOThreadFactory());
+        return AsynchronousChannelGroup.withFixedThreadPool(config.threadPoolSize, new MMOThreadFactory("server"));
     }
 
     /**

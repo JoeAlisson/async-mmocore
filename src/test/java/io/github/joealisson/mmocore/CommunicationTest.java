@@ -63,7 +63,8 @@ public class CommunicationTest {
 
         builder = ConnectionBuilder.create(listenAddress, AsyncClient::new, handler, handler).filter(channel -> true).threadPoolSize(2).useNagle(false)
                 .shutdownWaitTime(500).addBufferPool(10,300).initBufferPoolFactor(0.2f).bufferSegmentSize(256);
-        connector = Connector.create(AsyncClient::new, handler, handler).addBufferPool(10, 300).initBufferPoolFactor(0.2f).bufferSegmentSize(128);
+        connector = Connector.create(AsyncClient::new, handler, handler).addBufferPool(10, 300).initBufferPoolFactor(0.2f)
+                .bufferSegmentSize(128).useCachedThreadPool(true).threadPoolSize(2).maxCachedThreads(4);
         packetsSent.set(0);
         shutdown.set(false);
     }
@@ -71,6 +72,23 @@ public class CommunicationTest {
     @Test
     public void testIntegration() throws IOException, ExecutionException, InterruptedException {
         connectionHandler = builder.build();
+        connectionHandler.start();
+
+        AsyncClient client = connector.connect("localhost", 9090);
+        client.sendPacket(new AsyncClientPingPacket());
+
+        Awaitility.waitAtMost(10, TimeUnit.SECONDS).untilTrue(shutdown);
+
+        connectionHandler.shutdown();
+        connectionHandler.join();
+        if(!success) {
+            fail();
+        }
+    }
+
+    @Test
+    public void testIntegrationWithCachedThreadPool() throws IOException, ExecutionException, InterruptedException {
+        connectionHandler = builder.useCachedThreadPool(true).maxCachedThreads(4).build();
         connectionHandler.start();
 
         AsyncClient client = connector.connect("localhost", 9090);
@@ -115,10 +133,10 @@ public class CommunicationTest {
     public void testDisposable() throws IOException, ExecutionException, InterruptedException {
         int disposeThreshold = 5;
         PACKET_SENT_TO_SUCCESS = 100;
-        connectionHandler = builder.disposePacketThreshold(disposeThreshold).build();
+        connectionHandler = builder.dropPacketThreshold(disposeThreshold).build();
         connectionHandler.start();
 
-        AsyncClient client = connector.disposePacketThreshold(disposeThreshold).connect("localhost", 9090);
+        AsyncClient client = connector.dropPacketThreshold(disposeThreshold).connect("localhost", 9090);
         AsyncClientBroadcastPacket[] packets = new AsyncClientBroadcastPacket[100];
         for (int i = 0; i < 100; i++) {
             packets[i] = new AsyncClientBroadcastPacket();

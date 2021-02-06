@@ -66,19 +66,47 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
     }
 
     /**
+     * Configures the connection to use CachedThreadPool as defined in {@link java.nio.channels.AsynchronousChannelGroup#withCachedThreadPool(java.util.concurrent.ExecutorService, int)}.
+     *
+     * The default behaviour is to use a fixed thread poll as defined in {@link java.nio.channels.AsynchronousChannelGroup#withFixedThreadPool(int, java.util.concurrent.ThreadFactory)}.
+     *
+     * @param cached use a cached thread pool if true, otherwise use fixed thread pool
+     * @return this
+     */
+    public ConnectionBuilder<T> useCachedThreadPool(boolean cached) {
+        this.config.useCachedThreadPool = cached;
+        return this;
+    }
+
+    /**
      * Set the size of the threadPool used to manage the connections and data sending.
      *
-     * If the size is less than or equal to zero or greater than {@link Short#MAX_VALUE} then a cachedThreadPool is used.
-     * Otherwise a FixedThreadPool with the size set is used.
+     * If the thread pool is cached this method defines the corePoolSize of  ({@link java.util.concurrent.ThreadPoolExecutor})
+     * If the thread pool is fixed this method defines the amount of threads
      *
+     * The min accepted value is 1.
      * The default value is the quantity of available processors minus 2.
      *
-     * @param size - the size to be Set
+     * @param size - the size of thread pool to be Set
      *
      * @return this
      */
     public ConnectionBuilder<T> threadPoolSize(int size) {
         this.config.threadPoolSize = size;
+        return this;
+    }
+
+    /**
+     * Set the size of max threads allowed in the cached thread pool.
+     * The default is the value defined in {@link #threadPoolSize(int)} plus 2.
+     *
+     * This config is ignored when a fixed thread pool is used.
+     *
+     * @param size the max cached threads in the cached thread pool.
+     * @return this
+     */
+    public ConnectionBuilder<T> maxCachedThreads(int size) {
+        this.config.maxCachedThreads(size);
         return this;
     }
 
@@ -154,8 +182,8 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
      * @param threshold the minimum value to drop packets. The default value is 250
      * @return this
      */
-    public ConnectionBuilder<T> disposePacketThreshold(int threshold) {
-        config.disposePacketThreshold = threshold;
+    public ConnectionBuilder<T> dropPacketThreshold(int threshold) {
+        config.dropPacketThreshold = threshold;
         return this;
     }
 
