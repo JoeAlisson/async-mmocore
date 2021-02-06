@@ -136,15 +136,14 @@ public class Connector<T extends Client<Connection<T>>> {
 
     /**
      * Set the size of max threads allowed in the cached thread pool.
-     * The default is the value defined in {@link #threadPoolSize(int)} plus 2.
-     * <p>
+     *
      * This config is ignored when a fixed thread pool is used.
      *
      * @param size the max cached threads in the cached thread pool.
      * @return this
      */
     public Connector<T> maxCachedThreads(int size) {
-        this.config.maxCachedThreads(size);
+        this.config.maxCachedThreads = size;
         return this;
     }
 
@@ -196,7 +195,7 @@ public class Connector<T extends Client<Connection<T>>> {
             synchronized (groupLock) {
                 if (isNull(group)) {
                     if(config.useCachedThreadPool) {
-                        ExecutorService threadPool = new ThreadPoolExecutor(config.threadPoolSize, config.maxCachedThreads(), 60L, TimeUnit.SECONDS, new SynchronousQueue<>(), new MMOThreadFactory("Client"));
+                        ExecutorService threadPool = new ThreadPoolExecutor(config.threadPoolSize, config.maxCachedThreads, 60L, TimeUnit.SECONDS, new SynchronousQueue<>(), new MMOThreadFactory("Client"));
                         group = AsynchronousChannelGroup.withCachedThreadPool(threadPool, config.threadPoolSize);
                     } else {
                         group = AsynchronousChannelGroup.withFixedThreadPool(config.threadPoolSize, new MMOThreadFactory("Client"));

@@ -98,7 +98,7 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
 
     /**
      * Set the size of max threads allowed in the cached thread pool.
-     * The default is the value defined in {@link #threadPoolSize(int)} plus 2.
+     * The execution we be rejected when all the threads in the cached thread pool is busy after reaching the max thread allowed.
      *
      * This config is ignored when a fixed thread pool is used.
      *
@@ -106,7 +106,7 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
      * @return this
      */
     public ConnectionBuilder<T> maxCachedThreads(int size) {
-        this.config.maxCachedThreads(size);
+        this.config.maxCachedThreads = size;
         return this;
     }
 

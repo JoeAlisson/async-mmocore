@@ -48,13 +48,13 @@ class ConnectionConfig {
     ConnectionFilter acceptFilter;
     SocketAddress address;
 
-    private int maxCachedThreads = -1;
     float initBufferPoolFactor;
     long shutdownWaitTime = 5000;
     int threadPoolSize;
     boolean useNagle;
     int dropPacketThreshold = 250;
     boolean useCachedThreadPool;
+    int maxCachedThreads = Integer.MAX_VALUE;
 
     ConnectionConfig(SocketAddress address) {
         this.address = address;
@@ -146,13 +146,5 @@ class ConnectionConfig {
             int bufferSize = 16384 << i;
             resourcePool.addBufferPool(bufferSize,new BufferPool(10, bufferSize));
         }
-    }
-
-    int maxCachedThreads() {
-        return maxCachedThreads < 0  || maxCachedThreads <= threadPoolSize ? threadPoolSize + 2 : maxCachedThreads;
-    }
-
-    void maxCachedThreads(int size) {
-        maxCachedThreads = size;
     }
 }
