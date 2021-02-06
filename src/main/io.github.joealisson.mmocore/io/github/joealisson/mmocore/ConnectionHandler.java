@@ -62,11 +62,11 @@ public final class ConnectionHandler<T extends Client<Connection<T>>> extends Th
     private AsynchronousChannelGroup createChannelGroup() throws IOException {
         if(config.useCachedThreadPool) {
             LOGGER.debug("Channel group is using CachedThreadPool");
-            ExecutorService threadPool = new ThreadPoolExecutor(config.threadPoolSize, config.maxCachedThreads(), 60L, TimeUnit.SECONDS, new SynchronousQueue<>(), new MMOThreadFactory("server"));
+            ExecutorService threadPool = new ThreadPoolExecutor(config.threadPoolSize, config.maxCachedThreads(), 60L, TimeUnit.SECONDS, new SynchronousQueue<>(), new MMOThreadFactory("Server"));
             return AsynchronousChannelGroup.withCachedThreadPool(threadPool, config.threadPoolSize);
         }
         LOGGER.debug("Channel group is using FixedThreadPool");
-        return AsynchronousChannelGroup.withFixedThreadPool(config.threadPoolSize, new MMOThreadFactory("server"));
+        return AsynchronousChannelGroup.withFixedThreadPool(config.threadPoolSize, new MMOThreadFactory("Server"));
     }
 
     /**

@@ -196,10 +196,10 @@ public class Connector<T extends Client<Connection<T>>> {
             synchronized (groupLock) {
                 if (isNull(group)) {
                     if(config.useCachedThreadPool) {
-                        ExecutorService threadPool = new ThreadPoolExecutor(config.threadPoolSize, config.maxCachedThreads(), 60L, TimeUnit.SECONDS, new SynchronousQueue<>(), new MMOThreadFactory("client"));
+                        ExecutorService threadPool = new ThreadPoolExecutor(config.threadPoolSize, config.maxCachedThreads(), 60L, TimeUnit.SECONDS, new SynchronousQueue<>(), new MMOThreadFactory("Client"));
                         group = AsynchronousChannelGroup.withCachedThreadPool(threadPool, config.threadPoolSize);
                     } else {
-                        group = AsynchronousChannelGroup.withFixedThreadPool(config.threadPoolSize, new MMOThreadFactory("client"));
+                        group = AsynchronousChannelGroup.withFixedThreadPool(config.threadPoolSize, new MMOThreadFactory("Client"));
                     }
                 }
             }

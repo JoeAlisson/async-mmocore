@@ -31,7 +31,7 @@ public class MMOThreadFactory implements ThreadFactory {
     private final String namePrefix;
 
     public MMOThreadFactory(String name){
-        namePrefix = name + "MMO-pool-" +poolNumber.getAndIncrement() + "-thread-";
+        namePrefix = name + "-MMO-pool-" +poolNumber.getAndIncrement() + "-thread-";
     }
 
     @Override
