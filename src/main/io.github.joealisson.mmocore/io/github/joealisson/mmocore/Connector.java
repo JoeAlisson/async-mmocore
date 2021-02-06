@@ -94,9 +94,9 @@ public class Connector<T extends Client<Connection<T>>>  {
     }
 
     /**
-     * Define the threshold to allow the client to drop {@link Disposable} packets.
+     * Define the threshold to allow the client to drop disposable packets.
      *
-     * When the client has queued more than {@code threshold} {@link Disposable} packets will can be disposed.
+     * When the client has queued more than {@code threshold} disposable packets will can be disposed.
      *
      * @param threshold the minimum value to drop packets. The default value is 250
      * @return this

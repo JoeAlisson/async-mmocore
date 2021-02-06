@@ -148,7 +148,7 @@ public class CommunicationTest {
         }
 
         @Override
-        public boolean canBeDisposed(AsyncClient client) {
+        public boolean canBeDropped(AsyncClient client) {
             return true;
         }
     }

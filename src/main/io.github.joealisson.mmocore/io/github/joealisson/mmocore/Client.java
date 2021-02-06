@@ -69,18 +69,18 @@ public abstract class Client<T extends Connection<?>> {
      * @param packet to be sent.
      */
     protected final void writePacket(WritablePacket<? extends Client<T>> packet) {
-        if (!isConnected() || isNull(packet) || checkDispose(packet)) {
+        if (!isConnected() || isNull(packet) || packetCanBeDropped(packet)) {
             return;
         }
 
         estimateQueueSize++;
         packetsToWrite.add(packet);
-        tryWriteNextPacket();
+        writeFairPacket();
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private boolean checkDispose(WritablePacket packet) {
-        return estimateQueueSize > connection.disposePacketThreshold() && packet.canBeDisposed(this);
+    private boolean packetCanBeDropped(WritablePacket packet) {
+        return estimateQueueSize > connection.disposePacketThreshold() && packet.canBeDropped(this);
     }
 
     protected final void writePackets(Collection<WritablePacket<? extends Client<T>>> packets) {
@@ -89,22 +89,26 @@ public abstract class Client<T extends Connection<?>> {
         }
         estimateQueueSize += packets.size();
         packetsToWrite.addAll(packets);
-        tryWriteNextPacket();
+        writeFairPacket();
     }
 
-    private void tryWriteNextPacket() {
+    private void writeFairPacket() {
         if(writing.compareAndSet(false, true)) {
-            if(packetsToWrite.isEmpty()) {
-                connection.releaseWritingBuffer();
-                writing.set(false);
-                LOGGER.debug("There is no packet to send");
-                if(isClosing) {
-                    disconnect();
-                }
-            } else {
-                estimateQueueSize--;
-                write(packetsToWrite.poll());
+            FairnessController.sendFairPacket(this);
+        }
+    }
+
+    void writeNextPacket() {
+        WritablePacket<? extends Client<T>> packet = packetsToWrite.poll();
+        if(isNull(packet)) {
+            releaseWritingResource();
+            LOGGER.debug("There is no packet to send");
+            if(isClosing) {
+                disconnect();
             }
+        } else {
+            estimateQueueSize--;
+            write(packet);
         }
     }
 
@@ -136,14 +140,20 @@ public abstract class Client<T extends Connection<?>> {
                 LOGGER.debug("Sending packet {}[{}] to {}", packet, dataSentSize, this);
             }
         } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
+            LOGGER.error("Error while {} writing {}", this, packet, e);
         } finally {
             if(!written) {
-                if(nonNull(buffer)) {
-                    buffer.releaseResources();
-                }
-                finishWriting();
+                handleNotWritten(buffer);
             }
+        }
+    }
+
+    private void handleNotWritten(InternalWritableBuffer buffer) {
+        if(!releaseWritingResource() && nonNull(buffer)) {
+            buffer.releaseResources();
+        }
+        if(isConnected()) {
+            writeFairPacket();
         }
     }
 
@@ -186,7 +196,7 @@ public abstract class Client<T extends Connection<?>> {
         }
         isClosing = true;
         LOGGER.debug("Closing client connection {} with packet {}", this, packet);
-        tryWriteNextPacket();
+        writeFairPacket();
     }
 
     void resumeSend(long result) {
@@ -196,18 +206,19 @@ public abstract class Client<T extends Connection<?>> {
 
     void finishWriting() {
         connection.releaseWritingBuffer();
+        FairnessController.sendFairPacket(this);
+    }
+
+    private boolean releaseWritingResource() {
+        boolean released = connection.releaseWritingBuffer();
         writing.set(false);
-        tryWriteNextPacket();
+        return released;
     }
 
     final void disconnect() {
-        LOGGER.debug("Client {} disconnecting", this);
         try {
+            LOGGER.debug("Client {} disconnecting", this);
             onDisconnection();
-            // Give a time to send last packet
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
         } finally {
             packetsToWrite.clear();
             connection.close();
@@ -297,4 +308,21 @@ public abstract class Client<T extends Connection<?>> {
      * The Packets can be sent only after this method is called.
      */
     public abstract void onConnected();
+
+    private static class FairnessController {
+
+        private static final ConcurrentLinkedQueue<Client<?>> readyClients = new ConcurrentLinkedQueue<>();
+
+        private static void sendFairPacket(Client<?> client) {
+            readyClients.offer(client);
+            writeToNextClient();
+        }
+
+        private static void writeToNextClient() {
+            Client<?> client = readyClients.poll();
+            if(nonNull(client)) {
+                client.writeNextPacket();
+            }
+        }
+    }
 }

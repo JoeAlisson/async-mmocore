@@ -68,6 +68,7 @@ public class ClientTest {
     public void testClosedConnection() throws IOException {
         try(AsynchronousSocketChannel channel = AsynchronousSocketChannel.open()) {
             Connection<AsyncClient> connection = new Connection<>(channel, null, null, new ConnectionConfig(null));
+            channel.close();
             new AsyncClient(connection);
         }
     }

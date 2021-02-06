@@ -118,7 +118,7 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> {
      * @param client client to send data to
      * @return if the packet is disposable or not.
      */
-    public boolean canBeDisposed(T client) {
+    public boolean canBeDropped(T client) {
         return false;
     }
 

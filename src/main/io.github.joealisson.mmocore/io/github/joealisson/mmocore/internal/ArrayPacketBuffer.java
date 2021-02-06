@@ -230,9 +230,13 @@ public class ArrayPacketBuffer extends InternalWritableBuffer implements Readabl
 
     @Override
     public ByteBuffer[] toByteBuffers() {
+        return new ByteBuffer[] { toByteBuffer() };
+    }
+
+    ByteBuffer toByteBuffer() {
         ByteBuffer buffer = resourcePool.getBuffer(limit);
         buffer.put(data, 0, limit);
-        return new ByteBuffer[] { buffer.flip() };
+        return  buffer.flip();
     }
 
     @Override

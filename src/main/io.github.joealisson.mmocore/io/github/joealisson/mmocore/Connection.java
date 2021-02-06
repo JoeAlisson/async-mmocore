@@ -105,13 +105,16 @@ public class Connection<T extends Client<Connection<T>>> {
         }
     }
 
-    void releaseWritingBuffer() {
+    boolean releaseWritingBuffer() {
+        boolean released = false;
         if(nonNull(writingBuffers)) {
             for (ByteBuffer buffer : writingBuffers) {
                 config.resourcePool.recycleBuffer(buffer);
+                released = true;
             }
             writingBuffers = null;
         }
+        return released;
     }
 
     void close() {
@@ -138,11 +141,7 @@ public class Connection<T extends Client<Connection<T>>> {
     }
 
     boolean isOpen() {
-        try {
-            return channel.isOpen() && nonNull(channel.getRemoteAddress());
-        } catch (Exception e) {
-            return false;
-        }
+        return channel.isOpen();
     }
 
     public ResourcePool getResourcePool() {
