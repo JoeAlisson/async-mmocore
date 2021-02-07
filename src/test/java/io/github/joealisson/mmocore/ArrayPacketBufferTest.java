@@ -87,7 +87,7 @@ public class ArrayPacketBufferTest {
     @Test
     public void testReleaseResources() {
         ConnectionConfig config = new ConnectionConfig(null);
-        InternalWritableBuffer buffer = InternalWritableBuffer.of(config.resourcePool);
+        InternalWritableBuffer buffer = InternalWritableBuffer.arrayBacked(config.resourcePool);
 
         buffer.writeShort((short) 10);
         buffer.mark();

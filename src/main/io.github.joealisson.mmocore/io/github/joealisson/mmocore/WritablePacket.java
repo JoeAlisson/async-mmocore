@@ -73,7 +73,7 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> {
 
     private InternalWritableBuffer choosePacketBuffer(T client) {
         if(broadcast) {
-            return InternalWritableBuffer.of(client.getResourcePool());
+            return InternalWritableBuffer.arrayBacked(client.getResourcePool());
         }
         return InternalWritableBuffer.dynamicOf(client.getResourcePool().getSegmentBuffer(), client.getResourcePool());
     }

@@ -17,11 +17,9 @@
 [![SonarCloud Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=JoeAlisson_async-mmocore&metric=vulnerabilities)](https://sonarcloud.io/component_measures/metric/security_rating/list?id=JoeAlisson_async-mmocore)
 
 
-[Para mais detalhes, participe da discussão sobre o assunto no fórum L2jBrasil](https://www.l2jbrasil.com/index.php?/topic/130598-mmocore-20-ass%C3%ADncrono/)
-
 #### The  Goal
 
-The _**Async-mmocore**_ is primary designed to **Massive Multiplayer Online (MMO) Game Servers**. 
+The _**Async-mmocore**_ is primarily designed to **Massive Multiplayer Online (MMO) Game Servers**. 
 The Goal of the Async-mmocore is to provide an easy way to handle MMO connections to a server abstracting the networking layer complexity.
 
 #### The Requirements 
@@ -53,17 +51,12 @@ public class ClientImpl extends Client<Connection<ClientImpl>> {
     }
         
     @Override
-    public boolean decrypt(byte[] data, int offset, int size) {
+    public boolean decrypt(Buffer data, int offset, int size) {
         return myCrypter.decrypt(data, offset, size);
-    }
-
-    @Override
-    public int encryptedSize(int dataSize) {
-        return myCrypter.calcEncryptedSize(dataSize);
     }
     
     @Override
-    public byte[] encrypt(byte[] data, int offset, int size) {
+    public boolean encrypt(Buffer data, int offset, int size) {
         return myCrypter.encrypt(data, offset, size);
     }
     
@@ -108,7 +101,7 @@ The Packet Handler must implement the [interface PacketHandler](https://github.c
 public class PacketHandlerImpl implements PacketHandler<ClientImpl> {
     
      @Override
-    public ReadablePacket<ClientImpl> handlePacket(PacketBuffer buffer, ClientImpl client) {
+    public ReadablePacket<ClientImpl> handlePacket(ReadableBuffer buffer, ClientImpl client) {
         ReadablePacket<ClientImpl> packet = convertToPacket(buffer, client);
         return packet;
     }

@@ -48,7 +48,7 @@ public abstract class InternalWritableBuffer extends WritableBuffer {
         return copy;
     }
 
-    public static InternalWritableBuffer of(ResourcePool resourcePool) {
+    public static InternalWritableBuffer arrayBacked(ResourcePool resourcePool) {
         return new ArrayPacketBuffer(resourcePool.getSegmentSize(), resourcePool);
     }
 }
