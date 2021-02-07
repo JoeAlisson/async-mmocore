@@ -21,12 +21,6 @@ package io.github.joealisson.mmocore;
 import io.github.joealisson.mmocore.internal.ArrayPacketBuffer;
 import io.github.joealisson.mmocore.internal.InternalWritableBuffer;
 
-import java.nio.ByteBuffer;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import static java.lang.Math.max;
-import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 /**
@@ -40,7 +34,6 @@ import static java.util.Objects.nonNull;
  */
 public abstract class WritablePacket<T extends Client<Connection<T>>> {
 
-    private static final Map<Class<?>, Integer> packetInfo = new ConcurrentHashMap<>();
     private volatile boolean broadcast;
     private ArrayPacketBuffer broadcastCacheBuffer;
 
@@ -79,23 +72,14 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> {
     }
 
     private InternalWritableBuffer choosePacketBuffer(T client) {
-        ByteBuffer buffer;
         if(broadcast) {
-            int size = packetInfo.getOrDefault(getClass(), client.getResourcePool().getSegmentSize());
-            return InternalWritableBuffer.of(size, client.getResourcePool());
+            return InternalWritableBuffer.of(client.getResourcePool());
         }
-
-        if(packetInfo.containsKey(getClass())) {
-            buffer = client.getResourcePool().getBuffer(packetInfo.get(getClass()));
-        } else {
-            buffer = client.getResourcePool().getSegmentBuffer();
-        }
-        return InternalWritableBuffer.dynamicOf(buffer, client.getResourcePool());
+        return InternalWritableBuffer.dynamicOf(client.getResourcePool().getSegmentBuffer(), client.getResourcePool());
     }
 
-    void writeHeaderAndRecord(InternalWritableBuffer buffer, int header) {
+    void writeHeader(InternalWritableBuffer buffer, int header) {
         buffer.writeShort(0, (short) header);
-        packetInfo.compute(getClass(), (k, v) -> isNull(v) ? header : max(v, header));
     }
 
     /**

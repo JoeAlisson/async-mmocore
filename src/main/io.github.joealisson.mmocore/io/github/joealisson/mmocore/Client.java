@@ -135,7 +135,7 @@ public abstract class Client<T extends Connection<?>> {
                     return;
                 }
 
-                packet.writeHeaderAndRecord(buffer, dataSentSize);
+                packet.writeHeader(buffer, dataSentSize);
                 written = connection.write(buffer.toByteBuffers());
                 LOGGER.debug("Sending packet {}[{}] to {}", packet, dataSentSize, this);
             }

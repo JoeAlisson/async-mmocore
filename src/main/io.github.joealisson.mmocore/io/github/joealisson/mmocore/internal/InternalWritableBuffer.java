@@ -30,7 +30,7 @@ public abstract class InternalWritableBuffer extends WritableBuffer {
         return copy;
     }
 
-    public static InternalWritableBuffer of(int size, ResourcePool resourcePool) {
-        return new ArrayPacketBuffer(size, resourcePool);
+    public static InternalWritableBuffer of(ResourcePool resourcePool) {
+        return new ArrayPacketBuffer(resourcePool.getSegmentSize(), resourcePool);
     }
 }

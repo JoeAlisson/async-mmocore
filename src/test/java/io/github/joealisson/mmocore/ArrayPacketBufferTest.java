@@ -65,8 +65,8 @@ public class ArrayPacketBufferTest {
 
     @Test
     public void testReleaseResources() {
-        ConnectionConfig config = new ConnectionConfig(null);;
-        InternalWritableBuffer buffer = InternalWritableBuffer.of(10, config.resourcePool);
+        ConnectionConfig config = new ConnectionConfig(null);
+        InternalWritableBuffer buffer = InternalWritableBuffer.of(config.resourcePool);
 
         buffer.writeShort((short) 10);
         buffer.mark();
@@ -74,7 +74,7 @@ public class ArrayPacketBufferTest {
 
         buffer.releaseResources();
         Assert.assertEquals(0, buffer.position());
-        Assert.assertEquals(10, buffer.limit());
+        Assert.assertEquals(config.resourcePool.getSegmentSize(), buffer.limit());
     }
 
 }
