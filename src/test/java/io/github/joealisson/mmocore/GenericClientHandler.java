@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019-2020 Async-mmocore
+ * Copyright © 2019-2021 Async-mmocore
  *
  * This file is part of the Async-mmocore project.
  *
@@ -23,6 +23,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * @author JoeAlisson
+ */
 public class GenericClientHandler implements PacketHandler<AsyncClient>, PacketExecutor<AsyncClient> {
 
     private ThreadPoolExecutor threadPool = new ThreadPoolExecutor(2, 2, 15L,TimeUnit.SECONDS, new LinkedBlockingQueue<>(), Executors.defaultThreadFactory());

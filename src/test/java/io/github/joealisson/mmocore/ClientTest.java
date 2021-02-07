@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019-2020 Async-mmocore
+ * Copyright © 2019-2021 Async-mmocore
  *
  * This file is part of the Async-mmocore project.
  *
@@ -26,6 +26,9 @@ import java.net.InetSocketAddress;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.util.concurrent.ExecutionException;
 
+/**
+ * @author JoeAlisson
+ */
 public class ClientTest {
 
     @Test(expected = IllegalArgumentException.class)

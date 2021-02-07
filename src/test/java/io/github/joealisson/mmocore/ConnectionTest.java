@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019-2020 Async-mmocore
+ * Copyright © 2019-2021 Async-mmocore
  *
  * This file is part of the Async-mmocore project.
  *
@@ -32,6 +32,9 @@ import java.util.concurrent.TimeUnit;
 
 import static java.util.Objects.nonNull;
 
+/**
+ * @author JoeAlisson
+ */
 public class ConnectionTest {
 
     private AsyncClient connectionClient;

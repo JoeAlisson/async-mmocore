@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019-2020 Async-mmocore
+ * Copyright © 2019-2021 Async-mmocore
  *
  * This file is part of the Async-mmocore project.
  *
@@ -20,6 +20,9 @@ package io.github.joealisson.mmocore;
 
 import org.junit.Assert;
 
+/**
+ * @author JoeAlisson
+ */
 public class AsyncClientPongPacket extends ReadablePacket<AsyncClient> {
 
     private long varLong;

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019-2020 Async-mmocore
+ * Copyright © 2019-2021 Async-mmocore
  *
  * This file is part of the Async-mmocore project.
  *
@@ -18,6 +18,9 @@
  */
 package io.github.joealisson.mmocore;
 
+/**
+ * @author JoeAlisson
+ */
 public class AsyncClientClosePacket extends WritablePacket<AsyncClient> {
     @Override
     protected boolean write(AsyncClient client, WritableBuffer buffer) {

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019-2020 Async-mmocore
+ * Copyright © 2019-2021 Async-mmocore
  *
  * This file is part of the Async-mmocore project.
  *
@@ -33,6 +33,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.fail;
 
+/**
+ * @author JoeAlisson
+ */
 public class CommunicationTest {
 
     private static final AtomicBoolean shutdown = new AtomicBoolean(false);

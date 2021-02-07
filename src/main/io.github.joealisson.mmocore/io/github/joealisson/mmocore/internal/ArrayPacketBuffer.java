@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019-2020 Async-mmocore
+ * Copyright © 2019-2021 Async-mmocore
  *
  * This file is part of the Async-mmocore project.
  *
@@ -31,6 +31,9 @@ import static java.lang.Double.longBitsToDouble;
 import static java.lang.Float.intBitsToFloat;
 import static java.util.Objects.isNull;
 
+/**
+ * @author JoeAlisson
+ */
 public class ArrayPacketBuffer extends InternalWritableBuffer implements ReadableBuffer {
 
     private final ResourcePool resourcePool;

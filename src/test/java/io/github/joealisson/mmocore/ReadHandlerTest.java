@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019-2020 Async-mmocore
+ * Copyright © 2019-2021 Async-mmocore
  *
  * This file is part of the Async-mmocore project.
  *
@@ -27,6 +27,9 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ExecutionException;
 
+/**
+ * @author JoeAlisson
+ */
 public class ReadHandlerTest {
 
     private ConnectionBuilder<AsyncClient>  connectionBuilder;
