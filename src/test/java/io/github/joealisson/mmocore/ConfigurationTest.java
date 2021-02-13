@@ -55,7 +55,7 @@ public class ConfigurationTest {
         ConnectionConfig config = new ConnectionConfig(null);
         config.complete();
         assertEquals(5 * 1000L, config.shutdownWaitTime);
-        assertEquals(max(1, getRuntime().availableProcessors() - 2), config.threadPoolSize);
+        assertEquals(max(2, getRuntime().availableProcessors() - 2), config.threadPoolSize);
     }
 
     @After
