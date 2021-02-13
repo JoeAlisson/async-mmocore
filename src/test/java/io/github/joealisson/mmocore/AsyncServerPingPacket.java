@@ -18,7 +18,7 @@
  */
 package io.github.joealisson.mmocore;
 
-import org.junit.Assert;
+import io.github.joealisson.mmocore.util.Comparator;
 
 /**
  * @author JoeAlisson
@@ -69,22 +69,22 @@ public class AsyncServerPingPacket extends ReadablePacket<AsyncClient> {
     @Override
     public void run() {
         try {
-            Assert.assertEquals(Long.MAX_VALUE, varLong);
-            Assert.assertEquals(Double.MAX_VALUE, varDouble, 0);
-            Assert.assertEquals(Integer.MAX_VALUE, varInt);
-            Assert.assertEquals(Float.MAX_VALUE, varFloat, 0);
-            Assert.assertEquals(Short.MAX_VALUE, varShort);
-            Assert.assertEquals(Byte.MAX_VALUE, varByte);
-            Assert.assertEquals("Ping", varString);
-            Assert.assertEquals("", emptyString);
-            Assert.assertEquals("Packet", varSizedString);
-            Assert.assertEquals("", emptySizedString);
-            Assert.assertTrue(trueByteBoolean);
-            Assert.assertFalse(falseByteBoolean);
-            Assert.assertTrue(trueShortBoolean);
-            Assert.assertFalse(falseShortBoolean);
-            Assert.assertTrue(trueIntBoolean);
-            Assert.assertFalse(falseIntBoolean);
+            Comparator.assertEquals(Long.MAX_VALUE, varLong);
+            Comparator.assertEquals(Double.MAX_VALUE, varDouble);
+            Comparator.assertEquals(Integer.MAX_VALUE, varInt);
+            Comparator.assertEquals(Float.MAX_VALUE, varFloat);
+            Comparator.assertEquals(Short.MAX_VALUE, varShort);
+            Comparator.assertEquals(Byte.MAX_VALUE, varByte);
+            Comparator.assertEquals("Ping", varString);
+            Comparator.assertEquals("", emptyString);
+            Comparator.assertEquals("Packet", varSizedString);
+            Comparator.assertEquals("", emptySizedString);
+            Comparator.assertTrue(trueByteBoolean);
+            Comparator.assertFalse(falseByteBoolean);
+            Comparator.assertTrue(trueShortBoolean);
+            Comparator.assertFalse(falseShortBoolean);
+            Comparator.assertTrue(trueIntBoolean);
+            Comparator.assertFalse(falseIntBoolean);
         } catch (Exception e) {
             CommunicationTest.shutdown(false);
         }

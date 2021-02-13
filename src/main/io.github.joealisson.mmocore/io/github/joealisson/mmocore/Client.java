@@ -53,7 +53,7 @@ public abstract class Client<T extends Connection<?>> {
      * @param connection - The Connection to the client.
      * @throws IllegalArgumentException if the connection is null or closed.
      */
-    public Client(T connection) {
+    protected Client(T connection) {
         if(isNull(connection) || !connection.isOpen()) {
             throw new IllegalArgumentException("The Connection is null or closed");
         }

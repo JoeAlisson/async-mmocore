@@ -63,6 +63,7 @@ public class ClientTest {
             AsyncClient client = Connector.create(AsyncClient::new, ((buffer, client1) -> null), incomingPacket -> {
             }).connect(socketAddress);
             client.close(new AsyncClientClosePacket());
+            Assert.assertFalse(client.isConnected());
             client.close();
         } finally {
             handler.shutdown();
@@ -87,7 +88,9 @@ public class ClientTest {
             handler.start();
             AsyncClient client = Connector.create(AsyncClient::new, ((buffer, client1) -> null), incomingPacket -> {
             }).connect(socketAddress);
+            Assert.assertTrue(client.isConnected());
             client.close();
+            Assert.assertEquals(0, client.getDataSentSize());
         } finally {
             handler.shutdown();
             handler.join();
@@ -101,7 +104,9 @@ public class ClientTest {
         try {
             handler.start();
             AsyncClient client = Connector.create(AsyncClient::new, null, null).connect(socketAddress);
+            Assert.assertTrue(client.isConnected());
             client.sendPacket(null);
+            Assert.assertEquals(0, client.getDataSentSize());
         } finally {
             handler.shutdown();
             handler.join();

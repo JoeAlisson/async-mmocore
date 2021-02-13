@@ -45,6 +45,18 @@ public class Comparator {
         }
     }
 
+    public static void assertFalse(boolean actual) throws ValueMismatchException {
+        if(actual) {
+            mismatch(false, true);
+        }
+    }
+
+    public static void assertTrue(boolean actual) throws ValueMismatchException {
+        if(!actual) {
+            mismatch(true, false);
+        }
+    }
+
     private static void mismatch(Object expected, Object actual) throws ValueMismatchException {
         throw new ValueMismatchException(expected.toString(), actual.toString());
     }

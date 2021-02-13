@@ -27,6 +27,8 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ExecutionException;
 
+import static io.github.joealisson.mmocore.ConnectionConfig.HEADER_SIZE;
+
 /**
  * @author JoeAlisson
  */
@@ -60,14 +62,17 @@ public class ReadHandlerTest {
     }
 
     @Test
-    public void testCompletedDiconnected() throws InterruptedException, ExecutionException, IOException {
+    public void testCompletedDisconnected() throws InterruptedException, ExecutionException, IOException {
         ConnectionHandler<AsyncClient> connectionHandler = connectionBuilder.shutdownWaitTime(100).build();
         try {
             connectionHandler.start();
             AsyncClient client = connector.connect(address);
+            Assert.assertTrue(client.isConnected());
             client.disconnect();
+            Assert.assertFalse(client.isConnected());
             ReadHandler<AsyncClient> handler = new ReadHandler<>(null, null);
             handler.completed(2, client);
+            Assert.assertEquals(HEADER_SIZE, client.getExpectedReadSize());
         } finally {
             connectionHandler.shutdown();
             connectionHandler.join();

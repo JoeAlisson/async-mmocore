@@ -8,13 +8,13 @@
 ###### Quality Metrics
 
 ![Build](https://github.com/JoeAlisson/async-mmocore/workflows/Build/badge.svg)
-[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=JoeAlisson_async-mmocore&metric=alert_status)](https://sonarcloud.io/dashboard?id=JoeAlisson_async-mmocore)
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=JoeAlisson_async-mmocore&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=JoeAlisson_async-mmocore)
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=JoeAlisson_async-mmocore&metric=security_rating)](https://sonarcloud.io/dashboard?id=JoeAlisson_async-mmocore)
-[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=JoeAlisson_async-mmocore&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=JoeAlisson_async-mmocore)
-[![SonarCloud Coverage](https://sonarcloud.io/api/project_badges/measure?project=JoeAlisson_async-mmocore&metric=coverage)](https://sonarcloud.io/component_measures?id=JoeAlisson_async-mmocore&metric=Coverage)
-[![SonarCloud Bugs](https://sonarcloud.io/api/project_badges/measure?project=JoeAlisson_async-mmocore&metric=bugs)](https://sonarcloud.io/component_measures/metric/reliability_rating/list?id=JoeAlisson_async-mmocore)
-[![SonarCloud Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=JoeAlisson_async-mmocore&metric=vulnerabilities)](https://sonarcloud.io/component_measures/metric/security_rating/list?id=JoeAlisson_async-mmocore)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=JoeAlisson_async-mmocore2&metric=alert_status)](https://sonarcloud.io/dashboard?id=JoeAlisson_async-mmocore2)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=JoeAlisson_async-mmocore2&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=JoeAlisson_async-mmocore2)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=JoeAlisson_async-mmocore2&metric=security_rating)](https://sonarcloud.io/dashboard?id=JoeAlisson_async-mmocore2)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=JoeAlisson_async-mmocore2&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=JoeAlisson_async-mmocore2)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=JoeAlisson_async-mmocore2&metric=coverage)](https://sonarcloud.io/dashboard?id=JoeAlisson_async-mmocore2)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=JoeAlisson_async-mmocore2&metric=bugs)](https://sonarcloud.io/dashboard?id=JoeAlisson_async-mmocore2)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=JoeAlisson_async-mmocore2&metric=code_smells)](https://sonarcloud.io/dashboard?id=JoeAlisson_async-mmocore2)
 
 
 #### The  Goal
