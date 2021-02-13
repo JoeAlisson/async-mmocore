@@ -143,7 +143,7 @@ class ConnectionConfig {
         int missingPools = MINIMUM_POOL_GROUPS - resourcePool.bufferPoolSize();
 
         for (int i = 0; i < missingPools; i++) {
-            int bufferSize = 16384 << i;
+            int bufferSize = 256 << i;
             resourcePool.addBufferPool(bufferSize,new BufferPool(10, bufferSize));
         }
     }

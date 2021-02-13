@@ -18,7 +18,7 @@
  */
 package io.github.joealisson.mmocore;
 
-import org.junit.Assert;
+import io.github.joealisson.mmocore.util.Comparator;
 
 /**
  * @author JoeAlisson
@@ -52,14 +52,14 @@ public class AsyncClientBroadcastReceiverPacket extends ReadablePacket<AsyncClie
     @Override
     public void run() {
         try {
-            Assert.assertEquals(Long.MAX_VALUE, varLong);
-            Assert.assertEquals(Double.MAX_VALUE, varDouble, 0);
-            Assert.assertEquals(Integer.MAX_VALUE, varInt);
-            Assert.assertEquals(Float.MAX_VALUE, varFloat, 0);
-            Assert.assertEquals(Short.MAX_VALUE, varShort);
-            Assert.assertEquals(Byte.MAX_VALUE, varByte);
-            Assert.assertEquals("Ping", varString);
-            Assert.assertEquals("Packet", varSizedString);
+            Comparator.assertEquals(Long.MAX_VALUE, varLong);
+            Comparator.assertEquals(Double.MAX_VALUE, varDouble);
+            Comparator.assertEquals(Integer.MAX_VALUE, varInt);
+            Comparator.assertEquals(Float.MAX_VALUE, varFloat);
+            Comparator.assertEquals(Short.MAX_VALUE, varShort);
+            Comparator.assertEquals(Byte.MAX_VALUE, varByte);
+            Comparator.assertEquals("Ping", varString);
+            Comparator.assertEquals("Packet", varSizedString);
             CommunicationTest.incrementPacketSended();
         } catch (Exception e) {
             CommunicationTest.shutdown(false);

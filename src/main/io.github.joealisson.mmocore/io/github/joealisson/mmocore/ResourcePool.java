@@ -37,12 +37,14 @@ public class ResourcePool {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourcePool.class);
 
-    private int bufferSegmentSize = 256;
-    private int[] bufferSizes = new int[] { 2 };
-    private final Map<Integer, BufferPool> bufferPools = new HashMap<>(4);
+    private final Map<Integer, BufferPool> bufferPools;
+    private int[] bufferSizes;
+    private int bufferSegmentSize;
 
-    public ResourcePool() {
-
+    ResourcePool() {
+        bufferSizes = new int[] { 2, 64 };
+        bufferPools = new HashMap<>(4);
+        bufferSegmentSize = 64;
     }
 
     public ByteBuffer getHeaderBuffer() {
@@ -104,7 +106,7 @@ public class ResourcePool {
     }
 
     public void addBufferPool(int bufferSize, BufferPool bufferPool) {
-        bufferPools.put(bufferSize, bufferPool);
+        bufferPools.putIfAbsent(bufferSize, bufferPool);
     }
 
     public int bufferPoolSize() {

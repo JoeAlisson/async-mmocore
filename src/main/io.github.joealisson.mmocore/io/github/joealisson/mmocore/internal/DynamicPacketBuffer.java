@@ -79,7 +79,7 @@ public class DynamicPacketBuffer extends InternalWritableBuffer {
 
     @Override
     public void writeBytes(byte[] bytes) {
-        if(isNull(bytes)) {
+        if(isNull(bytes) || bytes.length == 0) {
             return;
         }
         ensureSize(bufferIndex + bytes.length);
