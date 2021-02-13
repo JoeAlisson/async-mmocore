@@ -151,7 +151,7 @@ signing {
 sonarqube {
     properties {
         property 'sonar.host.url', 'https://sonarcloud.io'
-        property 'sonar.organization', 'sonarsource'
+        property 'sonar.organization', 'joealisson-github'
         property 'sonar.projectKey', 'JoeAlisson_async-mmocore'
     }
 }
