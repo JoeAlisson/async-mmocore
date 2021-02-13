@@ -147,3 +147,11 @@ publishing {
 signing {
     sign publishing.publications.maven
 }
+
+sonarqube {
+    properties {
+        property 'sonar.host.url', 'https://sonarcloud.io'
+        property 'sonar.organization', 'sonarsource'
+        property 'sonar.projectKey', 'JoeAlisson_async-mmocore'
+    }
+}
