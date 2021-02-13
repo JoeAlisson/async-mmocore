@@ -7,7 +7,7 @@
 
 ###### Quality Metrics
 
-[![Build Status](https://travis-ci.org/JoeAlisson/async-mmocore.svg?branch=master)](https://travis-ci.org/JoeAlisson/async-mmocore)
+![Build](https://github.com/JoeAlisson/async-mmocore/workflows/Build/badge.svg)
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=JoeAlisson_async-mmocore&metric=alert_status)](https://sonarcloud.io/dashboard?id=JoeAlisson_async-mmocore)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=JoeAlisson_async-mmocore&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=JoeAlisson_async-mmocore)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=JoeAlisson_async-mmocore&metric=security_rating)](https://sonarcloud.io/dashboard?id=JoeAlisson_async-mmocore)
