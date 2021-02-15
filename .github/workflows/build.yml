@@ -35,4 +35,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          ossrhUsername: ${{ secrets.SONATYPE_USER }}
+          ossrhPassword: ${{ secrets.SONATYPE_PWD }}
         run: ./gradlew build sonarqube
