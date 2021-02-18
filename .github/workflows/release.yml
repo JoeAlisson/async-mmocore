@@ -37,4 +37,4 @@ jobs:
           signing.keyId: ${{ secrets.SIGN_KEY_ID }}
           signing.password: ${{ secrets.SIGN_PWD }}
           signing.secretKeyRingFile: ~/.gnupg/secring.key
-        run: ./gradlew publish
+        run: ./gradlew publish -PossrhUsername="$ossrhUsername" -PossrhPassword="$ossrhPassword" -Psigning.keyId="$signing.keyId" -Psigning.password="$signing.password" -Psigning.secretKeyRingFile="$signing.secretKeyRingFile"
