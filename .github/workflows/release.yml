@@ -24,9 +24,9 @@ jobs:
           restore-keys: ${{ runner.os }}-gradle
       - name: Configure GPG Key
         run: |
-          mkdir -p ~/.gnupg/
-          printf "$GPG_SIGNING_KEY" | base64 --decode > ~/.gnupg/secring.gpg
-          gpg --import ~/.gnupg/secring.gpg
+          mkdir -p /home/runner/.gnupg/
+          printf "$GPG_SIGNING_KEY" | base64 --decode > /home/runner/.gnupg/secring.gpg
+          gpg --import /home/runner/.gnupg/secring.gpg
         env:
           GPG_SIGNING_KEY: ${{ secrets.SIGN_RING_FILE }}
       - name: Publish
@@ -36,4 +36,4 @@ jobs:
           ossrhPassword: ${{ secrets.SONATYPE_PWD }}
           signing.keyId: ${{ secrets.SIGN_KEY_ID }}
           signing.password: ${{ secrets.SIGN_PWD }}
-        run: ./gradlew publish -PossrhUsername="$ossrhUsername" -PossrhPassword="$ossrhPassword" -Psigning.keyId="$signing.keyId" -Psigning.password="$signing.password" -Psigning.secretKeyRingFile=~/.gnupg/secring.gpg
+        run: ./gradlew publish -PossrhUsername="$ossrhUsername" -PossrhPassword="$ossrhPassword" -Psigning.keyId="$signing.keyId" -Psigning.password="$signing.password" -Psigning.secretKeyRingFile=/home/runner/.gnupg/secring.gpg
