@@ -34,6 +34,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ossrhUsername: ${{ secrets.SONATYPE_USER }}
           ossrhPassword: ${{ secrets.SONATYPE_PWD }}
-          signing.keyId: ${{ secrets.SIGN_KEY_ID }}
-          signing.password: ${{ secrets.SIGN_PWD }}
-        run: ./gradlew publish -PossrhUsername="$ossrhUsername" -PossrhPassword="$ossrhPassword" -Psigning.keyId="$signing.keyId" -Psigning.password="$signing.password" -Psigning.secretKeyRingFile=/home/runner/.gnupg/secring.gpg
+          signingKeyId: ${{ secrets.SIGN_KEY_ID }}
+          signingPassword: ${{ secrets.SIGN_PWD }}
+        run: ./gradlew publish -PossrhUsername="$ossrhUsername" -PossrhPassword="$ossrhPassword" -Psigning.keyId="$signingKeyId" -Psigning.password="$signingPassword" -Psigning.secretKeyRingFile=/home/runner/.gnupg/secring.gpg
