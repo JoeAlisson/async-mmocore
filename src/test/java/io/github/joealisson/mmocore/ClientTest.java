@@ -19,13 +19,13 @@
 package io.github.joealisson.mmocore;
 
 import org.awaitility.Awaitility;
-import org.awaitility.Duration;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.AsynchronousSocketChannel;
+import java.time.Duration;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -122,7 +122,7 @@ public class ClientTest {
             AsyncClient client = Connector.create(AsyncClient::new, null, null).connect(socketAddress);
             Assert.assertTrue(client.isConnected());
             client.sendPacket(new EmptyPacket());
-            Awaitility.waitAtMost(Duration.ONE_SECOND).atLeast(20, TimeUnit.MILLISECONDS).until(client::getEstimateQueueSize, s -> s == 0);
+            Awaitility.waitAtMost(Duration.ofSeconds(1)).atLeast(20, TimeUnit.MILLISECONDS).until(client::getEstimateQueueSize, s -> s == 0);
             Assert.assertEquals(0, client.getDataSentSize());
         } finally {
             handler.shutdown();
@@ -139,7 +139,7 @@ public class ClientTest {
             AsyncClient client = Connector.create(AsyncClient::new, null, null).connect(socketAddress);
             Assert.assertTrue(client.isConnected());
             client.sendPackets(new EmptyPacket(), new EmptyPacket());
-            Awaitility.waitAtMost(Duration.ONE_SECOND).atLeast(20, TimeUnit.MILLISECONDS).until(client::getEstimateQueueSize, s -> s == 0);
+            Awaitility.waitAtMost(Duration.ofSeconds(1)).atLeast(20, TimeUnit.MILLISECONDS).until(client::getEstimateQueueSize, s -> s == 0);
             Assert.assertEquals(0, client.getDataSentSize());
         } finally {
             handler.shutdown();
@@ -157,7 +157,7 @@ public class ClientTest {
             EmptyEncrypterClient client = Connector.create(EmptyEncrypterClient::new, null, null).connect(socketAddress);
             Assert.assertTrue(client.isConnected());
             client.writePacket(new EmptyEncrypterPacket());
-            Awaitility.waitAtMost(Duration.ONE_SECOND).atLeast(20, TimeUnit.MILLISECONDS).until(client::getEstimateQueueSize, s -> s == 0);
+            Awaitility.waitAtMost(Duration.ofSeconds(1)).atLeast(20, TimeUnit.MILLISECONDS).until(client::getEstimateQueueSize, s -> s == 0);
             Assert.assertEquals(0, client.getDataSentSize());
         } finally {
             handler.shutdown();
@@ -174,7 +174,7 @@ public class ClientTest {
             EmptyEncrypterClient client = Connector.create(EmptyEncrypterClient::new, null, null).connect(socketAddress);
             Assert.assertTrue(client.isConnected());
             client.writePackets(null);
-            Awaitility.waitAtMost(Duration.ONE_SECOND).atLeast(20, TimeUnit.MILLISECONDS).until(client::getEstimateQueueSize, s -> s == 0);
+            Awaitility.waitAtMost(Duration.ofSeconds(1)).atLeast(20, TimeUnit.MILLISECONDS).until(client::getEstimateQueueSize, s -> s == 0);
             Assert.assertEquals(0, client.getDataSentSize());
         } finally {
             handler.shutdown();
@@ -191,7 +191,7 @@ public class ClientTest {
             EmptyEncrypterClient client = Connector.create(EmptyEncrypterClient::new, null, null).connect(socketAddress);
             Assert.assertTrue(client.isConnected());
             client.writePackets(null);
-            Awaitility.waitAtMost(Duration.ONE_SECOND).atLeast(20, TimeUnit.MILLISECONDS).until(client::getEstimateQueueSize, s -> s == 0);
+            Awaitility.waitAtMost(Duration.ofSeconds(1)).atLeast(20, TimeUnit.MILLISECONDS).until(client::getEstimateQueueSize, s -> s == 0);
             Assert.assertEquals(0, client.getDataSentSize());
         } finally {
             handler.shutdown();
@@ -273,7 +273,7 @@ public class ClientTest {
             handler.start();
             BigEncripterClient client = Connector.create(BigEncripterClient::new, null, null)
                     .addBufferPool(10, 4).addBufferPool(10, 16).connect(socketAddress);
-            client.writePacket(new WritablePacket<BigEncripterClient>() {
+            client.writePacket(new WritablePacket<>() {
                 @Override
                 protected boolean write(BigEncripterClient client, WritableBuffer buffer) {
                     buffer.writeLong(90);
