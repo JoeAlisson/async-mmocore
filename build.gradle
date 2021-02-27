@@ -12,7 +12,7 @@ plugins {
 }
 
 group = 'io.github.joealisson'
-version = '3.3.0'
+version = '3.4.0-SNAPSHOT'
 
 sourceCompatibility = JavaVersion.VERSION_11
 
@@ -58,14 +58,14 @@ jar {
         attributes('Built-By'       : System.getProperty('user.name'),
                    'Build-Timestamp': new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
                    'Build-Revision' : revision,
-                   'Build-Version'  : version,
+                   'Build-Version'  : archiveVersion,
                    'Build-Jdk'      : buildJDK,
                    'Automatic-Module-Name': moduleName)
     }
 }
 
 task jarSources(type:Jar){
-    classifier = 'sources'
+    archiveClassifier = "sources"
     from sourceSets.main.allSource
 }
 
@@ -74,7 +74,7 @@ javadoc {
 }
 
 task javadocJar(type: Jar) {
-    classifier = 'javadoc'
+    archiveClassifier = 'javadoc'
     from javadoc
 }
 
