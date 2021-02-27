@@ -30,12 +30,13 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 /**
  * @author JoeAlisson
  */
-public final class ConnectionHandler<T extends Client<Connection<T>>> extends Thread {
+public final class ConnectionHandler<T extends Client<Connection<T>>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionHandler.class);
 
@@ -45,18 +46,14 @@ public final class ConnectionHandler<T extends Client<Connection<T>>> extends Th
     private final WriteHandler<T> writeHandler;
     private final ReadHandler<T> readHandler;
     private final ClientFactory<T> clientFactory;
-    private volatile boolean shutdown;
 
     ConnectionHandler(ConnectionConfig config, ClientFactory<T> clientFactory, ReadHandler<T> readHandler) throws IOException {
-        setName("MMO-Networking");
         this.config = config;
         this.readHandler = readHandler;
         this.clientFactory = clientFactory;
-        group = createChannelGroup();
-        listener = group.provider().openAsynchronousServerSocketChannel(group);
-        listener.setOption(StandardSocketOptions.SO_REUSEADDR, true);
-        listener.bind(config.address);
         writeHandler = new WriteHandler<>();
+        group = createChannelGroup();
+        listener = openServerSocket(config);
     }
 
     private AsynchronousChannelGroup createChannelGroup() throws IOException {
@@ -69,15 +66,27 @@ public final class ConnectionHandler<T extends Client<Connection<T>>> extends Th
         return AsynchronousChannelGroup.withFixedThreadPool(config.threadPoolSize, new MMOThreadFactory("Server"));
     }
 
+    private AsynchronousServerSocketChannel openServerSocket(ConnectionConfig config) throws IOException {
+        var listener = group.provider().openAsynchronousServerSocketChannel(group);
+        listener.setOption(StandardSocketOptions.SO_REUSEADDR, true);
+        listener.bind(config.address);
+        return listener;
+    }
+
     /**
      * Start to listen connections.
      */
-    @Override
-    public void run() {
+    public void start() {
         listener.accept(null, new AcceptConnectionHandler());
     }
 
-    private void closeConnection() {
+    /**
+     * Shutdown the connection listener, the thread pool and all associated resources.
+     *
+     * This method closes all established connections.
+     */
+    public void shutdown() {
+        LOGGER.debug("Shutting ConnectionHandler down");
         try {
             listener.close();
             group.awaitTermination(config.shutdownWaitTime, TimeUnit.MILLISECONDS);
@@ -88,27 +97,26 @@ public final class ConnectionHandler<T extends Client<Connection<T>>> extends Th
     }
 
     /**
-     * Shutdown the connection listener, the thread pool and all associated resources.
+     * Return the current use of Resource Buffers Pools
      *
-     * This method closes all established connections.
+     * API Note: This method exists mainly to support debugging, where you want to see the use of Buffers resource.
+     *
+     * @return the resource buffers pool stats
      */
-    public void shutdown() {
-        LOGGER.debug("Shutting ConnectionHandler down");
-        shutdown = true;
-        closeConnection();
+    public String resourceStats() {
+        return config.resourcePool.stats();
     }
 
     private class AcceptConnectionHandler implements CompletionHandler<AsynchronousSocketChannel, Void> {
         @Override
         public void completed(AsynchronousSocketChannel clientChannel, Void attachment) {
-            tryAcceptNewConnection();
-            acceptConnection(clientChannel);
+            listenConnections();
+            processNewConnection(clientChannel);
         }
 
-        private void tryAcceptNewConnection() {
-            if(!shutdown && listener.isOpen()) {
+        private void listenConnections() {
+            if(listener.isOpen())
                 listener.accept(null, this);
-            }
         }
 
         @Override
@@ -116,38 +124,54 @@ public final class ConnectionHandler<T extends Client<Connection<T>>> extends Th
             if(t instanceof ClosedChannelException) {
                 LOGGER.debug(t.getMessage(), t);
             } else {
-                tryAcceptNewConnection();
+                listenConnections();
                 LOGGER.warn(t.getMessage(), t);
             }
         }
 
-        private void acceptConnection(AsynchronousSocketChannel channel) {
+        private void processNewConnection(AsynchronousSocketChannel channel) {
             if(nonNull(channel) && channel.isOpen()) {
                 try {
-                    LOGGER.debug("Accepting connection from {}", channel);
-                    if(nonNull(config.acceptFilter) && !config.acceptFilter.accept(channel)) {
-                        channel.close();
-                        LOGGER.debug("Rejected connection");
-                        return;
-                    }
-
-                    channel.setOption(StandardSocketOptions.TCP_NODELAY, !config.useNagle);
-                    Connection<T> connection = new Connection<>(channel, readHandler, writeHandler, config);
-                    T client = clientFactory.create(connection);
-                    connection.setClient(client);
-                    client.onConnected();
-                    client.read();
+                    connectToChannel(channel);
                 } catch (ClosedChannelException e) {
                     LOGGER.debug(e.getMessage(), e);
                 } catch (Exception  e) {
                     LOGGER.error(e.getMessage(), e);
-                    try {
-                        channel.close();
-                    } catch (IOException ie) {
-                        LOGGER.warn(ie.getMessage(), ie);
-                    }
+                    closeChannel(channel);
                 }
             }
+        }
+
+        private void closeChannel(AsynchronousSocketChannel channel) {
+            try {
+                channel.close();
+            } catch (IOException ie) {
+                LOGGER.warn(ie.getMessage(), ie);
+            }
+        }
+
+        private void connectToChannel(AsynchronousSocketChannel channel) throws IOException {
+            LOGGER.debug("Connecting to {}", channel);
+            if(acceptConnection(channel)) {
+                T client = createClient(channel);
+                client.onConnected();
+                client.read();
+            } else {
+                LOGGER.debug("Rejected connection");
+                closeChannel(channel);
+            }
+        }
+
+        private boolean acceptConnection(AsynchronousSocketChannel channel) {
+            return isNull(config.acceptFilter) || config.acceptFilter.accept(channel);
+        }
+
+        private T createClient(AsynchronousSocketChannel channel) throws IOException {
+            channel.setOption(StandardSocketOptions.TCP_NODELAY, !config.useNagle);
+            Connection<T> connection = new Connection<>(channel, readHandler, writeHandler, config);
+            T client = clientFactory.create(connection);
+            connection.setClient(client);
+            return client;
         }
     }
 }

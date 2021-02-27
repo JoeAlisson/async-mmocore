@@ -57,7 +57,6 @@ public class ReadHandlerTest {
             Assert.assertFalse(connected);
         } finally {
             connectionHandler.shutdown();
-            connectionHandler.join();
         }
     }
 
@@ -75,7 +74,6 @@ public class ReadHandlerTest {
             Assert.assertEquals(HEADER_SIZE, client.getExpectedReadSize());
         } finally {
             connectionHandler.shutdown();
-            connectionHandler.join();
         }
     }
 
@@ -93,7 +91,6 @@ public class ReadHandlerTest {
             Assert.assertTrue(connected);
         } finally {
             connectionHandler.shutdown();
-            connectionHandler.join();
         }
     }
 
@@ -112,7 +109,6 @@ public class ReadHandlerTest {
             Assert.assertTrue(connected);
         } finally {
             connectionHandler.shutdown();
-            connectionHandler.join();
         }
     }
 
@@ -135,7 +131,6 @@ public class ReadHandlerTest {
             Assert.assertTrue(connected);
         } finally {
             connectionHandler.shutdown();
-            connectionHandler.join();
         }
     }
 }

@@ -27,6 +27,8 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import static java.util.Objects.nonNull;
+
 /**
  * @author JoeAlisson
  */
@@ -48,7 +50,6 @@ public class ConnectionHandlerTest {
             Assert.assertFalse(client.isConnected());
         }finally {
             connectionHandler.shutdown();
-            connectionHandler.join();
         }
     }
 
@@ -67,7 +68,6 @@ public class ConnectionHandlerTest {
             Assert.assertFalse(client.isConnected());
         }finally {
             connectionHandler.shutdown();
-            connectionHandler.join();
         }
     }
 
@@ -86,8 +86,49 @@ public class ConnectionHandlerTest {
             Assert.assertFalse(client.isConnected());
         }finally {
             connectionHandler.shutdown();
-            connectionHandler.join();
         }
+    }
+
+    @Test
+    public void testResourceStats() throws IOException {
+        var template = "Pool {maxSize=%d, bufferSize=%d, estimateUse=%d}";
+        var listenAddress = new InetSocketAddress(9090);
+        var handler = new GenericClientHandler();
+        ConnectionHandler<AsyncClient> connectionHandler = null;
+
+        try {
+            connectionHandler = createConnectionHandler(listenAddress, handler, 0);
+            checkStats(template, connectionHandler, 0, 0, 0);
+        } finally {
+            if(nonNull(connectionHandler))
+                connectionHandler.shutdown();
+        }
+
+        try {
+            connectionHandler = createConnectionHandler(listenAddress, handler, 0.5f);
+            checkStats(template, connectionHandler, 2, 4, 6);
+        } finally {
+            if(nonNull(connectionHandler))
+                connectionHandler.shutdown();
+        }
+
+
+    }
+
+    private ConnectionHandler<AsyncClient> createConnectionHandler(InetSocketAddress listenAddress, GenericClientHandler handler, float initFactor) throws IOException {
+        ConnectionHandler<AsyncClient> connectionHandler;
+        connectionHandler = ConnectionBuilder.create(listenAddress, AsyncClient::new, handler, handler).shutdownWaitTime(100).initBufferPoolFactor(initFactor)
+                .addBufferPool(4, 5)
+                .addBufferPool(8, 6)
+                .addBufferPool(12, 7).build();
+        return connectionHandler;
+    }
+
+    private void checkStats(String template, ConnectionHandler<AsyncClient> connectionHandler, int estimate1, int estimate2, int estimate3) {
+        String stats = connectionHandler.resourceStats();
+        Assert.assertTrue(stats.contains(String.format(template, 4, 5, estimate1)));
+        Assert.assertTrue(stats.contains(String.format(template, 8, 6, estimate2)));
+        Assert.assertTrue(stats.contains(String.format(template, 12, 7, estimate3)));
     }
 
     static class ThrowableFactory implements ClientFactory<ThrowableClient> {

@@ -22,7 +22,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author JoeAlisson
@@ -32,7 +31,7 @@ public class BufferPool {
     private final Queue<ByteBuffer> buffers = new ConcurrentLinkedQueue<>();
     private final int maxSize;
     private final int bufferSize;
-    private final AtomicInteger elements = new AtomicInteger();
+    private int estimateSize;
 
     public BufferPool(int maxSize, int bufferSize) {
         this.maxSize = maxSize;
@@ -44,21 +43,32 @@ public class BufferPool {
         for (int i = 0; i < amount; i++) {
             buffers.offer(ByteBuffer.allocateDirect(bufferSize).order(ByteOrder.LITTLE_ENDIAN));
         }
-        elements.set(amount);
+        estimateSize = amount;
     }
 
-    public void recycle(ByteBuffer buffer) {
-        if(elements.get() < maxSize) {
+    public boolean recycle(ByteBuffer buffer) {
+        var recycle = estimateSize < maxSize;
+        if(recycle) {
             buffers.offer(buffer.clear());
-            elements.incrementAndGet();
+            estimateSize++;
         }
+        return recycle;
     }
 
     public ByteBuffer get() {
-        if(elements.get() > 0) {
-            elements.getAndDecrement();
+        if(estimateSize > 0) {
+            estimateSize--;
             return buffers.poll();
         }
         return null;
+    }
+
+    public int estimateSize() {
+        return estimateSize;
+    }
+
+    @Override
+    public String toString() {
+        return "Pool {maxSize=" + maxSize + ", bufferSize=" + bufferSize + ", estimateUse=" +estimateSize + '}';
     }
 }

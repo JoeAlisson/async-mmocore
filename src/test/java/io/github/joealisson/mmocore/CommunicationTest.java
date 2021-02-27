@@ -83,7 +83,6 @@ public class CommunicationTest {
         Awaitility.waitAtMost(10, TimeUnit.SECONDS).untilTrue(shutdown);
 
         connectionHandler.shutdown();
-        connectionHandler.join();
         if(!success) {
             fail();
         }
@@ -100,7 +99,6 @@ public class CommunicationTest {
         Awaitility.waitAtMost(10, TimeUnit.SECONDS).untilTrue(shutdown);
 
         connectionHandler.shutdown();
-        connectionHandler.join();
         if(!success) {
             fail();
         }
@@ -126,7 +124,6 @@ public class CommunicationTest {
         Awaitility.waitAtMost(10, TimeUnit.SECONDS).untilTrue(shutdown);
 
         connectionHandler.shutdown();
-        connectionHandler.join();
         if(packetsSent.get() != clients.length) {
             fail();
         }
@@ -154,7 +151,6 @@ public class CommunicationTest {
         Awaitility.waitAtMost(10, TimeUnit.SECONDS).untilTrue(shutdown);
 
         connectionHandler.shutdown();
-        connectionHandler.join();
         if(packetsSent.get() != packets.length + 1) {
             fail();
         }

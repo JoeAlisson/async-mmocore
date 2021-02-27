@@ -43,7 +43,6 @@ public class WriteHandlerTest {
             Assert.assertFalse(connected);
         } finally {
             handler.shutdown();
-            handler.join();
         }
     }
 
@@ -62,7 +61,6 @@ public class WriteHandlerTest {
             Assert.assertTrue(client.getDataSentSize() > 0);
         } finally {
             handler.shutdown();
-            handler.join();
         }
     }
 
@@ -79,7 +77,6 @@ public class WriteHandlerTest {
             Assert.assertFalse(connected);
         } finally {
             handler.shutdown();
-            handler.join();
         }
     }
 

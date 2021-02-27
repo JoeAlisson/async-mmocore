@@ -50,7 +50,6 @@ public class ClientTest {
             Assert.assertEquals("127.0.0.1", client.getHostAddress());
         } finally {
             handler.shutdown();
-            handler.join();
         }
     }
 
@@ -67,7 +66,6 @@ public class ClientTest {
             client.close();
         } finally {
             handler.shutdown();
-            handler.join();
         }
     }
 
@@ -93,7 +91,6 @@ public class ClientTest {
             Assert.assertEquals(0, client.getDataSentSize());
         } finally {
             handler.shutdown();
-            handler.join();
         }
     }
 
@@ -109,7 +106,6 @@ public class ClientTest {
             Assert.assertEquals(0, client.getDataSentSize());
         } finally {
             handler.shutdown();
-            handler.join();
         }
     }
 
@@ -126,7 +122,6 @@ public class ClientTest {
             Assert.assertEquals(0, client.getDataSentSize());
         } finally {
             handler.shutdown();
-            handler.join();
         }
     }
 
@@ -143,7 +138,6 @@ public class ClientTest {
             Assert.assertEquals(0, client.getDataSentSize());
         } finally {
             handler.shutdown();
-            handler.join();
         }
     }
 
@@ -161,7 +155,6 @@ public class ClientTest {
             Assert.assertEquals(0, client.getDataSentSize());
         } finally {
             handler.shutdown();
-            handler.join();
         }
     }
 
@@ -178,7 +171,6 @@ public class ClientTest {
             Assert.assertEquals(0, client.getDataSentSize());
         } finally {
             handler.shutdown();
-            handler.join();
         }
     }
 
@@ -195,7 +187,6 @@ public class ClientTest {
             Assert.assertEquals(0, client.getDataSentSize());
         } finally {
             handler.shutdown();
-            handler.join();
         }
     }
 
@@ -215,7 +206,6 @@ public class ClientTest {
             Assert.assertTrue(client.isConnected());
         } finally {
             handler.shutdown();
-            handler.join();
         }
     }
 
@@ -237,7 +227,6 @@ public class ClientTest {
             Assert.assertTrue(client.isConnected());
         } finally {
             handler.shutdown();
-            handler.join();
         }
     }
 
@@ -261,7 +250,6 @@ public class ClientTest {
             Assert.assertTrue(client.getDataSentSize() > 0);
         } finally {
             handler.shutdown();
-            handler.join();
         }
     }
 
@@ -285,7 +273,6 @@ public class ClientTest {
             Assert.assertTrue(client.getDataSentSize() > 0);
         } finally {
             handler.shutdown();
-            handler.join();
         }
     }
 
@@ -315,7 +302,6 @@ public class ClientTest {
             Assert.assertTrue(client.getDataSentSize() > 0);
         } finally {
             handler.shutdown();
-            handler.join();
         }
     }
 

@@ -47,11 +47,11 @@ public class ResourcePool {
         bufferSegmentSize = 64;
     }
 
-    public ByteBuffer getHeaderBuffer() {
+    ByteBuffer getHeaderBuffer() {
         return getSizedBuffer(ConnectionConfig.HEADER_SIZE);
     }
 
-    public ByteBuffer getSegmentBuffer() {
+    ByteBuffer getSegmentBuffer() {
         return getSizedBuffer(bufferSegmentSize);
     }
 
@@ -59,7 +59,7 @@ public class ResourcePool {
         return getSizedBuffer(determineBufferSize(size));
     }
 
-    public ByteBuffer recycleAndGetNew(ByteBuffer buffer, int newSize) {
+    ByteBuffer recycleAndGetNew(ByteBuffer buffer, int newSize) {
         int bufferSize = determineBufferSize(newSize);
         if(nonNull(buffer)) {
             if(buffer.clear().limit() == bufferSize) {
@@ -95,8 +95,8 @@ public class ResourcePool {
     public void recycleBuffer(ByteBuffer buffer) {
         if (nonNull(buffer)) {
             BufferPool pool = bufferPools.get(buffer.capacity());
-            if(nonNull(pool)) {
-                pool.recycle(buffer);
+            if(isNull(pool) || !pool.recycle(buffer)) {
+                LOGGER.debug("buffer was not recycled {} in pool {}", buffer, pool);
             }
         }
     }
@@ -105,22 +105,31 @@ public class ResourcePool {
         return bufferSegmentSize;
     }
 
-    public void addBufferPool(int bufferSize, BufferPool bufferPool) {
+    void addBufferPool(int bufferSize, BufferPool bufferPool) {
         bufferPools.putIfAbsent(bufferSize, bufferPool);
     }
 
-    public int bufferPoolSize() {
+    int bufferPoolSize() {
         return bufferPools.size();
     }
 
-    public void initializeBuffers(float initBufferPoolFactor) {
+    void initializeBuffers(float initBufferPoolFactor) {
         if(initBufferPoolFactor > 0) {
             bufferPools.values().forEach(pool -> pool.initialize(initBufferPoolFactor));
         }
         bufferSizes = bufferPools.keySet().stream().sorted().mapToInt(Integer::intValue).toArray();
     }
 
-    public void setBufferSegmentSize(int size) {
+    void setBufferSegmentSize(int size) {
         bufferSegmentSize = size;
     }
+
+    String stats() {
+        var sb = new StringBuilder();
+        for (BufferPool pool : bufferPools.values()) {
+            sb.append(pool.toString()).append("\n");
+        }
+        return sb.toString();
+    }
+
 }

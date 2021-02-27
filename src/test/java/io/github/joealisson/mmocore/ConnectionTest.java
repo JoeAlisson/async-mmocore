@@ -59,7 +59,6 @@ public class ConnectionTest {
             Assert.assertEquals("", connection.getRemoteAddress());
         } finally {
             handler.shutdown();
-            handler.join();
         }
     }
 
@@ -85,7 +84,6 @@ public class ConnectionTest {
             Assert.assertEquals("", connection.getRemoteAddress());
         } finally {
             handler.shutdown();
-            handler.join();
         }
     }
 
@@ -101,7 +99,6 @@ public class ConnectionTest {
             Awaitility.waitAtMost(10, TimeUnit.SECONDS).until(() -> nonNull(connectionClient.receivedPacket));
         } finally {
             handler.shutdown();
-            handler.join();
         }
     }
 
