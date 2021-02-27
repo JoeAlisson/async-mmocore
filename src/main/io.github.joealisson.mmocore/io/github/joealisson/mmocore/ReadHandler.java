@@ -70,7 +70,11 @@ class ReadHandler<T extends Client<Connection<T>>> implements CompletionHandler<
         ByteBuffer buffer = client.getConnection().getReadingBuffer();
         buffer.flip();
         int dataSize = Short.toUnsignedInt(buffer.getShort()) - HEADER_SIZE;
-        client.readPayload(dataSize);
+        if(dataSize > 0) {
+            client.readPayload(dataSize);
+        } else {
+            client.read();
+        }
     }
 
     private void handlePayload(T client) {
