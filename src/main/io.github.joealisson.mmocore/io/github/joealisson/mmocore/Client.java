@@ -19,6 +19,7 @@
 package io.github.joealisson.mmocore;
 
 import io.github.joealisson.mmocore.internal.InternalWritableBuffer;
+import io.github.joealisson.mmocore.internal.NotWrittenBufferException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -119,10 +120,6 @@ public abstract class Client<T extends Connection<?>> {
         try {
              buffer = packet.writeData(this);
 
-            if(isNull(buffer)) {
-                return;
-            }
-
             var payloadSize = buffer.limit() - HEADER_SIZE;
             if(payloadSize <= 0) {
                 return;
@@ -139,6 +136,8 @@ public abstract class Client<T extends Connection<?>> {
                 written = connection.write(buffer.toByteBuffers());
                 LOGGER.debug("Sending packet {}[{}] to {}", packet, dataSentSize, this);
             }
+        } catch (NotWrittenBufferException ignored) {
+            LOGGER.debug("packet was not written {}", packet);
         } catch (Exception e) {
             LOGGER.error("Error while {} writing {}", this, packet, e);
         } finally {

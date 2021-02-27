@@ -20,6 +20,7 @@ package io.github.joealisson.mmocore;
 
 import io.github.joealisson.mmocore.internal.ArrayPacketBuffer;
 import io.github.joealisson.mmocore.internal.InternalWritableBuffer;
+import io.github.joealisson.mmocore.internal.NotWrittenBufferException;
 
 import static java.util.Objects.nonNull;
 
@@ -39,14 +40,14 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> {
 
     protected WritablePacket() { }
 
-    InternalWritableBuffer writeData(T client) {
+    InternalWritableBuffer writeData(T client) throws NotWrittenBufferException {
         if(broadcast) {
             return writeDataWithCache(client);
         }
         return writeDataToBuffer(client);
     }
 
-    private synchronized InternalWritableBuffer writeDataWithCache(T client) {
+    private synchronized InternalWritableBuffer writeDataWithCache(T client) throws NotWrittenBufferException {
         if (nonNull(broadcastCacheBuffer)) {
             return InternalWritableBuffer.dynamicOf(broadcastCacheBuffer, client.getResourcePool());
         } else {
@@ -59,7 +60,7 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> {
         }
     }
 
-    private InternalWritableBuffer writeDataToBuffer(T client) {
+    private InternalWritableBuffer writeDataToBuffer(T client) throws NotWrittenBufferException {
         InternalWritableBuffer buffer = choosePacketBuffer(client);
 
         buffer.position(ConnectionConfig.HEADER_SIZE);
@@ -68,7 +69,7 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> {
             return buffer;
         }
         buffer.releaseResources();
-        return null;
+        throw new NotWrittenBufferException();
     }
 
     private InternalWritableBuffer choosePacketBuffer(T client) {

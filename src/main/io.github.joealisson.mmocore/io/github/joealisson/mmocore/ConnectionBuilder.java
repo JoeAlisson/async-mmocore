@@ -21,6 +21,9 @@ package io.github.joealisson.mmocore;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
+import static java.lang.Thread.MAX_PRIORITY;
+import static java.lang.Thread.MIN_PRIORITY;
+
 /**
  * Builds the {@link ConnectionHandler} responsible to manage all incoming connections.
  *
@@ -184,6 +187,22 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
      */
     public ConnectionBuilder<T> dropPacketThreshold(int threshold) {
         config.dropPacketThreshold = threshold;
+        return this;
+    }
+
+    /**
+     * Define the MMO Threads' Priority.
+     * The value should be between {@link Thread#MIN_PRIORITY} and {@link Thread#MAX_PRIORITY}.
+     *
+     * @see Thread#setPriority(int)
+     *
+     * @param priority the thread priority
+     */
+    public ConnectionBuilder<T> threadPriority(int priority) {
+        if (priority > MAX_PRIORITY || priority < MIN_PRIORITY) {
+            throw new IllegalArgumentException();
+        }
+        config.threadPriority = priority;
         return this;
     }
 

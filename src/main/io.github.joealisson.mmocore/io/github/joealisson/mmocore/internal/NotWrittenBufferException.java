@@ -18,29 +18,8 @@
  */
 package io.github.joealisson.mmocore.internal;
 
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
-
 /**
  * @author JoeAlisson
  */
-public class MMOThreadFactory implements ThreadFactory {
-
-    private static final AtomicInteger poolNumber = new AtomicInteger(1);
-    private final AtomicInteger threadNumber = new AtomicInteger(1);
-    private final String namePrefix;
-    private int priority;
-
-    public MMOThreadFactory(String name, int priority){
-        namePrefix = name + "-MMO-pool-" +poolNumber.getAndIncrement() + "-thread-";
-        this.priority = priority;
-    }
-
-    @Override
-    public Thread newThread(Runnable r) {
-        Thread thread = new Thread(null, r,namePrefix +threadNumber.getAndIncrement(), 0);
-        thread.setPriority(priority);
-        thread.setDaemon(false);
-        return thread;
-    }
+public class NotWrittenBufferException  extends Exception {
 }

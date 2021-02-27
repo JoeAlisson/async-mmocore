@@ -65,9 +65,9 @@ public class CommunicationTest {
         GenericClientHandler handler = new GenericClientHandler();
 
         builder = ConnectionBuilder.create(listenAddress, AsyncClient::new, handler, handler).filter(channel -> true).threadPoolSize(2).useNagle(false)
-                .shutdownWaitTime(500).addBufferPool(10,300).initBufferPoolFactor(0.2f).bufferSegmentSize(256);
+                .shutdownWaitTime(500).addBufferPool(10,300).initBufferPoolFactor(0.2f).bufferSegmentSize(256).threadPriority(10);
         connector = Connector.create(AsyncClient::new, handler, handler).addBufferPool(10, 300).initBufferPoolFactor(0.2f)
-                .bufferSegmentSize(128).useCachedThreadPool(true).threadPoolSize(2).maxCachedThreads(4);
+                .bufferSegmentSize(128).useCachedThreadPool(true).threadPoolSize(2).maxCachedThreads(4).threadPriority(10);
         packetsSent.set(0);
         shutdown.set(false);
     }

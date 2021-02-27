@@ -26,6 +26,8 @@ import java.nio.channels.AsynchronousChannelGroup;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.util.concurrent.*;
 
+import static java.lang.Thread.MAX_PRIORITY;
+import static java.lang.Thread.MIN_PRIORITY;
 import static java.util.Objects.isNull;
 
 /**
@@ -147,6 +149,21 @@ public class Connector<T extends Client<Connection<T>>> {
         return this;
     }
 
+    /**
+     * Define the MMO Threads' Priority.
+     * The value should be between {@link Thread#MIN_PRIORITY} and {@link Thread#MAX_PRIORITY}.
+     *
+     * @see Thread#setPriority(int)
+     *
+     * @param priority the thread priority
+     */
+    public Connector<T> threadPriority(int priority) {
+        if (priority > MAX_PRIORITY || priority < MIN_PRIORITY) {
+            throw new IllegalArgumentException();
+        }
+        config.threadPriority = priority;
+        return this;
+    }
 
     /**
      * Connects to a host using the address and port.
@@ -195,10 +212,10 @@ public class Connector<T extends Client<Connection<T>>> {
             synchronized (groupLock) {
                 if (isNull(group)) {
                     if(config.useCachedThreadPool) {
-                        ExecutorService threadPool = new ThreadPoolExecutor(config.threadPoolSize, config.maxCachedThreads, 60L, TimeUnit.SECONDS, new SynchronousQueue<>(), new MMOThreadFactory("Client"));
+                        ExecutorService threadPool = new ThreadPoolExecutor(config.threadPoolSize, config.maxCachedThreads, 60L, TimeUnit.SECONDS, new SynchronousQueue<>(), new MMOThreadFactory("Client", config.threadPriority));
                         group = AsynchronousChannelGroup.withCachedThreadPool(threadPool, config.threadPoolSize);
                     } else {
-                        group = AsynchronousChannelGroup.withFixedThreadPool(config.threadPoolSize, new MMOThreadFactory("Client"));
+                        group = AsynchronousChannelGroup.withFixedThreadPool(config.threadPoolSize, new MMOThreadFactory("Client", config.threadPriority));
                     }
                 }
             }

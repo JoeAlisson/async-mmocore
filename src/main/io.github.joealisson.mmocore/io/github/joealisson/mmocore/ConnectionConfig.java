@@ -55,6 +55,7 @@ class ConnectionConfig {
     int dropPacketThreshold = 250;
     boolean useCachedThreadPool;
     int maxCachedThreads = Integer.MAX_VALUE;
+    int threadPriority = Thread.NORM_PRIORITY;
 
     ConnectionConfig(SocketAddress address) {
         this.address = address;
@@ -89,6 +90,7 @@ class ConnectionConfig {
         useCachedThreadPool = parseBoolean(properties, "useCachedThreadPool", useCachedThreadPool);
         threadPoolSize = Math.max(1, parseInt(properties, "threadPoolSize", threadPoolSize));
         maxCachedThreads = parseInt(properties, "maxCachedThreads", maxCachedThreads);
+        threadPriority = parseInt(properties, "threadPriority", threadPriority);
         initBufferPoolFactor = parseFloat(properties, "bufferPool.initFactor", 0);
         dropPacketThreshold = parseInt(properties, "dropPacketThreshold", 200);
         resourcePool.setBufferSegmentSize(parseInt(properties, "bufferSegmentSize", resourcePool.getSegmentSize()));
