@@ -67,10 +67,10 @@ public final class ConnectionHandler<T extends Client<Connection<T>>> {
     }
 
     private AsynchronousServerSocketChannel openServerSocket(ConnectionConfig config) throws IOException {
-        var listener = group.provider().openAsynchronousServerSocketChannel(group);
-        listener.setOption(StandardSocketOptions.SO_REUSEADDR, true);
-        listener.bind(config.address);
-        return listener;
+        var socketChannel = group.provider().openAsynchronousServerSocketChannel(group);
+        socketChannel.setOption(StandardSocketOptions.SO_REUSEADDR, true);
+        socketChannel.bind(config.address);
+        return socketChannel;
     }
 
     /**
