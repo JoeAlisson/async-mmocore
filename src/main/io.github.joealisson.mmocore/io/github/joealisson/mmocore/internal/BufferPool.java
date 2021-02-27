@@ -63,10 +63,6 @@ public class BufferPool {
         return null;
     }
 
-    public int estimateSize() {
-        return estimateSize;
-    }
-
     @Override
     public String toString() {
         return "Pool {maxSize=" + maxSize + ", bufferSize=" + bufferSize + ", estimateUse=" +estimateSize + '}';

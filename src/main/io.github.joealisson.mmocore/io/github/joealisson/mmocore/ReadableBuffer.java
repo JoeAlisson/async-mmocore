@@ -40,6 +40,11 @@ public interface ReadableBuffer extends Buffer {
      */
     short readShort();
 
+    /**
+     * Reads <B>char</B> from the buffer. <BR>
+     * 16bit integer (00 00)
+     * @return char read
+     */
     char readChar();
 
     /**
@@ -49,16 +54,47 @@ public interface ReadableBuffer extends Buffer {
      */
     int readInt();
 
+    /**
+     * Reads <B>float</B> from the buffer. <BR>
+     * 32bit float (00 00 00 00)
+     * @return float read
+     */
     float readFloat();
 
+    /**
+     * Reads <B>long</B> from the buffer. <BR>
+     * 64bit integer (00 00 00 00 00 00 00 00)
+     * @return long read
+     */
     long readLong();
 
+    /**
+     * Reads <B>double</B> from the buffer. <BR>
+     * 64bit float (00 00 00 00 00 00 00 00)
+     * @return double read
+     */
     double readDouble();
 
+    /**
+     *
+     * Reads as many bytes as the length of the array.
+     * @param dst : the byte array which will be filled with the data.
+     */
     void readBytes(byte[] dst);
 
+    /**
+     *
+     * Reads as many bytes as the given length (len). Starts to fill the
+     * byte array from the given offset to <B>offset</B> + <B>len</B>.
+     * @param dst : the byte array which will be filled with the data.
+     * @param offset : starts to fill the byte array from the given offset.
+     * @param length : the given length of bytes to be read.
+     */
     void readBytes(byte[] dst, int offset, int length);
 
+    /**
+     * @return the available bytes amount to be read
+     */
     int remaining();
 
     static ReadableBuffer of(ByteBuffer buffer) {

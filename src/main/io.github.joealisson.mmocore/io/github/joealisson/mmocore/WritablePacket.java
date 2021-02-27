@@ -54,7 +54,7 @@ public abstract class WritablePacket<T extends Client<Connection<T>>> {
             InternalWritableBuffer buffer = writeDataToBuffer(client);
             if(buffer instanceof ArrayPacketBuffer) {
                 broadcastCacheBuffer = (ArrayPacketBuffer) buffer;
-                return InternalWritableBuffer.dynamicOf(broadcastCacheBuffer, client.getResourcePool());
+                buffer = InternalWritableBuffer.dynamicOf(broadcastCacheBuffer, client.getResourcePool());
             }
             return buffer;
         }

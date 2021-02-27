@@ -144,11 +144,11 @@ public class Connection<T extends Client<Connection<T>>> {
         return channel.isOpen();
     }
 
-    public ResourcePool getResourcePool() {
+    ResourcePool getResourcePool() {
         return config.resourcePool;
     }
 
-    public int dropPacketThreshold() {
+    int dropPacketThreshold() {
         return config.dropPacketThreshold;
     }
 }
