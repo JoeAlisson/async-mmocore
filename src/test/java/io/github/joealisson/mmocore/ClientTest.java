@@ -128,7 +128,7 @@ public class ClientTest {
     @Test
     public void testWriteMultipleEmptyPacket() throws IOException, ExecutionException, InterruptedException {
         InetSocketAddress socketAddress = new InetSocketAddress("127.0.0.1", 9090);
-        ConnectionHandler<AsyncClient> handler = ConnectionBuilder.create(socketAddress, AsyncClient::new, null, null).shutdownWaitTime(100).build();
+        ConnectionHandler<AsyncClient> handler = ConnectionBuilder.create(socketAddress, AsyncClient::new, null, null).shutdownWaitTime(100).useNagle(true).build();
         try {
             handler.start();
             AsyncClient client = Connector.create(AsyncClient::new, null, null).connect(socketAddress);
@@ -196,7 +196,7 @@ public class ClientTest {
         ConnectionHandler<AsyncClient> handler = ConnectionBuilder.create(socketAddress, AsyncClient::new, null, null).shutdownWaitTime(100).build();
         try {
             handler.start();
-            AsyncClient client = Connector.create(AsyncClient::new, null, null).connect(socketAddress);
+            AsyncClient client = Connector.create(AsyncClient::new, null, null).useCachedThreadPool(false).connect(socketAddress);
             client.writePacket(new WritablePacket<>() {
                 @Override
                 protected boolean write(AsyncClient client, WritableBuffer buffer) {

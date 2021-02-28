@@ -21,6 +21,8 @@ package io.github.joealisson.mmocore;
 import org.junit.After;
 import org.junit.Test;
 
+import java.net.InetSocketAddress;
+
 import static java.lang.Math.max;
 import static java.lang.Runtime.getRuntime;
 import static org.junit.Assert.assertEquals;
@@ -56,6 +58,28 @@ public class ConfigurationTest {
         config.complete();
         assertEquals(5 * 1000L, config.shutdownWaitTime);
         assertEquals(max(2, getRuntime().availableProcessors() - 2), config.threadPoolSize);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testBuilderThreadPriorityLower() {
+        var socketAddress = new InetSocketAddress("127.0.0.1", 9090);
+        ConnectionBuilder.create(socketAddress, AsyncClient::new, null, null).threadPriority(-1);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testBuilderThreadPriorityHigher() {
+        var socketAddress = new InetSocketAddress("127.0.0.1", 9090);
+        ConnectionBuilder.create(socketAddress, AsyncClient::new, null, null).threadPriority(100);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testConnectorThreadPriorityLower() {
+       Connector.create(AsyncClient::new, null, null).threadPriority(-1);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testConnectorThreadPriorityHigher() {
+       Connector.create(AsyncClient::new, null, null).threadPriority(100);
     }
 
     @After

@@ -121,12 +121,8 @@ public final class ConnectionHandler<T extends Client<Connection<T>>> {
 
         @Override
         public void failed(Throwable t, Void attachment) {
-            if(t instanceof ClosedChannelException) {
-                LOGGER.debug(t.getMessage(), t);
-            } else {
-                listenConnections();
-                LOGGER.warn(t.getMessage(), t);
-            }
+            LOGGER.warn(t.getMessage(), t);
+            listenConnections();
         }
 
         private void processNewConnection(AsynchronousSocketChannel channel) {
@@ -145,8 +141,8 @@ public final class ConnectionHandler<T extends Client<Connection<T>>> {
         private void closeChannel(AsynchronousSocketChannel channel) {
             try {
                 channel.close();
-            } catch (IOException ie) {
-                LOGGER.warn(ie.getMessage(), ie);
+            } catch (IOException e) {
+                LOGGER.warn(e.getMessage(), e);
             }
         }
 

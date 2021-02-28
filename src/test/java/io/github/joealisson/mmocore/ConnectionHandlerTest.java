@@ -43,7 +43,7 @@ public class ConnectionHandlerTest {
         Connector<AsyncClient> connector = Connector.create(AsyncClient::new, handler, handler);
         try {
             connectionHandler.start();
-            AsyncClient client = connector.connect("localhost", 9090);
+            AsyncClient client = connector.connect(null, 9090);
 
             client.sendPacket(new AsyncClientClosePacket());
             Awaitility.waitAtMost(30, TimeUnit.SECONDS).until(() -> !client.isConnected());
