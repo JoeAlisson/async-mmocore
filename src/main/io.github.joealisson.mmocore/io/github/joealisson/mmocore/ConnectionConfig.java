@@ -70,9 +70,7 @@ class ConnectionConfig {
     }
 
     private void loadProperties(String propertyFileName) {
-        final Path path = Paths.get(propertyFileName);
-
-        try(final InputStream inputStream = Files.isRegularFile(path) ? Files.newInputStream(path) : ClassLoader.getSystemResourceAsStream(propertyFileName)) {
+        try(final InputStream inputStream = resolvePropertyFile(propertyFileName)) {
             if(nonNull(inputStream)) {
                 Properties properties = new Properties();
                 properties.load(inputStream);
@@ -83,6 +81,15 @@ class ConnectionConfig {
         } catch (IOException e) {
             throw new IllegalArgumentException("Failed to read property file", e);
         }
+    }
+
+    private InputStream resolvePropertyFile(String propertyFileName) throws IOException {
+        final Path path = Paths.get(propertyFileName);
+        if(Files.isRegularFile(path)) {
+            return Files.newInputStream(path);
+        }
+        InputStream stream = ClassLoader.getSystemResourceAsStream(propertyFileName);
+        return nonNull(stream) ? stream : getClass().getResourceAsStream(propertyFileName);
     }
 
     private void configure(Properties properties) {
