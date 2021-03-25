@@ -87,13 +87,19 @@ public final class ConnectionHandler<T extends Client<Connection<T>>> {
      */
     public void shutdown() {
         LOGGER.debug("Shutting ConnectionHandler down");
+        boolean terminated = false;
         try {
             listener.close();
-            group.awaitTermination(config.shutdownWaitTime, TimeUnit.MILLISECONDS);
+            group.shutdown();
+            terminated = group.awaitTermination(config.shutdownWaitTime, TimeUnit.MILLISECONDS);
             group.shutdownNow();
+        } catch (InterruptedException e) {
+            LOGGER.warn(e.getMessage(), e);
+            Thread.currentThread().interrupt();
         } catch (Exception e) {
             LOGGER.warn(e.getMessage(), e);
         }
+        LOGGER.debug("ConnectionHandler was shutdown with success status {}", terminated);
     }
 
     /**
