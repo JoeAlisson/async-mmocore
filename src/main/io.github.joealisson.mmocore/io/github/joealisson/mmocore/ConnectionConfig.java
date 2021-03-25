@@ -72,7 +72,7 @@ class ConnectionConfig {
     private void loadProperties(String propertyFileName) {
         final Path path = Paths.get(propertyFileName);
 
-        try(final InputStream inputStream = Files.isRegularFile(path) ? Files.newInputStream(path) : getClass().getResourceAsStream(propertyFileName)) {
+        try(final InputStream inputStream = Files.isRegularFile(path) ? Files.newInputStream(path) : ClassLoader.getSystemResourceAsStream(propertyFileName)) {
             if(nonNull(inputStream)) {
                 Properties properties = new Properties();
                 properties.load(inputStream);
