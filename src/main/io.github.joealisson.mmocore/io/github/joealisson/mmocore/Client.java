@@ -42,6 +42,7 @@ public abstract class Client<T extends Connection<?>> {
     private final T connection;
     private final Queue<WritablePacket<? extends Client<T>>> packetsToWrite = new ConcurrentLinkedQueue<>();
     private final AtomicBoolean writing = new AtomicBoolean(false);
+    private final AtomicBoolean disconnecting = new AtomicBoolean(false);
     private int estimateQueueSize = 0;
     private int dataSentSize;
     private volatile boolean isClosing;
@@ -137,7 +138,7 @@ public abstract class Client<T extends Connection<?>> {
                 LOGGER.debug("Sending packet {}[{}] to {}", packet, dataSentSize, this);
             }
         } catch (NotWrittenBufferException ignored) {
-            LOGGER.debug("packet was not written {}", packet);
+            LOGGER.debug("packet was not written {} to {}", packet, this);
         } catch (Exception e) {
             LOGGER.error("Error while {} writing {}", this, packet, e);
         } finally {
@@ -215,12 +216,14 @@ public abstract class Client<T extends Connection<?>> {
     }
 
     final void disconnect() {
-        try {
-            LOGGER.debug("Client {} disconnecting", this);
-            onDisconnection();
-        } finally {
-            packetsToWrite.clear();
-            connection.close();
+        if(disconnecting.compareAndSet(false, true)) {
+            try {
+                LOGGER.debug("Client {} disconnecting", this);
+                onDisconnection();
+            } finally {
+                packetsToWrite.clear();
+                connection.close();
+            }
         }
     }
 
