@@ -48,6 +48,9 @@ public abstract class Client<T extends Connection<?>> {
     private volatile boolean isClosing;
     private boolean readingPayload;
     private int expectedReadSize;
+    private final AtomicBoolean readNext = new AtomicBoolean(false);
+
+    volatile boolean isReading;
 
     /**
      * Construct a new Client
@@ -158,6 +161,7 @@ public abstract class Client<T extends Connection<?>> {
     }
 
     void read() {
+        isReading = true;
         expectedReadSize = HEADER_SIZE;
         readingPayload = false;
         connection.readHeader();
@@ -167,6 +171,14 @@ public abstract class Client<T extends Connection<?>> {
         expectedReadSize = dataSize;
         readingPayload = true;
         connection.read(dataSize);
+    }
+
+    public void readNextPacket() {
+        if(isReading) {
+            readNext.set(true);
+        } else {
+            read();
+        }
     }
 
     /**
@@ -271,6 +283,10 @@ public abstract class Client<T extends Connection<?>> {
 
     int getExpectedReadSize() {
         return expectedReadSize;
+    }
+
+    boolean canReadNextPacket() {
+        return connection.isAutoReadingEnabled() || readNext.getAndSet(false);
     }
 
     /**

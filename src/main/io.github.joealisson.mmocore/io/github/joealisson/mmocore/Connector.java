@@ -166,6 +166,21 @@ public class Connector<T extends Client<Connection<T>>> {
     }
 
     /**
+     * Define if the auto reading should be disabled.
+     *
+     * if the auto reading is enabled the server will read the client's packet automatically.
+     * Other wise the server needs to call the {@link Client#read()}] when the client packet should be read.
+     *
+     * The Auto Reading is enabled by default
+     *
+     * @param value true if auto reading should be disabled. Otherwise false.
+     */
+    public Connector<T> disableAutoReading(boolean value) {
+        config.autoReading = !value;
+        return this;
+    }
+
+    /**
      * Connects to a host using the address and port.
      *
      * @param host the address to be connected to

@@ -151,4 +151,8 @@ public class Connection<T extends Client<Connection<T>>> {
     int dropPacketThreshold() {
         return config.dropPacketThreshold;
     }
+
+    boolean isAutoReadingEnabled() {
+        return config.autoReading;
+    }
 }

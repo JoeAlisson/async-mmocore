@@ -81,7 +81,11 @@ class ReadHandler<T extends Client<Connection<T>>> implements CompletionHandler<
         ByteBuffer buffer = client.getConnection().getReadingBuffer();
         buffer.flip();
         parseAndExecutePacket(client, buffer);
-        client.read();
+        if(client.canReadNextPacket()) {
+            client.read();
+        } else {
+            client.isReading = false;
+        }
     }
 
     private void parseAndExecutePacket(T client, ByteBuffer incomingBuffer) {

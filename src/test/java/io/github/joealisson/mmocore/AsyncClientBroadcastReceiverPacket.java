@@ -60,7 +60,7 @@ public class AsyncClientBroadcastReceiverPacket extends ReadablePacket<AsyncClie
             Comparator.assertEquals(Byte.MAX_VALUE, varByte);
             Comparator.assertEquals("Ping", varString);
             Comparator.assertEquals("Packet", varSizedString);
-            CommunicationTest.incrementPacketSended();
+            CommunicationTest.incrementPacketSent();
         } catch (Exception e) {
             CommunicationTest.shutdown(false);
         }

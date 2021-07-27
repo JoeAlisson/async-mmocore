@@ -305,6 +305,58 @@ public class ClientTest {
         }
     }
 
+    @Test
+    public void testReadNextPacket() throws IOException {
+        InetSocketAddress socketAddress = new InetSocketAddress("127.0.0.1",9090);
+        ConnectionHandler<ReadingThrottlingHelper.RTClient> handler = ConnectionBuilder.create(socketAddress, ReadingThrottlingHelper::create, null, null).disableAutoReading(true).build();
+        try {
+            handler.start();
+            ReadingThrottlingHelper.RTClient client = Connector.create(ReadingThrottlingHelper.RTClient::new, null, null).disableAutoReading(true).connect(socketAddress);
+
+            Assert.assertTrue(client.isReading);
+            Assert.assertFalse(client.canReadNextPacket());
+
+            client.readNextPacket();
+
+            Assert.assertTrue(client.canReadNextPacket());
+            Assert.assertFalse(client.canReadNextPacket());
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            handler.shutdown();
+        }
+    }
+
+    @Test
+    public void testIdempotentReadNextPacket() throws IOException {
+        InetSocketAddress socketAddress = new InetSocketAddress("127.0.0.1",9090);
+        ConnectionHandler<ReadingThrottlingHelper.RTClient> handler = ConnectionBuilder.create(socketAddress, ReadingThrottlingHelper::create, ReadingThrottlingHelper::handlePacket, ReadingThrottlingHelper::execute).disableAutoReading(true).build();
+        try {
+            handler.start();
+            ReadingThrottlingHelper.RTClient client = Connector.create(ReadingThrottlingHelper.RTClient::new, ReadingThrottlingHelper::handlePacket, ReadingThrottlingHelper::execute).disableAutoReading(true).connect(socketAddress);
+
+            ReadingThrottlingHelper.RTClient receivingClient = ReadingThrottlingHelper.lastClient;
+
+            client.writePacket(ReadingThrottlingHelper.ping2nd());
+
+            receivingClient.readNextPacket();
+            receivingClient.readNextPacket();
+            receivingClient.readNextPacket();
+
+            client.writePacket(ReadingThrottlingHelper.ping());
+            client.writePacket(ReadingThrottlingHelper.ping2nd());
+
+            Awaitility.waitAtMost(5, TimeUnit.SECONDS).untilTrue(receivingClient.readableAgain);
+
+            Assert.assertFalse(receivingClient.canReadNextPacket());
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            handler.shutdown();
+        }
+    }
+
+
     static class BigEncripterClient extends Client<Connection<BigEncripterClient>> {
 
         public BigEncripterClient(Connection<BigEncripterClient> connection) {

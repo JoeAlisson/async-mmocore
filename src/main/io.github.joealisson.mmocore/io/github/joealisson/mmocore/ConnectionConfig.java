@@ -56,6 +56,7 @@ class ConnectionConfig {
     boolean useCachedThreadPool;
     int maxCachedThreads = Integer.MAX_VALUE;
     int threadPriority = Thread.NORM_PRIORITY;
+    boolean autoReading = true;
 
     ConnectionConfig(SocketAddress address) {
         this.address = address;

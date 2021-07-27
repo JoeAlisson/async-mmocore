@@ -26,6 +26,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -53,7 +54,7 @@ public class CommunicationTest {
         CommunicationTest.success = success;
     }
 
-    static void incrementPacketSended() {
+    static void incrementPacketSent() {
         if(packetsSent.incrementAndGet() == PACKET_SENT_TO_SUCCESS) {
             shutdown(true);
         }
@@ -156,6 +157,39 @@ public class CommunicationTest {
         }
     }
 
+    @Test
+    public void testReadingThrottling() throws IOException {
+        InetSocketAddress socketAddress = new InetSocketAddress("127.0.0.1",9090);
+        ConnectionHandler<ReadingThrottlingHelper.RTClient> handler = ConnectionBuilder.create(socketAddress, ReadingThrottlingHelper::create, ReadingThrottlingHelper::handlePacket, ReadingThrottlingHelper::execute).disableAutoReading(true).build();
+        try {
+            handler.start();
+            ReadingThrottlingHelper.RTClient client = Connector.create(ReadingThrottlingHelper.RTClient::new, ReadingThrottlingHelper::handlePacket, ReadingThrottlingHelper::execute).disableAutoReading(true).connect(socketAddress);
+
+            client.writePacket(ReadingThrottlingHelper.ping());
+            client.writePacket(ReadingThrottlingHelper.ping2nd());
+            ReadingThrottlingHelper.RTClient receivingClient = ReadingThrottlingHelper.lastClient;
+
+            Awaitility.waitAtMost(3, TimeUnit.SECONDS).untilTrue(receivingClient.readableAgain);
+            Assert.assertTrue(receivingClient.hasMinimumTimeBetweenPackets());
+
+
+            receivingClient.readableAgain.set(false);
+            client.writePackets(List.of(ReadingThrottlingHelper.ping(), ReadingThrottlingHelper.ping2nd()));
+            receivingClient.readNextPacket();
+
+            Awaitility.waitAtMost(3, TimeUnit.SECONDS).untilTrue(receivingClient.readableAgain);
+            Assert.assertTrue(receivingClient.hasMinimumTimeBetweenPackets());
+
+            client.close();
+            receivingClient.close();
+
+        } catch (ExecutionException | InterruptedException | IOException e) {
+            e.printStackTrace();
+        } finally {
+            handler.shutdown();
+        }
+    }
+
     static class AsyncDisposablePacket extends WritablePacket<AsyncClient> {
 
         @Override
@@ -170,10 +204,9 @@ public class CommunicationTest {
         }
     }
 
-
     @After
     public void tearDown() {
-        if(!shutdown.get()) {
+        if(!shutdown.get() && connectionHandler != null) {
             connectionHandler.shutdown();
         }
     }
