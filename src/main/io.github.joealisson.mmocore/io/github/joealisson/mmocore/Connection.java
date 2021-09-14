@@ -39,7 +39,7 @@ public class Connection<T extends Client<Connection<T>>> {
     private final AsynchronousSocketChannel channel;
     private final ReadHandler<T> readHandler;
     private final WriteHandler<T> writeHandler;
-    private final ConnectionConfig config;
+    final ConnectionConfig config;
     private T client;
 
     private ByteBuffer readingBuffer;

@@ -56,6 +56,10 @@ public class GenericClientHandler implements PacketHandler<AsyncClient>, PacketE
         }
         else if(opcode == 0x10) {
             packet = new AsyncClientBroadcastReceiverPacket();
+        } else if(opcode == 0x20) {
+            packet = new AsyncClientFairnessReceivePacket();
+        } else if(opcode == 0x21) {
+            packet = new AsyncClientFairnessRepliedPacket();
         }
         return packet;
     }

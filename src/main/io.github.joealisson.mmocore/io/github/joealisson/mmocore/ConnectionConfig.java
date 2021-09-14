@@ -19,6 +19,7 @@
 package io.github.joealisson.mmocore;
 
 import io.github.joealisson.mmocore.internal.BufferPool;
+import io.github.joealisson.mmocore.internal.fairness.FairnessController;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -57,6 +58,8 @@ class ConnectionConfig {
     int maxCachedThreads = Integer.MAX_VALUE;
     int threadPriority = Thread.NORM_PRIORITY;
     boolean autoReading = true;
+    int fairnessBuckets = 1;
+    FairnessController fairnessController;
 
     ConnectionConfig(SocketAddress address) {
         this.address = address;
@@ -102,6 +105,7 @@ class ConnectionConfig {
         initBufferPoolFactor = parseFloat(properties, "bufferPool.initFactor", 0);
         dropPacketThreshold = parseInt(properties, "dropPacketThreshold", 200);
         resourcePool.setBufferSegmentSize(parseInt(properties, "bufferSegmentSize", resourcePool.getSegmentSize()));
+        fairnessBuckets =  parseInt(properties, "fairnessBuckets", fairnessBuckets);
 
         properties.stringPropertyNames().forEach(property -> {
             Matcher matcher = BUFFER_POOL_PROPERTY.matcher(property);
@@ -146,6 +150,7 @@ class ConnectionConfig {
     public ConnectionConfig complete() {
         completeBuffersPool();
         resourcePool.initializeBuffers(initBufferPoolFactor);
+        fairnessController = FairnessController.init(fairnessBuckets);
         return this;
     }
 

@@ -99,7 +99,7 @@ public abstract class Client<T extends Connection<?>> {
 
     private void writeFairPacket() {
         if(writing.compareAndSet(false, true)) {
-            FairnessController.sendFairPacket(this);
+            connection.config.fairnessController.nextFairAction(this, Client::writeNextPacket);
         }
     }
 
@@ -218,7 +218,7 @@ public abstract class Client<T extends Connection<?>> {
 
     void finishWriting() {
         connection.releaseWritingBuffer();
-        FairnessController.sendFairPacket(this);
+        connection.config.fairnessController.nextFairAction(this, Client::writeNextPacket);
     }
 
     private boolean releaseWritingResource() {
@@ -326,21 +326,4 @@ public abstract class Client<T extends Connection<?>> {
      * The Packets can be sent only after this method is called.
      */
     public abstract void onConnected();
-
-    private static class FairnessController {
-
-        private static final ConcurrentLinkedQueue<Client<?>> readyClients = new ConcurrentLinkedQueue<>();
-
-        private static void sendFairPacket(Client<?> client) {
-            readyClients.offer(client);
-            writeToNextClient();
-        }
-
-        private static void writeToNextClient() {
-            Client<?> client = readyClients.poll();
-            if(nonNull(client)) {
-                client.writeNextPacket();
-            }
-        }
-    }
 }

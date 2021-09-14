@@ -210,7 +210,7 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
      * Define if the auto reading should be disabled.
      *
      * if the auto reading is enabled the server will read the client's packet automatically.
-     * Other wise the server needs to call the {@link Client#read()}] when the client packet should be read.
+     * Otherwise, the server needs to call the {@link Client#read()}] when the client packet should be read.
      *
      * The Auto Reading is enabled by default
      *
@@ -218,6 +218,20 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
      */
     public ConnectionBuilder<T> disableAutoReading(boolean value) {
         config.autoReading = !value;
+        return this;
+    }
+
+    /**
+     * Define the amount of buckets used in the fairness controller.
+     *
+     * The fairness controller is a mechanism used to maintain the network threads fairness among the clients.
+     * The default value is 1, is recommended to increase this value depending on high concurrency networks applications.
+     *
+     * @param buckets the amount of buckets to use
+     * @return this
+     */
+    public ConnectionBuilder<T> fairnessBuckets(int buckets) {
+        config.fairnessBuckets = buckets;
         return this;
     }
 

@@ -27,6 +27,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -109,7 +110,7 @@ public class CommunicationTest {
     public void testBroadcast() throws IOException, ExecutionException, InterruptedException {
         connectionHandler = builder.build();
         connectionHandler.start();
-
+        packetsSent.set(0);
         AsyncClient[] clients = new AsyncClient[PACKET_SENT_TO_SUCCESS];
         for (int i = 0; i < clients.length; i++) {
             clients[i] = connector.connect("localhost", 9090);
@@ -124,6 +125,10 @@ public class CommunicationTest {
 
         Awaitility.waitAtMost(10, TimeUnit.SECONDS).untilTrue(shutdown);
 
+        for (AsyncClient client : clients) {
+            client.close();
+        }
+
         connectionHandler.shutdown();
         if(packetsSent.get() != clients.length) {
             fail();
@@ -134,6 +139,7 @@ public class CommunicationTest {
     public void testDisposable() throws IOException, ExecutionException, InterruptedException {
         int disposeThreshold = 5;
         PACKET_SENT_TO_SUCCESS = 100;
+        packetsSent.set(0);
         connectionHandler = builder.dropPacketThreshold(disposeThreshold).build();
         connectionHandler.start();
 
@@ -187,6 +193,38 @@ public class CommunicationTest {
             e.printStackTrace();
         } finally {
             handler.shutdown();
+        }
+    }
+
+    @Test
+    public void testFairnessController() throws IOException, ExecutionException, InterruptedException {
+        GenericClientHandler handler = new GenericClientHandler();
+        connectionHandler = ConnectionBuilder.create(listenAddress, AsyncClient::new, handler, handler).fairnessBuckets(4).build();
+        connectionHandler.start();
+
+        PACKET_SENT_TO_SUCCESS = 10;
+        packetsSent.set(0);
+
+        AsyncClient[] clients = new AsyncClient[PACKET_SENT_TO_SUCCESS];
+        for (int i = 0; i < clients.length; i++) {
+            clients[i] = connector.connect("localhost", 9090);
+        }
+
+        AsyncClientFairnessPacket packet = new AsyncClientFairnessPacket();
+
+        for (AsyncClient client : clients) {
+            CompletableFuture.runAsync(() -> client.sendPacket(packet));
+        }
+
+        Awaitility.waitAtMost(10, TimeUnit.SECONDS).untilTrue(shutdown);
+
+        for (AsyncClient client : clients) {
+            client.close();
+        }
+
+        connectionHandler.shutdown();
+        if(packetsSent.get() != clients.length) {
+            fail();
         }
     }
 
