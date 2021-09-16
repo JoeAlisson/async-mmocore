@@ -197,6 +197,7 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
      * @see Thread#setPriority(int)
      *
      * @param priority the thread priority
+     * @return this
      */
     public ConnectionBuilder<T> threadPriority(int priority) {
         if (priority > MAX_PRIORITY || priority < MIN_PRIORITY) {
@@ -215,6 +216,7 @@ public class ConnectionBuilder<T extends Client<Connection<T>>> {
      * The Auto Reading is enabled by default
      *
      * @param value true if auto reading should be disabled. Otherwise false.
+     * @return this
      */
     public ConnectionBuilder<T> disableAutoReading(boolean value) {
         config.autoReading = !value;

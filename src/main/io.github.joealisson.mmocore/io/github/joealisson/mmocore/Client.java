@@ -161,6 +161,10 @@ public abstract class Client<T extends Connection<?>> {
     }
 
     void read() {
+        if(isReading) {
+            readNext.set(true);
+            return;
+        }
         isReading = true;
         expectedReadSize = HEADER_SIZE;
         readingPayload = false;

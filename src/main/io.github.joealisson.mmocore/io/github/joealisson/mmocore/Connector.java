@@ -156,6 +156,7 @@ public class Connector<T extends Client<Connection<T>>> {
      * @see Thread#setPriority(int)
      *
      * @param priority the thread priority
+     * @return this
      */
     public Connector<T> threadPriority(int priority) {
         if (priority > MAX_PRIORITY || priority < MIN_PRIORITY) {
@@ -174,6 +175,7 @@ public class Connector<T extends Client<Connection<T>>> {
      * The Auto Reading is enabled by default
      *
      * @param value true if auto reading should be disabled. Otherwise false.
+     * @return this
      */
     public Connector<T> disableAutoReading(boolean value) {
         config.autoReading = !value;
