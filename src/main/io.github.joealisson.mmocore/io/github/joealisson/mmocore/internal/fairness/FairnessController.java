@@ -33,6 +33,12 @@ public class FairnessController {
         // only construct by init
     }
 
+    /**
+     * Create a Fairness Controller using the fairnessBuckets
+     *
+     * @param fairnessBuckets the amount of buckets used in FairnessController
+     * @return the fairness Controller
+     */
     public static FairnessController init(int fairnessBuckets) {
         FairnessController controller = new FairnessController();
         if(fairnessBuckets <= 1) {
@@ -43,6 +49,12 @@ public class FairnessController {
         return controller;
     }
 
+    /**
+     * Add the client to the fairnessController and execute the action to the next client
+     *
+     * @param client the client to be added to Fairness Controller
+     * @param action the action to execute to the next fair client
+     */
     public void nextFairAction(Client<?> client, Consumer<Client<?>> action) {
         strategy.doNextAction(client, action);
     }

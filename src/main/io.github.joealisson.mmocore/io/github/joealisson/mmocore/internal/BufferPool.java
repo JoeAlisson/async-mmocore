@@ -33,11 +33,22 @@ public class BufferPool {
     private final int bufferSize;
     private int estimateSize;
 
+    /**
+     * Create a Buffer Pool
+     *
+     * @param maxSize the pool max size
+     * @param bufferSize the size of the buffers kept in Buffer Pool
+     */
     public BufferPool(int maxSize, int bufferSize) {
         this.maxSize = maxSize;
         this.bufferSize = bufferSize;
     }
 
+    /**
+     * Initialize the buffer pool
+     *
+     * @param factor The factor used to pre allocate ByteBuffers
+     */
     public void initialize(float factor) {
         final int amount = (int) Math.min(maxSize, maxSize * factor);
         for (int i = 0; i < amount; i++) {
@@ -46,6 +57,14 @@ public class BufferPool {
         estimateSize = amount;
     }
 
+    /**
+     * Recycle a ByteBuffer
+     *
+     * if the pool has less than max buffer amount, the buffer is added in the pool. otherwise, it will be discarded.
+     *
+     * @param buffer the ByteBuffer to be recycled
+     * @return true if the buffer was recycled, false otherwise
+     */
     public boolean recycle(ByteBuffer buffer) {
         var recycle = estimateSize < maxSize;
         if(recycle) {
@@ -55,12 +74,13 @@ public class BufferPool {
         return recycle;
     }
 
+    /**
+     * get a ByteBuffer from the pool
+     * @return a ByteBuffer or null if the pool is empty
+     */
     public ByteBuffer get() {
-        if(estimateSize > 0) {
-            estimateSize--;
-            return buffers.poll();
-        }
-        return null;
+        estimateSize--;
+        return buffers.poll();
     }
 
     @Override

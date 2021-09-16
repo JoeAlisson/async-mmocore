@@ -41,6 +41,12 @@ public class ArrayPacketBuffer extends InternalWritableBuffer implements Readabl
     private int index;
     private int limit;
 
+    /**
+     * Create a ArrayPacketBuffer
+     *
+     * @param size the initial buffer size
+     * @param resourcePool the resource pool used to get ByteBuffers
+     */
     public ArrayPacketBuffer(int size, ResourcePool resourcePool) {
         data = new byte[size];
         this.resourcePool = resourcePool;

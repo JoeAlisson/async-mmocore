@@ -97,6 +97,12 @@ public interface ReadableBuffer extends Buffer {
      */
     int remaining();
 
+    /**
+     *  create a Readable buffer based on buffer
+     *
+     * @param buffer the under layer buffer
+     * @return a Readable Buffer
+     */
     static ReadableBuffer of(ByteBuffer buffer) {
         return new SinglePacketBuffer(buffer);
     }
