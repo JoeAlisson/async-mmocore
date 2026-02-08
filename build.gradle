@@ -6,7 +6,7 @@ plugins {
     id 'eclipse'
     id 'maven-publish'
     id 'signing'
-    id 'net.nemerosa.versioning' version '2.14.0'
+    id 'net.nemerosa.versioning' version '3.1.0'
     id 'jacoco'
     id 'org.sonarqube' version '3.2.0'
 }
